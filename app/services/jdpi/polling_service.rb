@@ -2,17 +2,19 @@ module Jdpi
   # Intelligent status polling service for JDPI async operations
   # Implements recommended polling strategies from PIX expert guidance
   class PollingService < BaseService
+    include StatusCodes
+    
     # Polling intervals based on JDPI processing patterns
-    INITIAL_INTERVALS = [5, 5, 10, 10, 30, 30].freeze # First 40 seconds
-    INTERMEDIATE_INTERVALS = [30] * 20 # Next 10 minutes  
-    LONG_TERM_INTERVALS = [300] # 5 minutes thereafter
+    INITIAL_INTERVALS = StatusCodes::Polling::INITIAL_POLL_INTERVALS
+    INTERMEDIATE_INTERVALS = StatusCodes::Polling::INTERMEDIATE_POLL_INTERVALS * 20 # Next 10 minutes  
+    LONG_TERM_INTERVALS = StatusCodes::Polling::LONG_TERM_POLL_INTERVALS
     
-    # Maximum polling duration (90 days for refunds)
-    MAX_POLLING_DURATION = 90.days
+    # Maximum polling duration
+    MAX_POLLING_DURATION = StatusCodes::Duration::MAX_POLLING_DURATION_DAYS.days
     
-    # Final status indicators
-    FINAL_STATUSES = [-1, 9].freeze # Error or Success
-    PROCESSING_STATUSES = [0, 1, 2, 5].freeze # Various processing states
+    # Final status indicators using constants
+    FINAL_STATUSES = StatusCodes::FINAL_STATES
+    PROCESSING_STATUSES = StatusCodes::PROCESSING_STATES
     
     attr_accessor :jdpi_request_id, :operation_type, :started_at, :max_duration,
                   :on_success, :on_error, :on_timeout, :polling_count
@@ -182,14 +184,17 @@ module Jdpi
     
     def exponential_backoff_duration(attempt)
       # Exponential backoff with jitter for error conditions
-      base_delay = [2 ** [attempt, 8].min, 300].min # Max 5 minutes
+      max_power = StatusCodes::Polling::MAX_EXPONENTIAL_BACKOFF_POWER
+      max_seconds = StatusCodes::Polling::MAX_EXPONENTIAL_BACKOFF_SECONDS
+      
+      base_delay = [2 ** [attempt, max_power].min, max_seconds].min
       jitter = rand(0.1..0.3) * base_delay
       (base_delay + jitter).to_i
     end
     
     def should_retry_on_error?(attempt)
       # Retry on network errors, but not on client errors (4xx)
-      return false if attempt >= 10 # Max 10 error retries
+      return false if attempt >= StatusCodes::Polling::MAX_ERROR_RETRIES
       
       last_response = @response
       return true unless last_response
@@ -211,7 +216,7 @@ module Jdpi
         duration: Time.current - @started_at
       }
       
-      if status_code == 9
+      if StatusCodes::FINAL_SUCCESS_STATES.include?(status_code)
         on_success&.call(result) if on_success.respond_to?(:call)
         Rails.logger.info "[JDPI Polling] Operation successful after #{@polling_count} polls"
       else

@@ -1,6 +1,7 @@
 module Jdpi
   class BaseService
     include ActiveModel::Model
+    include StatusCodes
     
     attr_reader :response, :errors, :idempotency_key
     attr_accessor :scopes
@@ -31,8 +32,8 @@ module Jdpi
         config.request :json
         config.response :json, content_type: /\bjson$/
         config.adapter Faraday.default_adapter
-        config.options.timeout = 60
-        config.options.open_timeout = 30
+        config.options.timeout = StatusCodes::Network::DEFAULT_TIMEOUT_SECONDS
+        config.options.open_timeout = StatusCodes::Network::DEFAULT_OPEN_TIMEOUT_SECONDS
         
         # Authentication header
         if token = access_token

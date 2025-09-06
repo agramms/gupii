@@ -2,6 +2,7 @@ module Jdpi
   # EndToEndId Validator Service
   # Validates PIX EndToEndId format according to JDPI v5.2.1 specifications
   class EndToEndIdValidator < BaseService
+    include StatusCodes
     # EndToEndId format specifications
     # Original Payment: E{ISPB}{YYYYMMDD}{HHmm}{11-digit-sequence}
     # Refund Payment:  D{ISPB}{YYYYMMDD}{HHmm}{11-digit-sequence}
@@ -280,7 +281,7 @@ module Jdpi
       day = date_string[6..7].to_i
       
       # Basic range checks
-      return false if year < 2020 || year > 2099 # Reasonable PIX operation range
+      return false if year < StatusCodes::Duration::PIX_MIN_YEAR || year > StatusCodes::Duration::PIX_MAX_YEAR
       return false if month < 1 || month > 12
       return false if day < 1 || day > 31
       

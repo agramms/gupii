@@ -2,8 +2,10 @@ module Jdpi
   # OAuth 2.0 authentication service for JDPI API
   # Handles token acquisition, caching, and refresh using Redis
   class AuthenticationService < BaseService
+    include StatusCodes
+    
     CACHE_KEY_PREFIX = "jdpi:token"
-    TOKEN_REFRESH_THRESHOLD = 300 # Refresh when less than 5 minutes remaining
+    TOKEN_REFRESH_THRESHOLD = StatusCodes::Duration::TOKEN_REFRESH_THRESHOLD_SECONDS
     
     attr_accessor :scopes
     

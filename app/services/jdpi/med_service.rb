@@ -2,6 +2,8 @@ module Jdpi
   # Mecanismo Especial de Devolução (MED) service
   # Handles special refund mechanisms for PIX transactions according to JDPI v5.2.1
   class MedService < BaseService
+    include StatusCodes
+    
     # MED refund codes as defined by Central Bank
     REFUND_CODES = {
       be08: {
@@ -30,8 +32,8 @@ module Jdpi
       }
     }.freeze
 
-    # Maximum refund window: 90 days from original payment
-    REFUND_WINDOW_DAYS = 90
+    # Maximum refund window from original payment
+    REFUND_WINDOW_DAYS = StatusCodes::Duration::MAX_REFUND_WINDOW_DAYS
     
     # Attributes for MED refund request
     attr_accessor :end_to_end_id_original, :refund_amount, :refund_code, 
@@ -253,7 +255,7 @@ module Jdpi
       Rails.logger.info "[JDPI MED] Performing fraud detection validation"
       
       risk_score = calculate_fraud_risk_score
-      risk_score > 0.7 # Return true if high fraud risk detected
+      risk_score > StatusCodes::Risk::FRAUD_RISK_SCORE_THRESHOLD
     end
     
     # Compliance check: AML validation for FR01
@@ -319,7 +321,7 @@ module Jdpi
       # - User behavior
       # - Device characteristics
       # - Geographical factors
-      0.8 # Placeholder high-risk score
+      StatusCodes::Risk::DEFAULT_HIGH_RISK_SCORE
     end
     
     # Generate refund EndToEndId according to JDPI format

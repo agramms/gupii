@@ -2,8 +2,10 @@ module Jdpi
   # Idempotency service for JDPI API requests
   # Generates and manages idempotency keys as required by JDPI specification
   class IdempotencyService
+    include StatusCodes
+    
     CACHE_KEY_PREFIX = "jdpi:idempotency"
-    DEFAULT_TTL = 86400 # 24 hours - longer than typical transaction processing
+    DEFAULT_TTL = StatusCodes::Duration::IDEMPOTENCY_CACHE_TTL_SECONDS
     
     class << self
       # Generate new idempotency key (36-character GUID as required by JDPI)

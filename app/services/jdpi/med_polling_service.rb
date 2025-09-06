@@ -2,14 +2,16 @@ module Jdpi
   # MED Polling Service for monitoring refund status
   # Implements recommended polling strategy for JDPI MED operations
   class MedPollingService < BaseService
+    include StatusCodes
+    
     # Polling intervals according to JDPI best practices
     INITIAL_POLL_INTERVAL = 5.seconds  # First 40 seconds
     STANDARD_POLL_INTERVAL = 30.seconds # Next 10 minutes
     EXTENDED_POLL_INTERVAL = 5.minutes  # Up to 90 days
     
     # Status thresholds
-    INITIAL_PERIOD = 40.seconds
-    STANDARD_PERIOD = 10.minutes
+    INITIAL_PERIOD = StatusCodes::Polling::INITIAL_PERIOD_SECONDS.seconds
+    STANDARD_PERIOD = StatusCodes::Polling::INTERMEDIATE_PERIOD_SECONDS.seconds
     
     attr_accessor :jdpi_request_id, :idempotency_key, :started_at, :max_duration
     
@@ -21,7 +23,7 @@ module Jdpi
     def initialize(attributes = {})
       super
       @started_at = Time.current
-      @max_duration = 90.days # Maximum refund processing window
+      @max_duration = StatusCodes::Duration::MAX_POLLING_DURATION_DAYS.days
     end
     
     # Start polling for refund status with intelligent intervals
@@ -133,13 +135,13 @@ module Jdpi
       stj_dpi_proc = status_data["stJdPiProc"]&.to_i
       
       # Final success states
-      return true if stj_dpi == 9 # Débito efetivado com sucesso
-      return true if stj_dpi_proc == 9 # Débito processado com sucesso
+      return true if stj_dpi == ST_JDPI[:SUCCESS_COMPLETED]
+      return true if stj_dpi_proc == ST_JDPI_PROC[:SUCCESS_PROCESSED]
       
       # Final error states
-      return true if stj_dpi == -1 # Erro no processamento
-      return true if stj_dpi_proc == 7 # Erro de validação no JDPI
-      return true if stj_dpi_proc == 8 # Erro retornado pelo SPI
+      return true if stj_dpi == ST_JDPI[:PROCESSING_ERROR]
+      return true if stj_dpi_proc == ST_JDPI_PROC[:JDPI_VALIDATION_ERROR]
+      return true if stj_dpi_proc == ST_JDPI_PROC[:SPI_ERROR]
       
       false
     end
@@ -150,9 +152,9 @@ module Jdpi
       stj_dpi_proc = status_data["stJdPiProc"]&.to_i
       
       # Permanent failure states
-      return true if stj_dpi == -1 # Erro no processamento
-      return true if stj_dpi_proc == 7 # Erro de validação no JDPI
-      return true if stj_dpi_proc == 8 # Erro retornado pelo SPI
+      return true if stj_dpi == ST_JDPI[:PROCESSING_ERROR]
+      return true if stj_dpi_proc == ST_JDPI_PROC[:JDPI_VALIDATION_ERROR]
+      return true if stj_dpi_proc == ST_JDPI_PROC[:SPI_ERROR]
       
       false
     end
