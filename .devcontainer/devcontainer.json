@@ -19,34 +19,56 @@
   "customizations": {
     "vscode": {
       "extensions": [
+        // AI Assistant
+        "anthropic.claude-dev",
+        
+        // Ruby Development
         "shopify.ruby-lsp",
         "rebornix.ruby",
-        "ms-vscode.vscode-json",
+        
+        // Frontend Development
         "bradlc.vscode-tailwindcss",
         "esbenp.prettier-vscode",
         "ms-vscode.vscode-typescript-next",
+        "ms-vscode.vscode-html-language-features",
+        
+        // Data Formats
+        "ms-vscode.vscode-json",
         "ms-vscode.vscode-yaml",
         "redhat.vscode-xml",
-        "ms-vscode.vscode-html-language-features",
+        
+        // DevOps & Containers
         "ms-vscode-remote.remote-containers",
         "ms-azuretools.vscode-docker",
         "ms-vscode.vscode-docker-compose",
+        
+        // Database Tools
         "ckolkman.vscode-postgres",
         "ms-vscode.vscode-database-client",
         "formulahendry.vscode-postgresql-formatter",
+        
+        // API Development
         "humao.rest-client",
         "rangav.vscode-thunder-client",
+        
+        // Git & Version Control
         "ms-vscode.vscode-git-graph",
         "eamodio.gitlens",
         "github.vscode-pull-request-github",
+        
+        // Code Quality & Navigation
         "ms-vscode.vscode-todo-highlight",
         "gruntfuggly.todo-tree",
         "pflannery.vscode-versionlens",
+        
+        // Utilities
         "ms-vscode.vscode-bundle-analyzer",
         "ms-vscode.vscode-hexdump",
         "ms-vscode.vscode-json-languageservice",
         "redhat.vscode-commons",
         "ms-vscode.vscode-markdown-math",
+        
+        // Document Viewers
         "tomoki1207.pdf",
         "mathematic.vscode-pdf",
         "analytic-signal.preview-pdf"
