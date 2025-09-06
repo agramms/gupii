@@ -10,17 +10,20 @@ Our implementation follows domain-driven design principles:
 
 ```
 app/services/jdpi/
-├── authentication_service.rb    # OAuth2 + Redis token caching
-├── base_service.rb             # Common HTTP client + error handling  
-├── idempotency_service.rb      # UUID generation + deduplication
-├── med_service.rb              # MED refund operations (BE08, FR01, MD06, SL02)
-└── polling_service.rb          # Intelligent status polling
+├── authentication_service.rb         # OAuth2 + Redis token caching
+├── base_service.rb                   # Common HTTP client + error handling  
+├── idempotency_service.rb            # UUID generation + deduplication
+├── payment_refund_service.rb         # SPI payment refunds (BE08, FR01, MD06, SL02)
+├── infraction_notification_service.rb # DICT infraction notifications (8.2.15-8.2.22)
+├── refund_request_service.rb         # DICT refund solicitations (8.2.24-8.2.29)
+├── status_codes.rb                   # Centralized status constants
+└── polling_service.rb                # Intelligent status polling
 
 app/jobs/jdpi/
-└── polling_job.rb              # Async polling with Solid Queue
+└── polling_job.rb                    # Async polling with Solid Queue
 
 config/initializers/
-└── jdpi.rb                     # Configuration management
+└── jdpi.rb                           # Configuration management
 ```
 
 ## Authentication Examples
@@ -54,17 +57,22 @@ cached_token = { access_token: "...", expires_at: 1.hour.from_now }
 is_valid = auth_service.token_valid?(cached_token)
 ```
 
-## MED Refund Examples
+## Payment Refund Examples (SPI Scope)
+
+The `PaymentRefundService` handles actual monetary refunds through SPI endpoints:
 
 ### 1. Operational Failure Refund (BE08)
 
 ```ruby
 # System-initiated refund for operational failures
-result = Jdpi::MedService.operational_failure_refund(
-  end_to_end_id: "E00038166202312151030abc123def45",
-  amount: 150.85,
-  reason: "System timeout during transaction processing"
+service = Jdpi::PaymentRefundService.new(
+  end_to_end_id_original: "E00038166202312151030abc123def45",
+  refund_amount: 150.85,
+  refund_code: "BE08",
+  refund_description: "System timeout during transaction processing"
 )
+
+result = service.call
 
 if result[:success]
   puts "Refund submitted: #{result[:data]['idReqJdPi']}"
@@ -78,7 +86,7 @@ end
 
 ```ruby
 # Enhanced compliance refund for fraud detection
-service = Jdpi::MedService.new(
+service = Jdpi::PaymentRefundService.new(
   end_to_end_id_original: "E00038166202312151030xyz789abc12",
   refund_amount: 500.00,
   refund_code: "FR01",
@@ -99,7 +107,7 @@ result = service.call
 
 ```ruby
 # User-initiated refund with client authorization
-service = Jdpi::MedService.new(
+service = Jdpi::PaymentRefundService.new(
   end_to_end_id_original: "E00038166202312151030user123req",
   refund_amount: 75.50,
   refund_code: "MD06", 
@@ -115,11 +123,15 @@ result = service.call
 
 ```ruby
 # Refund for PIX withdrawal/change transaction errors
-result = Jdpi::MedService.saque_troco_refund(
-  end_to_end_id: "E00038166202312151030saque567troco",
-  amount: 20.00,
-  reason: "Incorrect change amount dispensed at merchant location"
+service = Jdpi::PaymentRefundService.new(
+  end_to_end_id_original: "E00038166202312151030saque567troco",
+  refund_amount: 20.00,
+  refund_code: "SL02",
+  refund_description: "Incorrect change amount dispensed at merchant location",
+  client_authorization_token: "merchant_jwt_token"
 )
+
+result = service.call
 ```
 
 ## Status Polling Examples
@@ -169,20 +181,20 @@ Jdpi::PollingService.start_async_polling(
 )
 ```
 
-### Query Operations
+### Payment Refund Query Operations
 
 ```ruby
 # Query refund status directly
-result = Jdpi::MedService.query_refund_status(
+result = Jdpi::PaymentRefundService.query_refund_status(
   jdpi_request_id: "70F945C1-9024-4123-1001-A1DE2A0000D1"
 )
 
 # List available refund reasons
-reasons = Jdpi::MedService.list_refund_reasons
+reasons = Jdpi::PaymentRefundService.list_refund_reasons
 puts reasons[:data]['resultado'] # Array of refund codes and descriptions
 
 # Query refund credit status
-credit_status = Jdpi::MedService.query_refund_credit(
+credit_status = Jdpi::PaymentRefundService.query_refund_credit(
   end_to_end_id: "D00038166202312151051abc123def45"
 )
 ```
@@ -205,12 +217,118 @@ exists = Jdpi::IdempotencyService.key_exists?(key)
 stored_context = Jdpi::IdempotencyService.get_context(key)
 ```
 
+## Infraction Notification Examples (DICT Scope)
+
+The `InfractionNotificationService` handles PIX key infractions through DICT endpoints:
+
+### Submit Infraction Notification
+
+```ruby
+# Report fraudulent PIX key usage
+service = Jdpi::InfractionNotificationService.new(
+  pix_key: "user@fraudulent-domain.com",
+  infraction_type: "account_fraud",
+  description: "This PIX key is being used for fraudulent transactions",
+  evidence_files: [
+    { name: "transaction_logs.pdf", url: "https://...", type: "application/pdf" },
+    { name: "user_report.txt", url: "https://...", type: "text/plain" }
+  ],
+  priority_level: "HIGH"
+)
+
+result = service.call
+if result[:success]
+  puts "Infraction submitted: #{result[:data]['notificationId']}"
+end
+```
+
+### Query and Manage Infractions
+
+```ruby
+# List processing infractions
+result = Jdpi::InfractionNotificationService.list_processing_infractions(limit: 25)
+
+# Query specific infraction
+result = Jdpi::InfractionNotificationService.query_infraction(
+  notification_id: "notification_123"
+)
+
+# Cancel infraction notification
+result = Jdpi::InfractionNotificationService.cancel_infraction(
+  notification_id: "notification_123",
+  reason: "Duplicate submission"
+)
+
+# Analyze infraction
+result = Jdpi::InfractionNotificationService.analyze_infraction(
+  notification_id: "notification_123",
+  analysis_result: "CONFIRMED",
+  comments: "Evidence supports fraud claim"
+)
+```
+
+## Refund Request Examples (DICT Scope)
+
+The `RefundRequestService` handles refund solicitations through DICT coordination:
+
+### Submit Refund Request
+
+```ruby
+# Request refund through DICT coordination
+service = Jdpi::RefundRequestService.new(
+  end_to_end_id_original: "E00038166202312151030dispute123",
+  refund_amount: 250.75,
+  request_type: "customer_dispute",
+  description: "Customer disputes transaction - goods not delivered",
+  justification: "Customer provided evidence that goods were never delivered despite successful PIX payment. Merchant has been unresponsive to dispute resolution attempts.",
+  evidence_files: [
+    { name: "delivery_tracking.pdf", url: "https://...", type: "application/pdf" },
+    { name: "customer_communications.pdf", url: "https://...", type: "application/pdf" }
+  ],
+  priority_level: "MEDIUM",
+  counterpart_approval_required: true
+)
+
+result = service.call
+if result[:success]
+  puts "Refund request submitted: #{result[:data]['requestId']}"
+end
+```
+
+### Query and Manage Refund Requests
+
+```ruby
+# List processing refund requests
+result = Jdpi::RefundRequestService.list_processing_requests(limit: 20)
+
+# Query specific refund request
+result = Jdpi::RefundRequestService.query_request(request_id: "request_456")
+
+# Cancel refund request
+result = Jdpi::RefundRequestService.cancel_request(
+  request_id: "request_456",
+  reason: "Customer withdrew dispute"
+)
+
+# Counterpart actions (for receiving participant)
+service = Jdpi::RefundRequestService.new
+result = service.approve_refund_request(
+  "request_456",
+  "Merchant agrees to refund - goods were indeed not delivered"
+)
+
+result = service.reject_refund_request(
+  "request_456",
+  "Delivery confirmation shows goods were received"
+)
+```
+
 ## Error Handling Examples
 
 ### Service-Level Error Handling
 
 ```ruby
-service = Jdpi::MedService.new(
+service = Jdpi::PaymentRefundService.new(
   end_to_end_id_original: "E00038166202312151030test123",
   refund_amount: 100.0,
   refund_code: "MD06"
@@ -241,10 +359,12 @@ end
 
 ```ruby
 begin
-  result = Jdpi::MedService.operational_failure_refund(
-    end_to_end_id: "invalid_format",
-    amount: -100 # Invalid amount
+  service = Jdpi::PaymentRefundService.new(
+    end_to_end_id_original: "invalid_format",
+    refund_amount: -100, # Invalid amount
+    refund_code: "BE08"
   )
+  result = service.call
 rescue ActiveModel::ValidationError => e
   puts "Validation failed: #{e.message}"
 rescue Faraday::TimeoutError => e
@@ -296,7 +416,7 @@ end
 ### Service Testing with RSpec
 
 ```ruby
-RSpec.describe Jdpi::MedService do
+RSpec.describe Jdpi::PaymentRefundService do
   describe '#call' do
     let(:service) do
       described_class.new(
@@ -321,6 +441,44 @@ RSpec.describe Jdpi::MedService do
     end
   end
 end
+
+# Test infraction notifications
+RSpec.describe Jdpi::InfractionNotificationService do
+  describe '#call' do
+    let(:service) do
+      described_class.new(
+        pix_key: 'test@example.com',
+        infraction_type: 'account_fraud',
+        description: 'Test infraction report'
+      )
+    end
+
+    it 'successfully submits infraction notification' do
+      result = service.call
+      expect(result[:success]).to be true
+    end
+  end
+end
+
+# Test refund requests
+RSpec.describe Jdpi::RefundRequestService do
+  describe '#call' do
+    let(:service) do
+      described_class.new(
+        end_to_end_id_original: 'E00038166202312151030test123',
+        refund_amount: 100.0,
+        request_type: 'customer_dispute',
+        description: 'Test dispute',
+        justification: 'Customer dispute - detailed justification here'
+      )
+    end
+
+    it 'successfully submits refund request' do
+      result = service.call
+      expect(result[:success]).to be true
+    end
+  end
+end
 ```
 
 ### Integration Testing
@@ -328,13 +486,16 @@ end
 ```ruby
 # spec/integration/jdpi_integration_spec.rb
 RSpec.describe 'JDPI Integration', type: :integration do
-  it 'processes complete refund workflow' do
-    # 1. Submit refund
-    refund_result = Jdpi::MedService.operational_failure_refund(
-      end_to_end_id: 'E00038166202312151030integration',
-      amount: 50.0
+  it 'processes complete payment refund workflow' do
+    # 1. Submit payment refund
+    service = Jdpi::PaymentRefundService.new(
+      end_to_end_id_original: 'E00038166202312151030integration',
+      refund_amount: 50.0,
+      refund_code: 'BE08',
+      refund_description: 'Integration test refund'
     )
     
+    refund_result = service.call
     expect(refund_result[:success]).to be true
     jdpi_request_id = refund_result[:data]['idReqJdPi']
     
@@ -346,6 +507,26 @@ RSpec.describe 'JDPI Integration', type: :integration do
     )
     
     expect(polling_result[:success]).to be true
+  end
+  
+  it 'processes complete infraction workflow' do
+    # 1. Submit infraction notification
+    service = Jdpi::InfractionNotificationService.new(
+      pix_key: 'test@fraudulent-domain.com',
+      infraction_type: 'account_fraud',
+      description: 'Integration test infraction'
+    )
+    
+    result = service.call
+    expect(result[:success]).to be true
+    notification_id = result[:data]['notificationId']
+    
+    # 2. Query infraction status
+    query_result = Jdpi::InfractionNotificationService.query_infraction(
+      notification_id: notification_id
+    )
+    
+    expect(query_result[:success]).to be true
   end
 end
 ```
@@ -363,12 +544,13 @@ Faraday.default_connection_options = {
 
 # Batch multiple operations
 refunds = [
-  { end_to_end_id: "E123...", amount: 100 },
-  { end_to_end_id: "E456...", amount: 200 }
+  { end_to_end_id_original: "E123...", refund_amount: 100, refund_code: "BE08" },
+  { end_to_end_id_original: "E456...", refund_amount: 200, refund_code: "BE08" }
 ]
 
 results = refunds.map do |refund_data|
-  Jdpi::MedService.operational_failure_refund(**refund_data)
+  service = Jdpi::PaymentRefundService.new(**refund_data)
+  service.call
 end
 ```
 
@@ -385,12 +567,32 @@ class JdpiMetrics
 end
 
 # In your service calls
-result = Jdpi::MedService.operational_failure_refund(params)
+service = Jdpi::PaymentRefundService.new(**params)
+result = service.call
 JdpiMetrics.record_refund_request(
   code: 'BE08',
-  amount: params[:amount],
+  amount: params[:refund_amount],
   success: result[:success]
 )
 ```
 
-This implementation provides a robust, compliant, and scalable foundation for PIX payment integration through JDPI, with particular strength in MED refund processing as required by your project specifications.
+## Service Architecture Summary
+
+Our domain-driven JDPI integration now consists of three specialized services:
+
+1. **PaymentRefundService** - Handles actual monetary refunds through SPI endpoints (8.5.x)
+   - BE08, FR01, MD06, SL02 refund codes
+   - Comprehensive compliance checks
+   - Direct payment processing
+
+2. **InfractionNotificationService** - Manages PIX key infractions through DICT endpoints (8.2.15-8.2.22)
+   - Account fraud, key misuse, phishing, identity theft reporting
+   - Evidence file management
+   - Claim processing and analysis
+
+3. **RefundRequestService** - Handles refund solicitations through DICT coordination (8.2.24-8.2.29)
+   - Operational error, fraud suspicion, customer dispute, regulatory compliance requests
+   - Counterpart approval workflows
+   - Request lifecycle management
+
+This implementation provides a robust, compliant, and scalable foundation for PIX payment integration through JDPI, with clear domain separation and comprehensive coverage of MED (Mecanismo Especial de Devolução) requirements as specified by the Brazilian Central Bank.

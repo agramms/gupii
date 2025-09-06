@@ -1,7 +1,8 @@
 module Jdpi
-  # Mecanismo Especial de Devolução (MED) service
-  # Handles special refund mechanisms for PIX transactions according to JDPI v5.2.1
-  class MedService < BaseService
+  # Payment Refund Service - handles SPI payment refunds (8.5.x endpoints)
+  # Implements Mecanismo Especial de Devolução (MED) for actual payment refunds
+  # Uses /jdpi/spi/api/v2/ endpoints for monetary refund operations
+  class PaymentRefundService < BaseService
     include StatusCodes
     
     # MED refund codes as defined by Central Bank
@@ -62,11 +63,11 @@ module Jdpi
       load_original_transaction if end_to_end_id_original
     end
     
-    # Main method to process MED refund
+    # Main method to process SPI payment refund (8.5.1)
     def call
       return failure_result("Validation failed: #{errors.full_messages.join(', ')}") unless valid?
       
-      Rails.logger.info "[JDPI MED] Processing #{refund_code} refund for #{end_to_end_id_original}"
+      Rails.logger.info "[JDPI SPI Refund] Processing #{refund_code} refund for #{end_to_end_id_original}"
       
       # Perform compliance checks
       return failure_result("Compliance check failed") unless perform_compliance_checks
@@ -78,27 +79,27 @@ module Jdpi
       response = submit_refund_request(refund_end_to_end_id)
       
       if response
-        Rails.logger.info "[JDPI MED] Refund submitted successfully: #{response['idReqJdPi']}"
+        Rails.logger.info "[JDPI SPI Refund] Refund submitted successfully: #{response['idReqJdPi']}"
         success_result(response)
       else
-        Rails.logger.error "[JDPI MED] Refund submission failed: #{errors.join(', ')}"
+        Rails.logger.error "[JDPI SPI Refund] Refund submission failed: #{errors.join(', ')}"
         failure_result("Refund submission failed")
       end
     end
     
-    # Query refund status by JDPI request ID
+    # Query refund status by JDPI request ID (8.5.2)
     def self.query_refund_status(jdpi_request_id:, idempotency_key: nil)
       service = new
       service.query_status(jdpi_request_id, idempotency_key)
     end
     
-    # List available refund reasons
+    # List available refund reasons (8.5.3)
     def self.list_refund_reasons
       service = new
       service.list_reasons
     end
     
-    # Query refund credit status by EndToEndId
+    # Query refund credit status by EndToEndId (8.5.4)
     def self.query_refund_credit(end_to_end_id:)
       service = new
       service.query_credit_status(end_to_end_id)
@@ -112,7 +113,7 @@ module Jdpi
       response = execute_request(:get, path)
       
       if response
-        Rails.logger.info "[JDPI MED] Status query successful for #{jdpi_request_id}"
+        Rails.logger.info "[JDPI SPI Refund] Status query successful for #{jdpi_request_id}"
         success_result(response)
       else
         failure_result("Status query failed")
@@ -124,7 +125,7 @@ module Jdpi
       response = execute_request(:get, "/jdpi/spi/api/v2/od/motivos")
       
       if response
-        Rails.logger.info "[JDPI MED] Refund reasons retrieved successfully"
+        Rails.logger.info "[JDPI SPI Refund] Refund reasons retrieved successfully"
         success_result(response)
       else
         failure_result("Failed to retrieve refund reasons")
@@ -136,7 +137,7 @@ module Jdpi
       response = execute_request(:get, "/jdpi/spi/api/v2/credito-devolucao/#{end_to_end_id}")
       
       if response
-        Rails.logger.info "[JDPI MED] Credit status query successful for #{end_to_end_id}"
+        Rails.logger.info "[JDPI SPI Refund] Credit status query successful for #{end_to_end_id}"
         success_result(response)
       else
         failure_result("Credit status query failed")
@@ -239,7 +240,7 @@ module Jdpi
       # TODO: Implement technical failure validation
       # - Check system logs for failures
       # - Validate failure occurred during transaction processing
-      Rails.logger.info "[JDPI MED] Performing technical failure validation"
+      Rails.logger.info "[JDPI SPI Refund] Performing technical failure validation"
       true
     end
     
@@ -252,7 +253,7 @@ module Jdpi
       # - IP geolocation validation 
       # - Device fingerprinting
       # - ML-based risk scoring
-      Rails.logger.info "[JDPI MED] Performing fraud detection validation"
+      Rails.logger.info "[JDPI SPI Refund] Performing fraud detection validation"
       
       risk_score = calculate_fraud_risk_score
       risk_score > StatusCodes::Risk::FRAUD_RISK_SCORE_THRESHOLD
@@ -264,7 +265,7 @@ module Jdpi
       # - Check against sanctions lists
       # - Validate transaction patterns
       # - Risk-based customer due diligence
-      Rails.logger.info "[JDPI MED] Performing AML validation"
+      Rails.logger.info "[JDPI SPI Refund] Performing AML validation"
       true
     end
     
@@ -273,7 +274,7 @@ module Jdpi
       # TODO: Implement Central Bank reporting
       # - Submit fraud report within 24h
       # - Include detailed transaction analysis
-      Rails.logger.info "[JDPI MED] Performing Central Bank reporting validation"
+      Rails.logger.info "[JDPI SPI Refund] Performing Central Bank reporting validation"
       true
     end
     
@@ -285,7 +286,7 @@ module Jdpi
       # - Verify JWT token signature
       # - Check token expiration
       # - Validate client identity
-      Rails.logger.info "[JDPI MED] Performing client authorization validation"
+      Rails.logger.info "[JDPI SPI Refund] Performing client authorization validation"
       true
     end
     
@@ -295,7 +296,7 @@ module Jdpi
       # - Multi-factor authentication
       # - Document verification
       # - Biometric validation if available
-      Rails.logger.info "[JDPI MED] Performing identity validation"
+      Rails.logger.info "[JDPI SPI Refund] Performing identity validation"
       true
     end
     
@@ -309,7 +310,7 @@ module Jdpi
       # TODO: Implement merchant agreement validation
       # - Check merchant consent for refund
       # - Validate merchant-customer agreement terms
-      Rails.logger.info "[JDPI MED] Performing merchant agreement validation"
+      Rails.logger.info "[JDPI SPI Refund] Performing merchant agreement validation"
       true
     end
     
