@@ -3,7 +3,7 @@ version: '3.8'
 services:
   # Development Application Container
   app:
-    image: mcr.microsoft.com/devcontainers/ruby:3.4.5-bullseye
+    image: mcr.microsoft.com/devcontainers/ruby:3.4-bullseye
     restart: unless-stopped
     volumes:
       - ../..:/workspaces/gupii:cached
