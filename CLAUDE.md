@@ -8,12 +8,32 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 The project mascot is **Gupii** 🐹 - a friendly blue gopher-like character with iugu branding, representing the project's focus on making PIX payments accessible and user-friendly.
 
+### Technical Architecture
+
+**Monolithic Rails 8 Application** with dual scopes:
+- **Admin UI**: Web interface for PIX key management, infraction reports, and transaction refunds
+- **API**: External endpoints for client applications with polling-based communication
+
+**Database Strategy**:
+- PostgreSQL server with environment-specific databases:
+  - `gupii_[env]` - Main application data
+  - `gupii_cache_[env]` - Solid Cache storage
+  - `gupii_queue_[env]` - Solid Queue jobs
+- Redis for additional caching layer
+
+**Integration Pattern**:
+- Service-oriented JDPI integration (`app/services/jdpi/`)
+- Local models with external API reference separation
+- Initial focus: MED (Mecanismo Especial de Devolução)
+- Client polling strategy for real-time updates
+
 ## Development Environment
 
 This project uses a comprehensive DevContainer setup with full observability stack:
 
 ### Core Infrastructure
-- **Rails 7+** with PostgreSQL and Redis
+- **Rails 8** (latest stable) with PostgreSQL and Redis
+- **Solid Cache** and **Solid Queue** with dedicated databases
 - **Development Container** with VS Code integration
 - **Docker Compose** orchestration for all services
 
@@ -46,13 +66,18 @@ This project uses a comprehensive DevContainer setup with full observability sta
 ### Development Setup
 - **Start Environment**: Open in VS Code with Dev Containers extension
 - **Ruby Version**: 3.4.5 (specified in `.ruby-version` and `Gemfile`)
-- **Initial Setup**: `rake prepare` (if applicable)
+- **Rails Version**: 8.0 (latest stable)
+- **Initial Setup**: `rails new . --database=postgresql --skip-git` (if needed)
 - **Install Dependencies**: `bundle install`
-- **Database Setup**: Automatic PostgreSQL setup via DevContainer
+- **Database Setup**: Multiple PostgreSQL databases via DevContainer
+- **Queue Setup**: Solid Queue with dedicated database
+- **Cache Setup**: Solid Cache with dedicated database
 
 ### Development Server
 - **Main Application**: http://localhost:3000
-- **Development Mode**: Rails auto-reloads with Tailwind CSS
+- **Admin UI**: `/admin` routes for PIX management
+- **API Endpoints**: `/api/v1` for client applications
+- **Polling Endpoint**: `/api/v1/events/poll` for client updates
 
 ### Code Quality (Using Reference Project)
 The `tmp/platform2-app-boleto` contains a reference Rails project for Tailwind templates and frontend patterns:
@@ -78,29 +103,76 @@ The `tmp/platform2-app-boleto` contains a reference Rails project for Tailwind t
 
 ## Architecture Focus
 
+### Authentication & Authorization
+- **Provider**: iugu Identity Provider (OAuth 2.0 + OpenID Connect)
+- **Documentation**: https://developer.iugu.com/identity/
+- **Token Type**: JWT (JSON Web Tokens)
+- **Flows**: Authorization Code, PKCE, Client Credentials
+- **Key Endpoints**:
+  - `/authorize` - Authorization flow initiation
+  - `/token` - Token issuance
+  - `/userinfo` - User information
+  - `/verify` - Permission verification
+
+### Service Architecture
+- **JDPI Services**: `app/services/jdpi/` directory structure
+- **MED Focus**: Start with Mecanismo Especial de Devolução
+- **External References**: Separate models for API data vs local data
+- **Best Practices**: Clean separation between internal and external systems
+
+### API Design Patterns
+- **Client Communication**: Polling-based strategy
+- **Event Updates**: Dedicated polling endpoints per entity
+- **Client Flow**: Client apps manage balances → Send PIX actions to Gupii → JDPI communication
+- **Versioning**: `/api/v1` namespace for external endpoints
+
 ### PIX Integration
 - **Primary Goal**: Integration with Brazil's Central Bank PIX system
 - **API**: JDPI (Diretório de Identificadores de Contas Transacionais)
 - **Real-time Payments**: 24/7 instant transfer capabilities
 - **Compliance**: Brazilian Central Bank regulations
+- **Admin Features**: PIX key management, infraction reports, transaction refunds
 
 ### Frontend Development
 - **Tailwind CSS**: Use templates from `tmp/platform2-app-boleto` as reference
-- **Component Patterns**: Follow Rails 7+ conventions with modern CSS
+- **Component Patterns**: Follow Rails 8 conventions with modern CSS
 - **Responsive Design**: Mobile-first approach for payment interfaces
+- **Admin Interface**: Focus on PIX management workflows
 
 ### Development Workflow
-1. **Reference First**: Check `tmp/platform2-app-boleto` for UI patterns
-2. **PIX Focus**: All features should support PIX transaction flows
-3. **Observability**: Use built-in monitoring stack for development insights
-4. **API Integration**: Follow JDPI documentation for Central Bank compliance
+1. **Service-First**: Build JDPI services with clean external/internal separation
+2. **Authentication**: Integrate iugu Identity Provider for JWT-based auth
+3. **Database Strategy**: Multi-database setup with Solid Cache/Queue
+4. **API Design**: Polling-based endpoints for client communication
+5. **Observability**: Use built-in monitoring stack for development insights
 
 ## Environment Configuration
 
 ```env
+# Main Database
 DATABASE_URL=postgresql://postgres:postgres@postgres:5432/gupii_development
+
+# Solid Cache Database  
+SOLID_CACHE_DATABASE_URL=postgresql://postgres:postgres@postgres:5432/gupii_cache_development
+
+# Solid Queue Database
+SOLID_QUEUE_DATABASE_URL=postgresql://postgres:postgres@postgres:5432/gupii_queue_development
+
+# Redis Cache
 REDIS_URL=redis://redis123@redis:6379/0
+
+# Rails Environment
 RAILS_ENV=development
+
+# iugu Identity Provider
+IUGU_IDENTITY_CLIENT_ID=your_client_id
+IUGU_IDENTITY_CLIENT_SECRET=your_client_secret
+IUGU_IDENTITY_BASE_URL=https://identity.iugu.com
+
+# JDPI API Configuration
+JDPI_BASE_URL=https://api.jdpi.bcb.gov.br
+JDPI_CLIENT_ID=your_jdpi_client_id
+JDPI_CLIENT_SECRET=your_jdpi_client_secret
 ```
 
 ## Quick Access URLs
@@ -113,12 +185,16 @@ RAILS_ENV=development
 
 ## Important Notes
 
-- **PIX Focus**: This is specifically for Brazilian Central Bank PIX integration
-- **Ruby Version**: 3.4.5 (latest stable version)
+- **PIX Focus**: Brazilian Central Bank PIX integration with MED (Mecanismo Especial de Devolução)
+- **Rails Version**: 8.0 (latest stable) with Ruby 3.4.5
+- **Multi-Database**: Separate PostgreSQL databases for app, cache, and queue
+- **Authentication**: iugu Identity Provider with JWT tokens
+- **API Strategy**: Polling-based client communication pattern
+- **Service Architecture**: Clean JDPI integration in `app/services/jdpi/`
 - **Reference Templates**: Use `tmp/platform2-app-boleto` for Tailwind patterns only
-- **JDPI Compliance**: Follow the API documentation in `tmp/jdpi-api-doc.5.2.1.pdf`
-- **Mascot**: Gupii represents friendly, accessible PIX payments
-- **Full Stack Observability**: Leverage built-in monitoring for development insights
-- **DevContainer**: Everything runs in containerized environment with full tooling
+- **JDPI Documentation**: API specification in `tmp/jdpi-api-doc.5.2.1.pdf`
+- **Mascot**: Gupii 🐹 represents friendly, accessible PIX payments
+- **Monolithic**: Single Rails app with Admin UI + API scopes for development velocity
+- **Full Stack Observability**: Comprehensive monitoring with Grafana, Prometheus, Jaeger
 
-The project combines modern Rails development with comprehensive observability to create a robust PIX payment integration solution.
+The project combines modern Rails 8 development with enterprise-grade observability and clean service architecture to create a robust, compliant PIX payment integration solution for the Brazilian Central Bank ecosystem.
