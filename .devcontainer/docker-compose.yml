@@ -6,7 +6,7 @@ services:
     image: mcr.microsoft.com/devcontainers/ruby:3.4-bullseye
     restart: unless-stopped
     volumes:
-      - ../..:/workspaces/gupii:cached
+      - ..:/workspaces/gupii:cached
       - app_gems:/usr/local/bundle
     working_dir: /workspaces/gupii
     environment:
