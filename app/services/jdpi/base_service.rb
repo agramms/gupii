@@ -156,7 +156,11 @@ module Jdpi
     end
     
     def default_scopes
-      ["spi_api"] # Default scope for most operations
+      ["spi_api"] # Default scope for SPI operations (payment refunds, etc.)
+      # Available scopes:
+      # - "dict_api": DICT operations (key management, infractions, refund requests)
+      # - "spi_api": SPI operations (payment refunds, credit queries)  
+      # - "qrcode_api": QR Code operations (static/dynamic codes)
     end
   end
 end

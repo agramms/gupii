@@ -49,7 +49,7 @@ module Jdpi
     private
     
     def request_new_token
-      response = oauth_client.post("/jdpi/connect/token") do |req|
+      response = oauth_client.post("/auth/jdpi/connect/token") do |req|
         req.headers["Content-Type"] = "application/x-www-form-urlencoded"
         req.body = URI.encode_www_form({
           client_id: client_id,
