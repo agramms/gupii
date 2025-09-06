@@ -22,9 +22,6 @@ Rails.application.routes.draw do
   
   # PIX Key Management
   resources :pix_keys
-  
-  # Infraction Reports (Notificações de Infração)
-  resources :infraction_reports
 
   # API routes for client applications
   namespace :api do
