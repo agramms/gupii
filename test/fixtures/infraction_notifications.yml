@@ -1,0 +1,34 @@
+# Infraction Notification Fixtures for Testing
+
+fraud_notification:
+  id: <%= SecureRandom.uuid %>
+  pix_key: "12345678901" 
+  infraction_type: "FRAUD"
+  description: "Suspected fraudulent activity on PIX key"
+  evidence_data: { "risk_score": 0.85, "detection_method": "automated" }
+  status: "SUBMITTED"
+  submitted_at: <%= 1.day.ago %>
+  idempotency_key: <%= SecureRandom.uuid %>
+
+aml_notification:
+  id: <%= SecureRandom.uuid %>
+  pix_key: "test@suspicious-domain.com"
+  infraction_type: "AML_VIOLATION" 
+  description: "Anti-money laundering violation detected"
+  evidence_data: { "suspicious_patterns": ["velocity", "amount"] }
+  status: "PROCESSING"
+  submitted_at: <%= 2.hours.ago %>
+  last_status_change_at: <%= 1.hour.ago %>
+  idempotency_key: <%= SecureRandom.uuid %>
+
+completed_notification:
+  id: <%= SecureRandom.uuid %>
+  pix_key: "+5511999999999"
+  infraction_type: "ACCOUNT_MISUSE"
+  description: "Inappropriate account usage patterns"
+  status: "COMPLETED"
+  analysis_result: "CONFIRMED"
+  analysis_notes: "Evidence confirmed violation"
+  submitted_at: <%= 1.week.ago %>
+  processed_at: <%= 6.days.ago %>
+  idempotency_key: <%= SecureRandom.uuid %>

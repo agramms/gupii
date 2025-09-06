@@ -1,0 +1,292 @@
+module Jdpi
+  # JDPI Infraction Notification Service
+  # Handles PIX key infraction reports through DICT API endpoints (8.2.16-8.2.21)
+  # Complies with JDPI v5.2.1 specifications for fraud reporting and PIX key misuse
+  class InfractionNotificationService < BaseService
+    include StatusCodes
+    
+    attr_accessor :notification_id, :pix_key, :infraction_type, :description, :evidence_data
+    
+    def initialize(attributes = {})
+      super
+      
+      # Force DICT API scope for infraction operations
+      @scopes = [ApiScopes::DICT_API]
+      @errors = []
+    end
+    
+    # 8.2.16 - Include Infraction Notification 
+    # POST /jdpi/dict/api/v2/notificacao-infracao
+    def create_notification(pix_key:, infraction_type:, description:, evidence_data: nil)
+      @pix_key = pix_key
+      @infraction_type = infraction_type
+      @description = description
+      @evidence_data = evidence_data
+      
+      return false unless validate_notification_data
+      
+      request_body = build_create_request_body
+      idempotency_key = Jdpi::IdempotencyService.generate_key
+      
+      Rails.logger.info "#{Logging::SERVICE_PREFIX} #{Logging::INFRACTION_TAG} Creating notification for PIX key: #{Utils.mask_sensitive_data(@pix_key)}"
+      
+      response = execute_request(
+        :post,
+        "/jdpi/dict/api/v2/notificacao-infracao",
+        body: request_body,
+        idempotent: true,
+        idempotency_key: idempotency_key
+      )
+      
+      if response
+        @notification_id = response['notificationId'] || response['id']
+        Rails.logger.info "#{Logging::SERVICE_PREFIX} #{Logging::INFRACTION_TAG} #{SuccessMessages::INFRACTION_CREATED % { id: @notification_id }}"
+        true
+      else
+        Rails.logger.error "#{Logging::SERVICE_PREFIX} #{Logging::INFRACTION_TAG} #{ErrorMessages::VALIDATION_FAILED % { errors: errors.join(', ') }}"
+        false
+      end
+    rescue => e
+      Rails.logger.error "#{Logging::SERVICE_PREFIX} #{Logging::INFRACTION_TAG} Exception creating notification: #{e.message}"
+      add_error("Failed to create infraction notification: #{e.message}")
+      false
+    end
+    
+    # 8.2.17 - List Processing Infraction Notifications
+    # GET /jdpi/dict/api/v2/notificacao-infracao/processamento
+    def list_processing_notifications(limit: 50, offset: 0)
+      params = build_pagination_params(limit, offset)
+      path = "/jdpi/dict/api/v2/notificacao-infracao/processamento"
+      path += "?#{params}" unless params.empty?
+      
+      Rails.logger.info "#{Logging::SERVICE_PREFIX} #{Logging::INFRACTION_TAG} Listing processing notifications (limit: #{limit}, offset: #{offset})"
+      
+      response = execute_request(:get, path)
+      
+      if response
+        Rails.logger.info "#{Logging::SERVICE_PREFIX} #{Logging::INFRACTION_TAG} Retrieved #{response['notifications']&.size || 0} processing notifications"
+        response
+      else
+        Rails.logger.error "#{Logging::SERVICE_PREFIX} #{Logging::INFRACTION_TAG} Failed to list processing notifications: #{errors.join(', ')}"
+        nil
+      end
+    rescue => e
+      Rails.logger.error "#{Logging::SERVICE_PREFIX} #{Logging::INFRACTION_TAG} Exception listing processing notifications: #{e.message}"
+      add_error("Failed to list processing notifications: #{e.message}")
+      nil
+    end
+    
+    # 8.2.18 - Query Infraction Notification
+    # GET /jdpi/dict/api/v2/notificacao-infracao/{notificationId}
+    def get_notification_status(notification_id)
+      return nil if notification_id.blank?
+      
+      Rails.logger.info "#{Logging::SERVICE_PREFIX} #{Logging::INFRACTION_TAG} Querying notification status: #{notification_id}"
+      
+      response = execute_request(:get, "/jdpi/dict/api/v2/notificacao-infracao/#{notification_id}")
+      
+      if response
+        Rails.logger.info "#{Logging::SERVICE_PREFIX} #{Logging::INFRACTION_TAG} Retrieved notification status: #{response['status']}"
+        response
+      else
+        Rails.logger.error "#{Logging::SERVICE_PREFIX} #{Logging::INFRACTION_TAG} Failed to get notification status: #{errors.join(', ')}"
+        nil
+      end
+    rescue => e
+      Rails.logger.error "#{Logging::SERVICE_PREFIX} #{Logging::INFRACTION_TAG} Exception querying notification: #{e.message}"
+      add_error("Failed to query notification: #{e.message}")
+      nil
+    end
+    
+    # 8.2.19 - Cancel Infraction Notification
+    # DELETE /jdpi/dict/api/v2/notificacao-infracao/{notificationId}
+    def cancel_notification(notification_id, reason:)
+      return false if notification_id.blank? || reason.blank?
+      
+      request_body = {
+        cancellationReason: reason,
+        cancelledAt: Time.current.iso8601,
+        cancelledBy: 'REQUESTER'
+      }
+      
+      Rails.logger.info "#{Logging::SERVICE_PREFIX} #{Logging::INFRACTION_TAG} Cancelling notification: #{notification_id}"
+      
+      response = execute_request(
+        :delete,
+        "/jdpi/dict/api/v2/notificacao-infracao/#{notification_id}",
+        body: request_body
+      )
+      
+      if response
+        Rails.logger.info "#{Logging::SERVICE_PREFIX} #{Logging::INFRACTION_TAG} #{SuccessMessages::INFRACTION_CANCELLED}"
+        true
+      else
+        Rails.logger.error "#{Logging::SERVICE_PREFIX} #{Logging::INFRACTION_TAG} Failed to cancel notification: #{errors.join(', ')}"
+        false
+      end
+    rescue => e
+      Rails.logger.error "#{Logging::SERVICE_PREFIX} #{Logging::INFRACTION_TAG} Exception cancelling notification: #{e.message}"
+      add_error("Failed to cancel notification: #{e.message}")
+      false
+    end
+    
+    # 8.2.20 - Analyze Infraction Notification
+    # PUT /jdpi/dict/api/v2/notificacao-infracao/{notificationId}/analise
+    def analyze_notification(notification_id, analysis_result:, analysis_notes: nil)
+      return false if notification_id.blank? || analysis_result.blank?
+      return false unless valid_analysis_result?(analysis_result)
+      
+      request_body = {
+        analysisResult: analysis_result.upcase,
+        analysisNotes: analysis_notes,
+        analyzedAt: Time.current.iso8601,
+        analyzedBy: 'SYSTEM'
+      }.compact
+      
+      Rails.logger.info "#{Logging::SERVICE_PREFIX} #{Logging::INFRACTION_TAG} Analyzing notification: #{notification_id}"
+      
+      response = execute_request(
+        :put,
+        "/jdpi/dict/api/v2/notificacao-infracao/#{notification_id}/analise",
+        body: request_body
+      )
+      
+      if response
+        Rails.logger.info "#{Logging::SERVICE_PREFIX} #{Logging::INFRACTION_TAG} #{SuccessMessages::INFRACTION_ANALYZED % { result: analysis_result }}"
+        true
+      else
+        Rails.logger.error "#{Logging::SERVICE_PREFIX} #{Logging::INFRACTION_TAG} Failed to analyze notification: #{errors.join(', ')}"
+        false
+      end
+    rescue => e
+      Rails.logger.error "#{Logging::SERVICE_PREFIX} #{Logging::INFRACTION_TAG} Exception analyzing notification: #{e.message}"
+      add_error("Failed to analyze notification: #{e.message}")
+      false
+    end
+    
+    # 8.2.21 - List Infraction Notifications
+    # GET /jdpi/dict/api/v2/notificacao-infracao
+    def list_notifications(status: nil, limit: 50, offset: 0, start_date: nil, end_date: nil)
+      params = build_list_params(status, limit, offset, start_date, end_date)
+      path = "/jdpi/dict/api/v2/notificacao-infracao"
+      path += "?#{params}" unless params.empty?
+      
+      Rails.logger.info "#{Logging::SERVICE_PREFIX} #{Logging::INFRACTION_TAG} Listing notifications (status: #{status}, limit: #{limit})"
+      
+      response = execute_request(:get, path)
+      
+      if response
+        count = response['notifications']&.size || 0
+        Rails.logger.info "#{Logging::SERVICE_PREFIX} #{Logging::INFRACTION_TAG} Retrieved #{count} notifications"
+        response
+      else
+        Rails.logger.error "#{Logging::SERVICE_PREFIX} #{Logging::INFRACTION_TAG} Failed to list notifications: #{errors.join(', ')}"
+        nil
+      end
+    rescue => e
+      Rails.logger.error "#{Logging::SERVICE_PREFIX} #{Logging::INFRACTION_TAG} Exception listing notifications: #{e.message}"
+      add_error("Failed to list notifications: #{e.message}")
+      nil
+    end
+    
+    private
+    
+    def validate_notification_data
+      errors.clear
+      
+      # Validate PIX key
+      if @pix_key.blank?
+        add_error("PIX key is required")
+      elsif !Utils.valid_pix_key?(@pix_key)
+        key_type = Utils.detect_pix_key_type(@pix_key)
+        add_error(ErrorMessages::INVALID_PIX_KEY_FORMAT % { type: key_type || 'unknown' })
+      end
+      
+      # Validate infraction type
+      if @infraction_type.blank?
+        add_error("Infraction type is required")
+      elsif !Utils.valid_infraction_type?(@infraction_type)
+        add_error(ErrorMessages::INVALID_INFRACTION_TYPE % { type: @infraction_type })
+      end
+      
+      # Validate description
+      if @description.blank?
+        add_error("Description is required")
+      elsif @description.length > BusinessRules::MAX_DESCRIPTION_LENGTH
+        add_error("Description cannot exceed #{BusinessRules::MAX_DESCRIPTION_LENGTH} characters")
+      end
+      
+      # Validate evidence data if provided
+      if @evidence_data.present?
+        unless @evidence_data.is_a?(Hash)
+          add_error("Evidence data must be a valid JSON object")
+        elsif @evidence_data.to_json.bytesize > 64.kilobytes
+          add_error("Evidence data cannot exceed 64KB in size")
+        end
+      end
+      
+      errors.empty?
+    end
+    
+    def build_create_request_body
+      {
+        pixKey: @pix_key,
+        infractionType: normalize_infraction_type(@infraction_type),
+        description: @description,
+        evidenceData: @evidence_data,
+        submittedAt: Time.current.iso8601,
+        submittedBy: 'SYSTEM'
+      }.compact
+    end
+    
+    def build_pagination_params(limit, offset)
+      params = []
+      params << "limit=#{[limit, BusinessRules::MAX_PAGINATION_LIMIT].min}" if limit && limit > 0
+      params << "offset=#{offset}" if offset && offset >= 0
+      params.join("&")
+    end
+    
+    def build_list_params(status, limit, offset, start_date, end_date)
+      params = build_pagination_params(limit, offset).split("&")
+      params << "status=#{status}" if status
+      params << "startDate=#{start_date.iso8601}" if start_date
+      params << "endDate=#{end_date.iso8601}" if end_date
+      params.reject(&:blank?).join("&")
+    end
+    
+    def normalize_infraction_type(type)
+      return nil if type.blank?
+      
+      # Handle both symbol keys and string codes
+      type_symbol = type.to_s.downcase.to_sym
+      if InfractionTypes::DESCRIPTIONS.has_key?(type.to_s.upcase)
+        type.to_s.upcase
+      else
+        # Map friendly names to codes
+        case type_symbol
+        when :fraud then InfractionTypes::FRAUD
+        when :aml_violation then InfractionTypes::AML_VIOLATION
+        when :account_misuse then InfractionTypes::ACCOUNT_MISUSE
+        when :invalid_key then InfractionTypes::INVALID_KEY
+        when :unauthorized_use then InfractionTypes::UNAUTHORIZED_USE
+        else
+          type.to_s.upcase
+        end
+      end
+    end
+    
+    def valid_analysis_result?(result)
+      return false if result.blank?
+      Utils.valid_analysis_result?(result)
+    end
+    
+    def add_error(message)
+      @errors ||= []
+      @errors << message
+    end
+    
+    def errors
+      @errors ||= []
+    end
+  end
+end
