@@ -1,0 +1,31 @@
+<div class="flex h-12 items-center justify-between">
+  <div class="gap-x-3 ml-2">
+    <%= link_to "https://developer.iugu.com/pix",
+                class:"flex-col items-center gap-x-3 md:flex md:flex-row text-xs md:text-sm",
+                target: 'blank' do %>
+
+      <%= image_tag("favicon.png", class: "h-4 w-auto", alt:"iugu") %>
+      <div><%= I18n.t('header.api_documentation') %></div>
+    <% end %>
+  </div>
+
+  <div class="flex flex-col gap-x-4 mr-1 items-left text-[12px] justify-end md:text-sm md:items-center md:flex-row">
+    <div class="flex flex-col">
+      <span class="text-gray-500 text-xs"><%= I18n.t('header.environment') %></span>
+      <span class="font-semibold"><%= Rails.env.capitalize %></span>
+    </div>
+    
+    <div class="flex flex-col">
+      <span class="text-gray-500 text-xs"><%= I18n.t('header.workspace') %></span>
+      <span class="font-semibold"><%= @current_workspace_name if @current_workspace_name %></span>
+    </div>
+    
+    <div class="flex flex-col">
+      <span class="text-gray-500 text-xs"><%= I18n.t('header.language') %></span>
+      <select class="font-semibold bg-transparent border-none text-sm" onchange="changeLanguage(this.value)">
+        <option value="pt-BR" <%= 'selected' if I18n.locale == :'pt-BR' %>>🇧🇷 PT</option>
+        <option value="en" <%= 'selected' if I18n.locale == :en %>>🇺🇸 EN</option>
+      </select>
+    </div>
+  </div>
+</div>

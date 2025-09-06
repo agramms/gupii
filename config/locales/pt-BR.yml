@@ -6,12 +6,16 @@ pt-BR:
     description: "Sistema de integração com o PIX do Banco Central do Brasil"
 
   # Navegação
-  navigation:
-    dashboard: "Painel"
+  sidebar:
+    home: "Início"
     pix_keys: "Chaves PIX"
-    infraction_reports: "Relatórios de Infração"
-    transaction_refunds: "Estornos de Transação"
-    logout: "Sair"
+    infraction_reports: "Notificações de Infração"
+    
+  header:
+    workspace: "Workspace"
+    environment: "Ambiente"
+    api_documentation: "Documentação API"
+    language: "Idioma"
 
   # Botões e ações
   actions:

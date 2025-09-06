@@ -22,9 +22,35 @@
     <%= javascript_importmap_tags %>
   </head>
 
-  <body>
-    <main class="container mx-auto mt-28 px-5 flex">
+  <body class="h-full bg-white">
+    <header class="z-50 fixed inset-x-0 top-0 h-16 p-2 bg-white border-b-[1px] border-gray-200 shadow-md">
+      <%= render 'shared/header' %>
+    </header>
+
+    <aside class="hidden z-40 fixed inset-y-0 w-44 h-full mt-16 py-6 bg-white border-l-xl shadow-xl lg:flex">
+      <div class="flex flex-col gap-y-5 w-full">
+        <%= render 'shared/sidebar' %>
+      </div>
+    </aside>
+
+    <main class="z-0 ml-0 mt-16 overflow-y-auto p-3 lg:ml-44">
       <%= yield %>
     </main>
+
+    <footer class="z-50 fixed inset-x-0 bottom-0 flex justify-center bg-white border-t-2 border-gray-200 shadow-md lg:hidden">
+      <%= render 'shared/footer' %>
+    </footer>
   </body>
 </html>
+
+<script type="text/javascript">
+  addEventListener("turbo:frame-missing", (event) => {
+    event.preventDefault()
+  })
+  
+  function changeLanguage(locale) {
+    const url = new URL(window.location)
+    url.searchParams.set('locale', locale)
+    window.location.href = url.toString()
+  }
+</script>

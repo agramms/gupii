@@ -28,4 +28,20 @@
 #       enabled: "ON"
 
 en:
-  hello: "Hello world"
+  # Gupii Application - PIX System
+  app:
+    name: "Gupii"
+    tagline: "PIX Integration System"
+    description: "Integration system with Brazil's Central Bank PIX"
+
+  # Navigation
+  sidebar:
+    home: "Home"
+    pix_keys: "PIX Keys"
+    infraction_reports: "Infraction Reports"
+    
+  header:
+    workspace: "Workspace"
+    environment: "Environment"
+    api_documentation: "API Documentation"
+    language: "Language"

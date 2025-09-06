@@ -13,22 +13,18 @@ Rails.application.routes.draw do
   get "oauth2/callback", to: "authentication#callback"
   get "logout", to: "authentication#logout"
 
-  # Root route
-  root "admin/dashboard#index"
-
-  # Admin UI routes
-  namespace :admin do
-    root "dashboard#index"
-    
-    # PIX Key Management
-    resources :pix_keys
-    
-    # Infraction Reports
-    resources :infraction_reports
-    
-    # Transaction Refunds
-    resources :transaction_refunds
-  end
+  # Root route - Dashboard
+  root "dashboard#index"
+  
+  # Web UI routes
+  # Dashboard (Home)
+  resources :dashboard, only: [:index]
+  
+  # PIX Key Management
+  resources :pix_keys
+  
+  # Infraction Reports (Notificações de Infração)
+  resources :infraction_reports
 
   # API routes for client applications
   namespace :api do
