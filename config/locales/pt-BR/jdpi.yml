@@ -72,6 +72,66 @@ pt-BR:
       maintenance_mode: "JDPI em modo de manutenção"
       unknown_error: "Erro desconhecido no JDPI"
       
+    # Notificações de Infrações
+    infractions:
+      name: "Notificações de Infração"
+      description: "Sistema para reportar e gerenciar infrações de chaves PIX"
+      
+      # Tipos de infração
+      types:
+        fraud: "Fraude"
+        aml_violation: "Violação de Prevenção à Lavagem de Dinheiro"
+        account_misuse: "Uso Inadequado de Conta"
+        invalid_key: "Chave PIX Inválida"
+        unauthorized_use: "Uso Não Autorizado"
+        
+      # Status das notificações de infração
+      status:
+        submitted: "Enviada"
+        processing: "Em Processamento"
+        analyzing: "Em Análise"
+        approved: "Aprovada"
+        rejected: "Rejeitada"
+        cancelled: "Cancelada"
+        completed: "Concluída"
+        
+      # Operações de infração
+      operations:
+        create: "Criar Notificação de Infração"
+        query: "Consultar Notificação"
+        cancel: "Cancelar Notificação"
+        analyze: "Analisar Notificação"
+        list: "Listar Notificações"
+        list_processing: "Listar Em Processamento"
+        
+      # Mensagens de sucesso para infrações
+      success:
+        created: "Notificação de infração criada com sucesso"
+        queried: "Consulta realizada com sucesso"
+        cancelled: "Notificação cancelada com sucesso"
+        analyzed: "Análise registrada com sucesso"
+        listed: "Notificações listadas com sucesso"
+        
+      # Mensagens de erro para infrações  
+      errors:
+        invalid_pix_key: "Chave PIX inválida ou formato incorreto"
+        invalid_type: "Tipo de infração inválido"
+        description_required: "Descrição é obrigatória"
+        description_too_long: "Descrição excede o limite máximo (500 caracteres)"
+        notification_not_found: "Notificação não encontrada"
+        cannot_cancel: "Notificação não pode ser cancelada no status atual"
+        cannot_analyze: "Notificação não pode ser analisada no status atual"
+        invalid_analysis_result: "Resultado da análise inválido"
+        sync_failed: "Falha ao sincronizar com JDPI"
+        
+      # Validações
+      validations:
+        pix_key_required: "Chave PIX é obrigatória"
+        type_required: "Tipo de infração é obrigatório"
+        description_required: "Descrição é obrigatória"
+        notification_id_required: "ID da notificação é obrigatório"
+        analysis_result_required: "Resultado da análise é obrigatório"
+
     # Mensagens de sucesso JDPI
     success:
       key_registered: "Chave registrada com sucesso no JDPI"
@@ -88,3 +148,7 @@ pt-BR:
       transaction_query: "Consulta de transação no JDPI"
       refund_request: "Solicitação de estorno no JDPI"
       infraction_report: "Relatório de infração no JDPI"
+      infraction_created: "Criação de notificação de infração"
+      infraction_cancelled: "Cancelamento de notificação de infração"
+      infraction_analyzed: "Análise de notificação de infração"
+      infraction_synced: "Sincronização de notificação com JDPI"

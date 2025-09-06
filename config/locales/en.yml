@@ -45,3 +45,71 @@ en:
     environment: "Environment"
     api_documentation: "API Documentation"
     language: "Language"
+
+  # JDPI - English translations
+  jdpi:
+    # JDPI System
+    system:
+      name: "JDPI"
+      full_name: "Transactional Account Identifiers Directory"
+      description: "Central Bank system for PIX key management"
+
+    # Infraction Notifications
+    infractions:
+      name: "Infraction Notifications"
+      description: "System for reporting and managing PIX key infractions"
+      
+      # Infraction types
+      types:
+        fraud: "Fraud"
+        aml_violation: "Anti-Money Laundering Violation"
+        account_misuse: "Account Misuse"
+        invalid_key: "Invalid PIX Key"
+        unauthorized_use: "Unauthorized Use"
+        
+      # Infraction notification status
+      status:
+        submitted: "Submitted"
+        processing: "Processing"
+        analyzing: "Analyzing"
+        approved: "Approved"
+        rejected: "Rejected"
+        cancelled: "Cancelled"
+        completed: "Completed"
+        
+      # Infraction operations
+      operations:
+        create: "Create Infraction Notification"
+        query: "Query Notification"
+        cancel: "Cancel Notification"
+        analyze: "Analyze Notification"
+        list: "List Notifications"
+        list_processing: "List Processing Notifications"
+        
+      # Success messages for infractions
+      success:
+        created: "Infraction notification created successfully"
+        queried: "Query completed successfully"
+        cancelled: "Notification cancelled successfully"
+        analyzed: "Analysis recorded successfully"
+        listed: "Notifications listed successfully"
+        
+      # Error messages for infractions
+      errors:
+        invalid_pix_key: "Invalid PIX key or incorrect format"
+        invalid_type: "Invalid infraction type"
+        description_required: "Description is required"
+        description_too_long: "Description exceeds maximum length (500 characters)"
+        notification_not_found: "Notification not found"
+        cannot_cancel: "Notification cannot be cancelled in current status"
+        cannot_analyze: "Notification cannot be analyzed in current status"
+        invalid_analysis_result: "Invalid analysis result"
+        sync_failed: "Failed to sync with JDPI"
+        
+      # Validations
+      validations:
+        pix_key_required: "PIX key is required"
+        type_required: "Infraction type is required"
+        description_required: "Description is required"
+        notification_id_required: "Notification ID is required"
+        analysis_result_required: "Analysis result is required"
