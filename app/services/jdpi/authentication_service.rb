@@ -2,10 +2,10 @@ module Jdpi
   # OAuth 2.0 authentication service for JDPI API
   # Handles token acquisition, caching, and refresh using Redis
   class AuthenticationService < BaseService
-    include StatusCodes
+    include Jdpi::StatusCodes
     
     CACHE_KEY_PREFIX = "jdpi:token"
-    TOKEN_REFRESH_THRESHOLD = StatusCodes::Duration::TOKEN_REFRESH_THRESHOLD_SECONDS
+    TOKEN_REFRESH_THRESHOLD = Duration::TOKEN_REFRESH_THRESHOLD_SECONDS
     
     attr_accessor :scopes
     
@@ -49,7 +49,7 @@ module Jdpi
     private
     
     def request_new_token
-      response = oauth_client.post("/auth/jdpi/connect/token") do |req|
+      response = oauth_client.post(Endpoints::AUTH_TOKEN) do |req|
         req.headers["Content-Type"] = "application/x-www-form-urlencoded"
         req.body = URI.encode_www_form({
           client_id: client_id,

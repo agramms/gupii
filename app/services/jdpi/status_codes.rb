@@ -6,8 +6,10 @@ module Jdpi
     
     # Network and HTTP timeout constants
     module Network
-      DEFAULT_TIMEOUT_SECONDS = 30
+      DEFAULT_TIMEOUT_SECONDS = 60
+      DEFAULT_OPEN_TIMEOUT_SECONDS = 30
       AUTH_TIMEOUT_SECONDS = 10  
+      OAUTH_TIMEOUT_SECONDS = 30
       LONG_OPERATION_TIMEOUT_SECONDS = 120
       RETRY_ATTEMPTS = 3
       RETRY_DELAY_SECONDS = 2
@@ -15,6 +17,23 @@ module Jdpi
     
     # JDPI API Response Status Codes
     module JdpiResponse
+      # Legacy string codes
+      SUCCESS = "00"
+      KEY_NOT_FOUND = "01"
+      KEY_ALREADY_EXISTS = "02"
+      INVALID_KEY_FORMAT = "03"
+      UNSUPPORTED_KEY_TYPE = "04"
+      KEY_LIMIT_EXCEEDED = "05"
+      INVALID_ACCOUNT = "06"
+      UNAUTHORIZED_INSTITUTION = "07"
+      TRANSACTION_NOT_FOUND = "08"
+      INVALID_VALUE = "09"
+      INVALID_DATETIME = "10"
+      INVALID_SIGNATURE = "11"
+      INVALID_CERTIFICATE = "12"
+      SYSTEM_ERROR = "99"
+      
+      # Numeric status codes
       PROCESSING_ERROR = -1          # Erro no processamento
       ACCEPTED_AWAITING = 0          # Aceita aguardando processamento
       SUCCESS_COMPLETED = 9          # Processada com sucesso
@@ -24,6 +43,34 @@ module Jdpi
       NOT_FOUND_ERROR = 404         # Recurso não encontrado
       CONFLICT_ERROR = 409          # Conflito de estado
       INTERNAL_SERVER_ERROR = 500   # Erro interno do servidor
+    end
+    
+    # Transaction Status Codes
+    module TransactionStatus
+      PROCESSING = 0
+      SUCCESS = 9
+      ERROR = -1
+    end
+    
+    # HTTP Status Codes
+    module HttpStatus
+      OK = 200
+      CREATED = 201
+      ACCEPTED = 202
+      NO_CONTENT = 204
+      BAD_REQUEST = 400
+      UNAUTHORIZED = 401
+      FORBIDDEN = 403
+      NOT_FOUND = 404
+      METHOD_NOT_ALLOWED = 405
+      REQUEST_TIMEOUT = 408
+      CONFLICT = 409
+      UNPROCESSABLE_ENTITY = 422
+      TOO_MANY_REQUESTS = 429
+      INTERNAL_SERVER_ERROR = 500
+      BAD_GATEWAY = 502
+      SERVICE_UNAVAILABLE = 503
+      GATEWAY_TIMEOUT = 504
     end
     
     # PIX Key Types and Validation Patterns
@@ -103,14 +150,24 @@ module Jdpi
     
     # API Scopes for Different JDPI Operations
     module ApiScopes
-      DICT_API = 'dict_api'       # For DICT operations (key management, infractions)
-      SPI_API = 'spi_api'         # For SPI operations (payments, refunds)
-      BOTH = [DICT_API, SPI_API]  # For operations requiring both scopes
+      DICT_API = 'dict_api'               # DICT operations (key management, infractions)
+      SPI_API = 'spi_api'                 # SPI operations (payments, refunds)
+      QRCODE_API = 'qrcode_api'           # QR Code operations
+      SPI_WEBHOOK_API = 'spi_webhook_api' # Webhook notifications
+      SPIAUT_API = 'spiaut_api'           # SPI authentication
+      SPIAGE_API = 'spiage_api'           # SPI agent operations
+      
+      BOTH = [DICT_API, SPI_API]          # For operations requiring both scopes
+      ALL = [DICT_API, SPI_API, QRCODE_API, SPI_WEBHOOK_API, SPIAUT_API, SPIAGE_API].freeze
       
       # Scope descriptions
       DESCRIPTIONS = {
         DICT_API => 'DICT API access for PIX key management and infractions',
-        SPI_API => 'SPI API access for payment processing and refunds'
+        SPI_API => 'SPI API access for payment processing and refunds',
+        QRCODE_API => 'QR Code generation and management',
+        SPI_WEBHOOK_API => 'Webhook notification handling',
+        SPIAUT_API => 'SPI authentication operations',
+        SPIAGE_API => 'SPI agent operations'
       }.freeze
     end
     
@@ -122,12 +179,21 @@ module Jdpi
       DEFAULT_PAGINATION_LIMIT = 50
       MAX_EVIDENCE_FILES = 10
       MAX_EVIDENCE_FILE_SIZE_MB = 50
+      
+      # Default PI-PayerId (Bank Institution CNPJ)
+      DEFAULT_PI_PAYER_ID = '15111975000164'  # 15.111.975/0001-64
+      
+      # Default ISPB (Institution's Identifier in SFN)
+      DEFAULT_ISPB = '15111975'  # Bank's ISPB code
     end
     
     # Time and Duration Constants
     module Duration
       TOKEN_CACHE_TTL_SECONDS = 3300        # 55 minutes (tokens expire in 1h)
+      TOKEN_REFRESH_THRESHOLD_SECONDS = 300 # Refresh token 5 minutes before expiry
+      CACHE_EXPIRY_SECONDS = 1200           # 20 minutes default cache
       IDEMPOTENCY_TTL_SECONDS = 86400       # 24 hours
+      IDEMPOTENCY_CACHE_TTL_SECONDS = 86400 # 24 hours (alias for consistency)
       MAX_REFUND_WINDOW_DAYS = 90           # Maximum days for refund requests
       MAX_ANALYSIS_DAYS = 30                # Maximum days to analyze infractions
     end
@@ -146,18 +212,48 @@ module Jdpi
       FRAUD_RISK_SCORE_THRESHOLD = HIGH_RISK_THRESHOLD
     end
     
+    # MED Refund Reason Codes
+    module MedReasonCodes
+      OPERATIONAL_FAILURE = "BE08"  # Falha operacional
+      FRAUD_SUSPICION = "FR01"      # Suspeita de fraude
+      USER_REQUESTED = "MD06"       # Solicitação do usuário
+      SAQUE_TROCO_ERROR = "SL02"    # Erro PIX Saque/Troco
+      
+      ALL = [OPERATIONAL_FAILURE, FRAUD_SUSPICION, USER_REQUESTED, SAQUE_TROCO_ERROR].freeze
+      
+      DESCRIPTIONS = {
+        OPERATIONAL_FAILURE => 'Operational failure refund',
+        FRAUD_SUSPICION => 'Fraud suspicion refund', 
+        USER_REQUESTED => 'User requested refund',
+        SAQUE_TROCO_ERROR => 'PIX Cash withdrawal/Change error'
+      }.freeze
+    end
+    
+    # Validation Patterns
+    module ValidationPatterns
+      END_TO_END_ID = /\A[DE]\d{8}\d{8}\w{11}\z/  # E/D + ISPB(8) + DateTime(8) + Sequence(11)
+      IDEMPOTENCY_KEY = /\A[\w-]{36}\z/            # 36-character GUID format
+      PIX_KEY_CPF = /\A\d{11}\z/                   # CPF: 11 digits
+      PIX_KEY_CNPJ = /\A\d{14}\z/                  # CNPJ: 14 digits
+      PIX_KEY_PHONE = /\A\+55\d{10,11}\z/          # Phone: +55 + 10/11 digits
+      PIX_KEY_EMAIL = /\A[^@\s]+@[^@\s]+\.[^@\s]+\z/ # Basic email format
+      PIX_KEY_RANDOM = /\A[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\z/i # UUID format
+    end
+
     # JDPI API Endpoint Patterns
     module Endpoints
       # DICT API Base
-      DICT_BASE = '/jdpi/dict/api/v2'
+      DICT_BASE = '/chave-gestao-api/jdpi/dict/api/v2'
+      INFRACTION_BASE = '/chave-relato-infracao-api/jdpi/dict/api/v2'
       
       # SPI API Base  
-      SPI_BASE = '/jdpi/spi/api/v2'
+      SPI_BASE = '/spi-api/jdpi/spi/api/v2'
       
       # Infraction endpoints
-      INFRACTIONS = "#{DICT_BASE}/notificacao-infracao"
-      INFRACTION_PROCESSING = "#{INFRACTIONS}/processamento"
-      INFRACTION_BY_ID = "#{INFRACTIONS}/%{notification_id}"
+      INFRACTIONS = "#{INFRACTION_BASE}/relato-infracao"
+      INFRACTION_PROCESSING = "#{INFRACTIONS}/pendentes"
+      INFRACTION_LIST = "#{INFRACTIONS}/listar"
+      INFRACTION_BY_ID = "#{INFRACTIONS}/consultar"  # Query params added at runtime
       INFRACTION_ANALYSIS = "#{INFRACTIONS}/%{notification_id}/analise"
       
       # Authentication
@@ -270,6 +366,17 @@ module Jdpi
           key.length > 12 ? "#{key[0..7]}****#{key[-4..-1]}" : key
         else
           key
+        end
+      end
+      
+      # Get ISPB value from configuration or environment with fallback to default
+      def self.ispb_value
+        if defined?(Rails)
+          Rails.application.credentials.jdpi&.dig(:ispb) || 
+            ENV['JDPI_ISPB'] || 
+            BusinessRules::DEFAULT_ISPB
+        else
+          BusinessRules::DEFAULT_ISPB
         end
       end
     end

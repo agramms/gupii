@@ -3,7 +3,7 @@ module Jdpi
   # Handles PIX key infraction reports through DICT API endpoints (8.2.16-8.2.21)
   # Complies with JDPI v5.2.1 specifications for fraud reporting and PIX key misuse
   class InfractionNotificationService < BaseService
-    include StatusCodes
+    include Jdpi::StatusCodes
     
     attr_accessor :notification_id, :pix_key, :infraction_type, :description, :evidence_data
     
@@ -16,7 +16,7 @@ module Jdpi
     end
     
     # 8.2.16 - Include Infraction Notification 
-    # POST /jdpi/dict/api/v2/notificacao-infracao
+    # POST Endpoints::INFRACTIONS
     def create_notification(pix_key:, infraction_type:, description:, evidence_data: nil)
       @pix_key = pix_key
       @infraction_type = infraction_type
@@ -32,7 +32,7 @@ module Jdpi
       
       response = execute_request(
         :post,
-        "/jdpi/dict/api/v2/notificacao-infracao",
+        Endpoints::INFRACTIONS,
         body: request_body,
         idempotent: true,
         idempotency_key: idempotency_key
@@ -53,15 +53,16 @@ module Jdpi
     end
     
     # 8.2.17 - List Processing Infraction Notifications
-    # GET /jdpi/dict/api/v2/notificacao-infracao/processamento
-    def list_processing_notifications(limit: 50, offset: 0)
+    # GET Endpoints::INFRACTION_PROCESSING
+    # Requires PI-PayerId header - uses default bank CNPJ if not provided
+    def list_processing_notifications(limit: 50, offset: 0, pi_payer_id: nil)
       params = build_pagination_params(limit, offset)
-      path = "/jdpi/dict/api/v2/notificacao-infracao/processamento"
+      path = Endpoints::INFRACTION_PROCESSING
       path += "?#{params}" unless params.empty?
       
       Rails.logger.info "#{Logging::SERVICE_PREFIX} #{Logging::INFRACTION_TAG} Listing processing notifications (limit: #{limit}, offset: #{offset})"
       
-      response = execute_request(:get, path)
+      response = execute_request(:get, path, pi_payer_id: pi_payer_id)
       
       if response
         Rails.logger.info "#{Logging::SERVICE_PREFIX} #{Logging::INFRACTION_TAG} Retrieved #{response['notifications']&.size || 0} processing notifications"
@@ -77,13 +78,17 @@ module Jdpi
     end
     
     # 8.2.18 - Query Infraction Notification
-    # GET /jdpi/dict/api/v2/notificacao-infracao/{notificationId}
+    # GET Endpoints::INFRACTION_BY_ID with query parameters
     def get_notification_status(notification_id)
-      return nil if notification_id.blank?
+      return nil unless validate_notification_id(notification_id)
+      
+      # Build query string with required parameters
+      query_params = "idRelatoInfracao=#{notification_id}&ispb=#{Utils.ispb_value}"
+      path = "#{Endpoints::INFRACTION_BY_ID}?#{query_params}"
       
       Rails.logger.info "#{Logging::SERVICE_PREFIX} #{Logging::INFRACTION_TAG} Querying notification status: #{notification_id}"
       
-      response = execute_request(:get, "/jdpi/dict/api/v2/notificacao-infracao/#{notification_id}")
+      response = execute_request(:get, path)
       
       if response
         Rails.logger.info "#{Logging::SERVICE_PREFIX} #{Logging::INFRACTION_TAG} Retrieved notification status: #{response['status']}"
@@ -99,9 +104,10 @@ module Jdpi
     end
     
     # 8.2.19 - Cancel Infraction Notification
-    # DELETE /jdpi/dict/api/v2/notificacao-infracao/{notificationId}
+    # DELETE Endpoints::INFRACTION_BY_ID
     def cancel_notification(notification_id, reason:)
-      return false if notification_id.blank? || reason.blank?
+      return false unless validate_notification_id(notification_id)
+      return false if reason.blank?
       
       request_body = {
         cancellationReason: reason,
@@ -113,7 +119,7 @@ module Jdpi
       
       response = execute_request(
         :delete,
-        "/jdpi/dict/api/v2/notificacao-infracao/#{notification_id}",
+        Endpoints::INFRACTION_BY_ID % { notification_id: notification_id },
         body: request_body
       )
       
@@ -131,9 +137,10 @@ module Jdpi
     end
     
     # 8.2.20 - Analyze Infraction Notification
-    # PUT /jdpi/dict/api/v2/notificacao-infracao/{notificationId}/analise
+    # PUT Endpoints::INFRACTION_ANALYSIS
     def analyze_notification(notification_id, analysis_result:, analysis_notes: nil)
-      return false if notification_id.blank? || analysis_result.blank?
+      return false unless validate_notification_id(notification_id)
+      return false if analysis_result.blank?
       return false unless valid_analysis_result?(analysis_result)
       
       request_body = {
@@ -147,7 +154,7 @@ module Jdpi
       
       response = execute_request(
         :put,
-        "/jdpi/dict/api/v2/notificacao-infracao/#{notification_id}/analise",
+        Endpoints::INFRACTION_ANALYSIS % { notification_id: notification_id },
         body: request_body
       )
       
@@ -165,15 +172,16 @@ module Jdpi
     end
     
     # 8.2.21 - List Infraction Notifications
-    # GET /jdpi/dict/api/v2/notificacao-infracao
-    def list_notifications(status: nil, limit: 50, offset: 0, start_date: nil, end_date: nil)
+    # GET Endpoints::INFRACTIONS
+    # Requires PI-PayerId header - uses default bank CNPJ if not provided
+    def list_notifications(status: nil, limit: 50, offset: 0, start_date: nil, end_date: nil, pi_payer_id: nil)
       params = build_list_params(status, limit, offset, start_date, end_date)
-      path = "/jdpi/dict/api/v2/notificacao-infracao"
+      path = Endpoints::INFRACTION_LIST
       path += "?#{params}" unless params.empty?
       
       Rails.logger.info "#{Logging::SERVICE_PREFIX} #{Logging::INFRACTION_TAG} Listing notifications (status: #{status}, limit: #{limit})"
       
-      response = execute_request(:get, path)
+      response = execute_request(:get, path, pi_payer_id: pi_payer_id)
       
       if response
         count = response['notifications']&.size || 0
@@ -220,7 +228,9 @@ module Jdpi
       if @evidence_data.present?
         unless @evidence_data.is_a?(Hash)
           add_error("Evidence data must be a valid JSON object")
-        elsif @evidence_data.to_json.bytesize > 64.kilobytes
+        end
+        
+        if @evidence_data.is_a?(Hash) && @evidence_data.to_json.bytesize > 64.kilobytes
           add_error("Evidence data cannot exceed 64KB in size")
         end
       end
@@ -251,6 +261,7 @@ module Jdpi
       params << "status=#{status}" if status
       params << "startDate=#{start_date.iso8601}" if start_date
       params << "endDate=#{end_date.iso8601}" if end_date
+      params << "ispb=#{Utils.ispb_value}"
       params.reject(&:blank?).join("&")
     end
     
@@ -287,6 +298,22 @@ module Jdpi
     
     def errors
       @errors ||= []
+    end
+    
+    # Validate notification ID format and presence
+    def validate_notification_id(notification_id)
+      if notification_id.blank?
+        add_error("Notification ID is required")
+        return false
+      end
+      
+      # Basic format validation - could be enhanced based on JDPI specs
+      unless notification_id.is_a?(String) && notification_id.length > 0
+        add_error("Invalid notification ID format")
+        return false
+      end
+      
+      true
     end
   end
 end

@@ -1,7 +1,7 @@
 module Jdpi
   class BaseService
     include ActiveModel::Model
-    include StatusCodes
+    include Jdpi::StatusCodes
     
     attr_reader :response, :errors, :idempotency_key
     attr_accessor :scopes
@@ -32,8 +32,8 @@ module Jdpi
         config.request :json
         config.response :json, content_type: /\bjson$/
         config.adapter Faraday.default_adapter
-        config.options.timeout = StatusCodes::Network::DEFAULT_TIMEOUT_SECONDS
-        config.options.open_timeout = StatusCodes::Network::DEFAULT_OPEN_TIMEOUT_SECONDS
+        config.options.timeout = Network::DEFAULT_TIMEOUT_SECONDS
+        config.options.open_timeout = Network::DEFAULT_OPEN_TIMEOUT_SECONDS
         
         # Authentication header
         if token = access_token
@@ -47,11 +47,12 @@ module Jdpi
     end
     
     # Execute authenticated request with idempotency support
-    def execute_request(method, path, body: nil, idempotent: false)
+    def execute_request(method, path, body: nil, idempotent: false, pi_payer_id: nil)
       prepare_idempotency_key if idempotent
       
       response = client.send(method, path) do |req|
         req.headers["Chave-Idempotencia"] = @idempotency_key if @idempotency_key
+        req.headers["PI-PayerId"] = pi_payer_id || BusinessRules::DEFAULT_PI_PAYER_ID
         req.body = body if body
       end
       
