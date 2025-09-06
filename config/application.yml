@@ -1,0 +1,57 @@
+shared:
+  appname: gupii_app
+  iugu:
+    company_name: Iugu Serviços na Internet SA
+    bank_code: 401
+    cnpj: 15111975000164
+  # OAuth credentials are stored in Rails credentials (use: rails credentials:edit)
+  # oauth:
+  #   client_id: stored_in_credentials
+  #   client_secret: stored_in_credentials
+  datadog:
+    enabled: true
+  jobs:
+    default_cron: '*/5 * * * *'
+    nightly_liquidation_cron: '25 8 * * 1-5'
+    daytime_liquidation_cron: '15 16 * * 1-5'
+    update_expired_pix_cron: '0 0 * * *'
+    register_or_update_banks_cron: '0 5 * * *'
+    queues: '*'
+    max_threads: 5
+    shutdown_timeout: 25 # seconds
+    preserve_records: true
+    cleanup_days: 1
+    enable_cron: false
+    dashboard:
+      user: gupii
+      password: solid_queue_2025*
+    check_interval: 30 # seconds
+  identity:
+    base_url: https://identity.iugu.com
+  core:
+    base_url: https://core.staging.spb.iugu/api/v1
+    # api_token: stored_in_credentials
+  billing:
+    # app_id: stored_in_credentials
+    base_url: https://billing.iugu.com
+  icp_signature:
+    # app_id: stored_in_credentials
+    base_url: https://api.icp-signature.br.iugu.com
+    sign_url: https://sign.icp-signature.br.iugu.com
+  api_documentation:
+    base_url: https://developer.iugu.com/pix
+
+test:
+  datadog:
+    enabled: false
+  # Test credentials are also stored in Rails credentials
+
+development:
+  datadog:
+    enabled: false
+  jobs:
+    default_cron: every 10 seconds
+
+production:
+  core:
+    base_url: https://core-staging-workers.eba-msphd3j3.sa-east-1.elasticbeanstalk.com/api/v1

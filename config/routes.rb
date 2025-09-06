@@ -9,6 +9,10 @@ Rails.application.routes.draw do
   # get "manifest" => "rails/pwa#manifest", as: :pwa_manifest
   # get "service-worker" => "rails/pwa#service_worker", as: :pwa_service_worker
 
+  # OAuth2 Authentication routes
+  get "oauth2/callback", to: "authentication#callback"
+  get "logout", to: "authentication#logout"
+
   # Root route
   root "admin/dashboard#index"
 

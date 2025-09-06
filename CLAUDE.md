@@ -104,15 +104,31 @@ The `tmp/platform2-app-boleto` contains a reference Rails project for Tailwind t
 ## Architecture Focus
 
 ### Authentication & Authorization
-- **Provider**: iugu Identity Provider (OAuth 2.0 + OpenID Connect)
-- **Documentation**: https://developer.iugu.com/identity/
-- **Token Type**: JWT (JSON Web Tokens)
-- **Flows**: Authorization Code, PKCE, Client Credentials
-- **Key Endpoints**:
-  - `/authorize` - Authorization flow initiation
-  - `/token` - Token issuance
-  - `/userinfo` - User information
-  - `/verify` - Permission verification
+- **Provider**: iugu Identity Provider (OAuth 2.0 + JWT)
+- **Base URL**: `https://identity.iugu.com`
+- **Implementation**: Based on `platform2-app-boleto` reference architecture
+
+**Key Components**:
+- **IdentityClient** (`lib/identity_client.rb`): JWT validation, OAuth2 client setup
+- **AuthBaseController**: Base authentication for admin controllers
+- **JwtCache**: Token management with Redis caching
+- **AppSettings**: Configuration management with env var support
+
+**OAuth2 Flow**:
+- **Authorization URL**: `/authorize` → Redirect to iugu Identity
+- **Callback URL**: `/oauth2/callback` → Handle authorization code
+- **Token Validation**: RS256 JWT with JWKS endpoint validation
+- **Token Refresh**: Automatic refresh with 20-minute cache expiry
+
+**Key Endpoints**:
+- `GET /oauth2/callback` - OAuth2 authorization callback
+- `GET /logout` - Session termination
+- **JWKS**: `/.well-known/jwks.json` for token validation
+
+**Configuration**:
+- `config/application.yml` - Base application configuration
+- **Rails Credentials**: `rails credentials:edit` for secrets management
+- **Priority**: Rails credentials → application.yml → environment variables
 
 ### Service Architecture
 - **JDPI Services**: `app/services/jdpi/` directory structure
@@ -146,33 +162,43 @@ The `tmp/platform2-app-boleto` contains a reference Rails project for Tailwind t
 4. **API Design**: Polling-based endpoints for client communication
 5. **Observability**: Use built-in monitoring stack for development insights
 
-## Environment Configuration
+## Configuration Management
+
+### Rails Credentials (Recommended)
+Use `rails credentials:edit` to manage sensitive information:
+
+```yaml
+# config/credentials.yml.enc (encrypted)
+oauth:
+  client_id: your_iugu_oauth_client_id
+  client_secret: your_iugu_oauth_client_secret
+
+core:
+  api_token: your_core_api_token
+
+billing:
+  app_id: your_billing_app_id
+
+icp_signature:
+  app_id: your_icp_signature_app_id
+
+# Test environment credentials
+test:
+  oauth:
+    client_id: test_client_id
+    client_secret: test_client_secret
+  core:
+    api_token: test_core_token
+```
+
+### Environment Variables (DevContainer Managed)
+These are automatically configured in the DevContainer:
 
 ```env
-# Main Database
+# Database URLs (automatically set)
 DATABASE_URL=postgresql://postgres:postgres@postgres:5432/gupii_development
-
-# Solid Cache Database  
-SOLID_CACHE_DATABASE_URL=postgresql://postgres:postgres@postgres:5432/gupii_cache_development
-
-# Solid Queue Database
-SOLID_QUEUE_DATABASE_URL=postgresql://postgres:postgres@postgres:5432/gupii_queue_development
-
-# Redis Cache
 REDIS_URL=redis://redis123@redis:6379/0
-
-# Rails Environment
 RAILS_ENV=development
-
-# iugu Identity Provider
-IUGU_IDENTITY_CLIENT_ID=your_client_id
-IUGU_IDENTITY_CLIENT_SECRET=your_client_secret
-IUGU_IDENTITY_BASE_URL=https://identity.iugu.com
-
-# JDPI API Configuration
-JDPI_BASE_URL=https://api.jdpi.bcb.gov.br
-JDPI_CLIENT_ID=your_jdpi_client_id
-JDPI_CLIENT_SECRET=your_jdpi_client_secret
 ```
 
 ## Quick Access URLs
