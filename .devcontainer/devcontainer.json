@@ -46,7 +46,10 @@
         "ms-vscode.vscode-hexdump",
         "ms-vscode.vscode-json-languageservice",
         "redhat.vscode-commons",
-        "ms-vscode.vscode-markdown-math"
+        "ms-vscode.vscode-markdown-math",
+        "tomoki1207.pdf",
+        "mathematic.vscode-pdf",
+        "analytic-signal.preview-pdf"
       ],
       "settings": {
         "ruby.intellisense": "rubyLsp",
