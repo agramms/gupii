@@ -1,0 +1,89 @@
+# Ruby
+*.gem
+*.rbc
+/.config
+/coverage/
+/InstalledFiles
+/pkg/
+/spec/reports/
+/spec/examples.txt
+/test/tmp/
+/test/version_tmp/
+/tmp/
+
+# Bundler
+/.bundle/
+/vendor/bundle
+/lib/bundler/man/
+
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# Logs
+*.log
+/log/*
+!/log/.keep
+
+# Rails specific
+/storage/*
+!/storage/.keep
+/tmp/storage/*
+!/tmp/storage/.keep
+/public/assets
+/public/packs
+/public/packs-test
+/config/master.key
+/config/credentials/*.key
+/app/assets/builds/*
+!/app/assets/builds/.keep
+
+# Node.js
+/node_modules
+/yarn-error.log
+yarn-debug.log*
+.yarn-integrity
+
+# Development containers and Docker
+.devcontainer/.env
+postgres_data/
+redis_data/
+grafana_data/
+prometheus_data/
+statsd_data/
+minio_data/
+pgladmin_data/
+app_gems/
+
+# IDE
+.vscode/
+!.vscode/extensions.json
+!.vscode/settings.json
+.idea/
+*.iml
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+*.cab
+*.msi
+*.msm
+*.msp
+*.lnk
+
+# Byebug history
+.byebug_history
+
+# RDoc documentation
+/doc/
+/rdoc/
+
+# Pow environment settings
+.powenv
+
