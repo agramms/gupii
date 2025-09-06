@@ -1,0 +1,112 @@
+<div class="min-h-screen bg-gray-50">
+  <div class="bg-white shadow">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between items-center py-6">
+        <div class="flex items-center">
+          <h1 class="text-3xl font-bold text-gray-900">Gupii Admin</h1>
+          <span class="ml-3 text-sm text-gray-500">PIX Integration Dashboard</span>
+        </div>
+        <div class="flex items-center">
+          <span class="text-sm text-gray-500">Environment: <%= Rails.env %></span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+    <!-- Dashboard Stats -->
+    <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+      <!-- PIX Keys -->
+      <div class="bg-white overflow-hidden shadow rounded-lg">
+        <div class="p-5">
+          <div class="flex items-center">
+            <div class="flex-shrink-0">
+              <div class="w-8 h-8 bg-blue-500 rounded-md flex items-center justify-center">
+                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m0 0a2 2 0 012 2m-2-2h-6m6 0v6a2 2 0 01-2 2H9a2 2 0 01-2-2v-6a2 2 0 012-2m0-2V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h.01M7 3h5c.552 0 1.02.02 1.5.057m4.5 2.5a9 9 0 110 3m-3.5 1.5a9 9 0 01-3.5-1.5"></path>
+                </svg>
+              </div>
+            </div>
+            <div class="ml-5 w-0 flex-1">
+              <dl>
+                <dt class="text-sm font-medium text-gray-500 truncate">PIX Keys</dt>
+                <dd class="text-lg font-medium text-gray-900"><%= @pix_keys_count %></dd>
+              </dl>
+            </div>
+          </div>
+        </div>
+        <div class="bg-gray-50 px-5 py-3">
+          <%= link_to "Manage Keys", admin_pix_keys_path, class: "text-sm text-blue-600 font-medium hover:text-blue-500" %>
+        </div>
+      </div>
+
+      <!-- Infraction Reports -->
+      <div class="bg-white overflow-hidden shadow rounded-lg">
+        <div class="p-5">
+          <div class="flex items-center">
+            <div class="flex-shrink-0">
+              <div class="w-8 h-8 bg-red-500 rounded-md flex items-center justify-center">
+                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                </svg>
+              </div>
+            </div>
+            <div class="ml-5 w-0 flex-1">
+              <dl>
+                <dt class="text-sm font-medium text-gray-500 truncate">Infraction Reports</dt>
+                <dd class="text-lg font-medium text-gray-900"><%= @infraction_reports_count %></dd>
+              </dl>
+            </div>
+          </div>
+        </div>
+        <div class="bg-gray-50 px-5 py-3">
+          <%= link_to "View Reports", admin_infraction_reports_path, class: "text-sm text-red-600 font-medium hover:text-red-500" %>
+        </div>
+      </div>
+
+      <!-- Transaction Refunds -->
+      <div class="bg-white overflow-hidden shadow rounded-lg">
+        <div class="p-5">
+          <div class="flex items-center">
+            <div class="flex-shrink-0">
+              <div class="w-8 h-8 bg-green-500 rounded-md flex items-center justify-center">
+                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path>
+                </svg>
+              </div>
+            </div>
+            <div class="ml-5 w-0 flex-1">
+              <dl>
+                <dt class="text-sm font-medium text-gray-500 truncate">Transaction Refunds</dt>
+                <dd class="text-lg font-medium text-gray-900"><%= @transaction_refunds_count %></dd>
+              </dl>
+            </div>
+          </div>
+        </div>
+        <div class="bg-gray-50 px-5 py-3">
+          <%= link_to "Manage Refunds", admin_transaction_refunds_path, class: "text-sm text-green-600 font-medium hover:text-green-500" %>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recent Activity -->
+    <div class="mt-8">
+      <div class="bg-white shadow rounded-lg">
+        <div class="px-4 py-5 sm:p-6">
+          <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">Recent Activities</h3>
+          <% if @recent_activities.empty? %>
+            <div class="text-center py-8">
+              <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 48 48">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5h6m-6 4h6m2-15h6m-6 4h6m-6 5h6m-6 4h6M5 8h6m6 0h6m-6 4h6m-6 4h6m-6 5h6"/>
+              </svg>
+              <p class="mt-2 text-sm text-gray-500">No recent activities</p>
+              <p class="text-xs text-gray-400">Activities will appear here once you start using the system</p>
+            </div>
+          <% else %>
+            <!-- Activity list will be implemented when we have actual activities -->
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
