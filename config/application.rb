@@ -20,8 +20,22 @@ module Gupii
     #
     # These settings can be overridden in specific environments using the files
     # in config/environments, which are processed later.
-    #
-    # config.time_zone = "Central Time (US & Canada)"
+    
+    # Brazilian timezone for PIX integration
+    config.time_zone = "America/Sao_Paulo"
+    
+    # Default locale for Brazilian Portuguese
+    config.i18n.default_locale = :"pt-BR"
+    
+    # Available locales for PIX system
+    config.i18n.available_locales = [:"pt-BR", :en]
+    
+    # Fallback to English if translation missing
+    config.i18n.fallbacks = [:"pt-BR", :en]
+    
+    # Load locale files from subdirectories
+    config.i18n.load_path += Dir[Rails.root.join('config', 'locales', '**', '*.{rb,yml}')]
+    
     # config.eager_load_paths << Rails.root.join("extras")
   end
 end

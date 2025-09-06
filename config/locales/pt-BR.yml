@@ -1,0 +1,115 @@
+pt-BR:
+  # Aplicação Gupii - Sistema PIX
+  app:
+    name: "Gupii"
+    tagline: "Sistema de Integração PIX"
+    description: "Sistema de integração com o PIX do Banco Central do Brasil"
+
+  # Navegação
+  navigation:
+    dashboard: "Painel"
+    pix_keys: "Chaves PIX"
+    infraction_reports: "Relatórios de Infração"
+    transaction_refunds: "Estornos de Transação"
+    logout: "Sair"
+
+  # Botões e ações
+  actions:
+    create: "Criar"
+    edit: "Editar"
+    update: "Atualizar"
+    delete: "Excluir"
+    cancel: "Cancelar"
+    save: "Salvar"
+    back: "Voltar"
+    search: "Buscar"
+    filter: "Filtrar"
+    export: "Exportar"
+    import: "Importar"
+    view: "Visualizar"
+    manage: "Gerenciar"
+
+  # Estados e status
+  status:
+    active: "Ativo"
+    inactive: "Inativo"
+    pending: "Pendente"
+    approved: "Aprovado"
+    rejected: "Rejeitado"
+    processing: "Processando"
+    completed: "Concluído"
+    canceled: "Cancelado"
+    failed: "Falhou"
+
+  # Mensagens genéricas
+  messages:
+    success: "Operação realizada com sucesso"
+    error: "Ocorreu um erro"
+    not_found: "Não encontrado"
+    unauthorized: "Não autorizado"
+    forbidden: "Acesso negado"
+    validation_failed: "Dados inválidos"
+    loading: "Carregando..."
+    empty_state: "Nenhum registro encontrado"
+    confirm_delete: "Tem certeza que deseja excluir?"
+
+  # Data e hora
+  datetime:
+    formats:
+      default: "%d/%m/%Y %H:%M"
+      short: "%d/%m/%Y"
+      long: "%A, %d de %B de %Y às %H:%M"
+      time_only: "%H:%M"
+
+  # Números e moeda
+  number:
+    currency:
+      format:
+        unit: "R$"
+        precision: 2
+        separator: ","
+        delimiter: "."
+        format: "%u %n"
+
+  # Validações
+  activerecord:
+    errors:
+      messages:
+        blank: "não pode ficar em branco"
+        present: "deve ficar em branco"
+        confirmation: "não confere"
+        empty: "não pode ficar vazio"
+        equal_to: "deve ser igual a %{count}"
+        even: "deve ser par"
+        exclusion: "não está disponível"
+        greater_than: "deve ser maior que %{count}"
+        greater_than_or_equal_to: "deve ser maior ou igual a %{count}"
+        inclusion: "não está incluído na lista"
+        invalid: "não é válido"
+        less_than: "deve ser menor que %{count}"
+        less_than_or_equal_to: "deve ser menor ou igual a %{count}"
+        model_invalid: "A validação falhou: %{errors}"
+        not_a_number: "não é um número"
+        not_an_integer: "não é um número inteiro"
+        odd: "deve ser ímpar"
+        other_than: "deve ser diferente de %{count}"
+        required: "é obrigatório(a)"
+        taken: "já está em uso"
+        too_long: "é muito longo (máximo: %{count} caracteres)"
+        too_short: "é muito curto (mínimo: %{count} caracteres)"
+        wrong_length: "não possui o tamanho esperado (%{count} caracteres)"
+
+  # Títulos de páginas
+  pages:
+    dashboard:
+      title: "Painel de Controle"
+      subtitle: "Visão geral do sistema PIX"
+    pix_keys:
+      title: "Chaves PIX"
+      subtitle: "Gerenciamento de chaves PIX"
+    infraction_reports:
+      title: "Relatórios de Infração"
+      subtitle: "Relatórios de infrações PIX"
+    transaction_refunds:
+      title: "Estornos de Transação"
+      subtitle: "Gerenciamento de estornos"

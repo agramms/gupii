@@ -1,0 +1,106 @@
+pt-BR:
+  pix:
+    # Terminologia PIX
+    terms:
+      pix: "PIX"
+      pix_key: "Chave PIX"
+      pix_keys: "Chaves PIX"
+      transaction: "Transação"
+      payment: "Pagamento"
+      transfer: "Transferência"
+      refund: "Estorno"
+      devolution: "Devolução"
+      med: "MED"
+      med_full: "Mecanismo Especial de Devolução"
+      jdpi: "JDPI"
+      jdpi_full: "Diretório de Identificadores de Contas Transacionais"
+      central_bank: "Banco Central do Brasil"
+      bcb: "BCB"
+
+    # Tipos de chave PIX
+    key_types:
+      cpf: "CPF"
+      cnpj: "CNPJ"
+      email: "E-mail"
+      phone: "Telefone"
+      random: "Chave Aleatória"
+
+    # Status de transações PIX
+    transaction_status:
+      pending: "Pendente"
+      processing: "Em processamento"
+      completed: "Concluída"
+      failed: "Falhada"
+      canceled: "Cancelada"
+      refunded: "Estornada"
+
+    # Tipos de infração
+    infraction_types:
+      fraud: "Fraude"
+      unauthorized: "Não autorizada"
+      duplicate: "Duplicada"
+      technical_error: "Erro técnico"
+      operational_error: "Erro operacional"
+
+    # Motivos de estorno
+    refund_reasons:
+      fraud: "Fraude comprovada"
+      error: "Erro operacional"
+      duplicate: "Transação duplicada"
+      unauthorized: "Transação não autorizada pelo usuário"
+      technical: "Falha técnica do sistema"
+
+    # Mensagens específicas do PIX
+    messages:
+      key_created: "Chave PIX criada com sucesso"
+      key_updated: "Chave PIX atualizada com sucesso"
+      key_deleted: "Chave PIX removida com sucesso"
+      transaction_processed: "Transação PIX processada"
+      refund_initiated: "Estorno PIX iniciado"
+      refund_completed: "Estorno PIX concluído"
+      infraction_reported: "Infração PIX reportada"
+      
+    # Erros PIX
+    errors:
+      key_already_exists: "Esta chave PIX já está cadastrada"
+      invalid_key_format: "Formato de chave PIX inválido"
+      key_not_found: "Chave PIX não encontrada"
+      transaction_limit_exceeded: "Limite de transação PIX excedido"
+      insufficient_balance: "Saldo insuficiente para transação PIX"
+      invalid_amount: "Valor da transação PIX inválido"
+      recipient_not_found: "Destinatário PIX não encontrado"
+      refund_not_allowed: "Estorno PIX não permitido para esta transação"
+      jdpi_connection_error: "Erro de conexão com JDPI"
+      jdpi_timeout: "Timeout na comunicação com JDPI"
+      central_bank_unavailable: "Banco Central temporariamente indisponível"
+
+    # Validações PIX
+    validations:
+      cpf_invalid: "CPF inválido"
+      cnpj_invalid: "CNPJ inválido"
+      email_invalid: "E-mail inválido"
+      phone_invalid: "Telefone inválido"
+      key_format_invalid: "Formato de chave inválido"
+      amount_too_small: "Valor mínimo para PIX é R$ 0,01"
+      amount_too_large: "Valor excede o limite máximo para PIX"
+
+    # Dashboard
+    dashboard:
+      total_keys: "Total de Chaves PIX"
+      active_keys: "Chaves Ativas"
+      pending_transactions: "Transações Pendentes"
+      daily_volume: "Volume Diário"
+      recent_activities: "Atividades Recentes"
+      no_activities: "Nenhuma atividade recente"
+
+    # Formulários
+    forms:
+      key_type: "Tipo de Chave"
+      key_value: "Valor da Chave"
+      account_holder: "Titular da Conta"
+      bank_code: "Código do Banco"
+      agency: "Agência"
+      account: "Conta"
+      amount: "Valor"
+      description: "Descrição"
+      reference: "Referência"

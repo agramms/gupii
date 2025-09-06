@@ -1,0 +1,90 @@
+pt-BR:
+  jdpi:
+    # Sistema JDPI
+    system:
+      name: "JDPI"
+      full_name: "Diretório de Identificadores de Contas Transacionais"
+      description: "Sistema do Banco Central para gerenciamento de chaves PIX"
+
+    # Status de integração JDPI
+    integration_status:
+      connected: "Conectado ao JDPI"
+      disconnected: "Desconectado do JDPI"
+      authenticating: "Autenticando com JDPI"
+      error: "Erro de conexão JDPI"
+      maintenance: "JDPI em manutenção"
+
+    # Operações JDPI
+    operations:
+      register_key: "Registrar chave no JDPI"
+      update_key: "Atualizar chave no JDPI"
+      delete_key: "Remover chave do JDPI"
+      query_key: "Consultar chave no JDPI"
+      process_refund: "Processar estorno via JDPI"
+      report_infraction: "Reportar infração ao JDPI"
+
+    # Códigos de resposta JDPI
+    response_codes:
+      "00": "Sucesso"
+      "01": "Chave não encontrada"
+      "02": "Chave já cadastrada"
+      "03": "Formato de chave inválido"
+      "04": "Tipo de chave não suportado"
+      "05": "Limite de chaves excedido"
+      "06": "Conta inválida"
+      "07": "Instituição não autorizada"
+      "08": "Transação não encontrada"
+      "09": "Valor inválido"
+      "10": "Data/hora inválida"
+      "11": "Assinatura inválida"
+      "12": "Certificado inválido"
+      "99": "Erro interno do sistema"
+
+    # MED - Mecanismo Especial de Devolução
+    med:
+      name: "MED"
+      full_name: "Mecanismo Especial de Devolução"
+      description: "Sistema para processamento de estornos especiais PIX"
+      
+      reasons:
+        fraud: "Fraude comprovada"
+        operational_failure: "Falha operacional"
+        duplicate_payment: "Pagamento duplicado"
+        unauthorized_transaction: "Transação não autorizada"
+        technical_error: "Erro técnico do sistema"
+        
+      status:
+        requested: "Estorno solicitado"
+        analyzing: "Em análise"
+        approved: "Aprovado"
+        rejected: "Rejeitado"
+        processed: "Processado"
+        completed: "Concluído"
+
+    # Mensagens de erro JDPI
+    errors:
+      connection_failed: "Falha na conexão com JDPI"
+      authentication_failed: "Falha na autenticação JDPI"
+      timeout: "Timeout na requisição JDPI"
+      invalid_request: "Requisição inválida para JDPI"
+      service_unavailable: "Serviço JDPI indisponível"
+      rate_limit_exceeded: "Limite de requisições JDPI excedido"
+      maintenance_mode: "JDPI em modo de manutenção"
+      unknown_error: "Erro desconhecido no JDPI"
+      
+    # Mensagens de sucesso JDPI
+    success:
+      key_registered: "Chave registrada com sucesso no JDPI"
+      key_updated: "Chave atualizada com sucesso no JDPI"
+      key_deleted: "Chave removida com sucesso do JDPI"
+      refund_processed: "Estorno processado com sucesso via JDPI"
+      infraction_reported: "Infração reportada com sucesso ao JDPI"
+
+    # Logs e auditoria
+    audit:
+      key_registration: "Registro de chave PIX no JDPI"
+      key_modification: "Modificação de chave PIX no JDPI"
+      key_removal: "Remoção de chave PIX do JDPI"
+      transaction_query: "Consulta de transação no JDPI"
+      refund_request: "Solicitação de estorno no JDPI"
+      infraction_report: "Relatório de infração no JDPI"
