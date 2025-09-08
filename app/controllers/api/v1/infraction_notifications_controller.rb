@@ -80,7 +80,8 @@ module Api
       private
 
       def set_infraction_notification
-        @infraction_notification = InfractionNotification.find_by(id: params[:id])
+        @infraction_notification = InfractionNotification.find_by_any_id(params[:id]) ||
+                                   InfractionNotification.search_by_short_id(params[:id]).first
       end
 
       def infraction_notification_params
@@ -112,6 +113,7 @@ module Api
       def notification_json(notification, include_logs: false)
         json = {
           id: notification.id,
+          short_id: notification.display_id,
           pix_key: notification.pix_key,
           masked_pix_key: notification.masked_pix_key,
           pix_key_type: notification.pix_key_type,
@@ -144,6 +146,7 @@ module Api
           json[:logs] = notification.infraction_logs.recent.limit(50).map do |log|
             {
               id: log.id,
+              short_id: log.display_id,
               level: log.level,
               message: log.message,
               metadata: log.metadata,

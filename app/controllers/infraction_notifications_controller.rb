@@ -66,10 +66,14 @@ class InfractionNotificationsController < AuthBaseController
   private
 
   def set_infraction_notification
-    @infraction_notification = InfractionNotification.find(params[:id])
-  rescue ActiveRecord::RecordNotFound
-    flash[:error] = 'Notificação de infração não encontrada.'
-    redirect_to infraction_notifications_path
+    # Try to find by full UUID first, then by short ID
+    @infraction_notification = InfractionNotification.find_by_any_id(params[:id]) ||
+                               InfractionNotification.search_by_short_id(params[:id]).first
+    
+    unless @infraction_notification
+      flash[:error] = 'Notificação de infração não encontrada.'
+      redirect_to infraction_notifications_path
+    end
   end
 
   def infraction_notification_params

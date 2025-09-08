@@ -4,6 +4,7 @@
 # Domain model - JDPI-specific logic is handled in Jdpi::InfractionNotificationService
 class InfractionNotification < ApplicationRecord
   include Jdpi::StatusCodes
+  include ShortId
   
   # Validations
   validates :pix_key, presence: true, length: { maximum: 77 }

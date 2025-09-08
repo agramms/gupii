@@ -51,6 +51,9 @@ gem "thruster", require: false
 gem "pagy", "~> 6.2"
 gem "ransack", "~> 4.1"
 
+# Generate short, URL-safe, unique identifiers from integers
+gem "hashids", "~> 1.0"
+
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
   gem "debug", platforms: %i[ mri windows ], require: "debug/prelude"

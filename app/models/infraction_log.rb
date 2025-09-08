@@ -4,6 +4,8 @@
 # Maintains audit trail of all infraction notification operations
 # Domain model - JDPI-specific logic is handled in service layer
 class InfractionLog < ApplicationRecord
+  include ShortId
+  
   # Associations
   belongs_to :infraction_notification
 
