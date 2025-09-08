@@ -3,32 +3,32 @@
 class CreateInfractionNotifications < ActiveRecord::Migration[8.0]
   def change
     # Infraction Notifications table
-    create_table :infraction_notifications, id: :uuid do |t|
+    create_table :infraction_notifications, id: :uuid, comment: "PIX key infraction notifications tracking" do |t|
       # JDPI identifiers
-      t.string :jdpi_notification_id, null: true, index: { unique: true }
-      t.string :idempotency_key, null: false, index: { unique: true }
+      t.string :jdpi_notification_id, null: true, index: { unique: true }, comment: "JDPI notification identifier returned by API"
+      t.string :idempotency_key, null: false, index: { unique: true }, comment: "36-character UUID for request deduplication"
       
       # PIX key information
-      t.string :pix_key, null: false, index: true, limit: 77
+      t.string :pix_key, null: false, index: true, limit: 77, comment: "PIX key value (CPF/CNPJ/Email/Phone/UUID)"
       
       # Infraction details
-      t.string :infraction_type, null: false, index: true
-      t.text :description, null: false, limit: 500
-      t.json :evidence_data
+      t.string :infraction_type, null: false, index: true, comment: "Type of infraction (FRAUD, AML_VIOLATION, etc.)"
+      t.text :description, null: false, limit: 500, comment: "Description of the infraction"
+      t.json :evidence_data, comment: "JSON evidence supporting the infraction claim"
       
       # Status tracking
-      t.string :status, null: false, default: "SUBMITTED", index: true
-      t.timestamp :submitted_at
-      t.timestamp :last_status_change_at
-      t.timestamp :processed_at
-      t.timestamp :cancelled_at
+      t.string :status, null: false, default: "SUBMITTED", index: true, comment: "Current status in lifecycle"
+      t.timestamp :submitted_at, comment: "When notification was submitted to JDPI"
+      t.timestamp :last_status_change_at, comment: "Last time status was updated"
+      t.timestamp :processed_at, comment: "When JDPI finished processing"
+      t.timestamp :cancelled_at, comment: "When notification was cancelled"
       
       # Analysis information
-      t.string :analysis_result
-      t.text :analysis_notes, limit: 1000
+      t.string :analysis_result, comment: "Result of JDPI analysis (CONFIRMED, REJECTED, etc.)"
+      t.text :analysis_notes, limit: 1000, comment: "Notes from analysis process"
       
       # Cancellation information
-      t.text :cancellation_reason
+      t.text :cancellation_reason, comment: "Reason for cancellation"
       
       # Standard timestamps
       t.timestamps
@@ -42,7 +42,7 @@ class CreateInfractionNotifications < ActiveRecord::Migration[8.0]
     end
 
     # Infraction Logs table for audit trail
-    create_table :infraction_logs, id: :uuid do |t|
+    create_table :infraction_logs, id: :uuid, comment: "Audit trail for infraction notification changes" do |t|
       t.references :infraction_notification, 
                    type: :uuid, 
                    null: false, 
@@ -50,33 +50,14 @@ class CreateInfractionNotifications < ActiveRecord::Migration[8.0]
                    index: { name: 'idx_infraction_logs_on_notification' }
       
       # Log details
-      t.string :level, null: false, default: "info"
-      t.text :message, null: false
-      t.json :metadata, default: {}
-      t.timestamp :occurred_at, null: false
+      t.string :level, null: false, default: "info", comment: "Log level: debug, info, warn, error"
+      t.text :message, null: false, comment: "Log message describing the action"
+      t.json :metadata, default: {}, comment: "Additional contextual information for the log entry"
+      t.timestamp :occurred_at, null: false, comment: "When the logged action occurred"
       
       # Indexes for log querying
       t.index [:level, :occurred_at]
       t.index [:occurred_at]
     end
-
-    # Add comments for documentation
-    add_column_comment :infraction_notifications, :jdpi_notification_id, 
-                      "JDPI notification identifier returned by API"
-    add_column_comment :infraction_notifications, :idempotency_key, 
-                      "36-character UUID for request deduplication"
-    add_column_comment :infraction_notifications, :pix_key, 
-                      "PIX key value (CPF/CNPJ/Email/Phone/UUID)"
-    add_column_comment :infraction_notifications, :infraction_type, 
-                      "Type of infraction (FRAUD, AML_VIOLATION, etc.)"
-    add_column_comment :infraction_notifications, :evidence_data, 
-                      "JSON evidence supporting the infraction claim"
-    add_column_comment :infraction_notifications, :status,
-                      "Current status in lifecycle"
-    
-    add_column_comment :infraction_logs, :level, 
-                      "Log level: debug, info, warn, error"
-    add_column_comment :infraction_logs, :metadata, 
-                      "Additional contextual information for the log entry"
   end
 end

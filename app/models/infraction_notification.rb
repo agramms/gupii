@@ -10,6 +10,7 @@ class InfractionNotification < ApplicationRecord
   validates :infraction_type, presence: true, inclusion: { in: InfractionTypes::ALL }
   validates :description, presence: true, length: { maximum: BusinessRules::MAX_DESCRIPTION_LENGTH }
   validates :status, presence: true, inclusion: { in: InfractionStatus::ALL }
+  validates :created_by, presence: true, inclusion: { in: InfractionSources::ALL }
   validates :jdpi_notification_id, uniqueness: true, allow_nil: true
   validates :idempotency_key, presence: true, uniqueness: true
   
@@ -21,11 +22,15 @@ class InfractionNotification < ApplicationRecord
   scope :by_status, ->(status) { where(status: status) if status.present? }
   scope :by_infraction_type, ->(type) { where(infraction_type: type) if type.present? }
   scope :by_pix_key, ->(key) { where(pix_key: key) if key.present? }
+  scope :by_created_by, ->(source) { where(created_by: source) if source.present? }
   scope :recent, -> { order(created_at: :desc) }
   scope :submitted_after, ->(date) { where('submitted_at >= ?', date) if date.present? }
   scope :submitted_before, ->(date) { where('submitted_at <= ?', date) if date.present? }
   scope :pending, -> { where(status: [InfractionStatus::SUBMITTED, InfractionStatus::PROCESSING]) }
   scope :completed, -> { where(status: [InfractionStatus::COMPLETED, InfractionStatus::CANCELLED]) }
+  scope :customer_service, -> { where(created_by: InfractionSources::CUSTOMER_SERVICE) }
+  scope :customer_experience, -> { where(created_by: InfractionSources::CUSTOMER_EXPERIENCE) }
+  scope :dict_automatic, -> { where(created_by: InfractionSources::DICT_AUTOMATIC) }
   
   # Callbacks
   before_validation :normalize_data, on: :create
@@ -46,11 +51,54 @@ class InfractionNotification < ApplicationRecord
   end
   
   def infraction_type_description
-    InfractionTypes::DESCRIPTIONS[infraction_type]
+    I18n.t("infraction_notifications.dropdown_options.infraction_types.#{infraction_type}", default: infraction_type.humanize)
+  end
+  
+  def created_by_description
+    I18n.t("infraction_notifications.dropdown_options.sources.#{created_by}", default: created_by.humanize)
+  end
+  
+  def created_by_customer_service?
+    created_by == InfractionSources::CUSTOMER_SERVICE
+  end
+  
+  def created_by_customer_experience?
+    created_by == InfractionSources::CUSTOMER_EXPERIENCE
+  end
+  
+  def created_by_dict_automatic?
+    created_by == InfractionSources::DICT_AUTOMATIC
   end
   
   def can_be_cancelled?
     [InfractionStatus::SUBMITTED, InfractionStatus::PROCESSING].include?(status)
+  end
+  
+  # Soft delete implementation - changes status to CANCELLED instead of deleting record
+  def soft_delete!(reason: nil, cancelled_by: nil)
+    return false unless can_be_cancelled?
+    
+    update!(
+      status: InfractionStatus::CANCELLED,
+      cancelled_at: Time.current,
+      cancellation_reason: reason,
+      last_status_change_at: Time.current
+    )
+    
+    # Log the cancellation
+    InfractionLog.create!(
+      infraction_notification: self,
+      level: 'info',
+      message: "Notification cancelled by #{cancelled_by || 'system'}",
+      metadata: {
+        action: 'soft_delete',
+        cancelled_by: cancelled_by,
+        reason: reason,
+        cancelled_at: Time.current
+      }
+    )
+    
+    true
   end
   
   def can_be_analyzed?
@@ -68,6 +116,49 @@ class InfractionNotification < ApplicationRecord
   def days_since_submission
     return 0 unless submitted_at
     ((Time.current - submitted_at) / 1.day).ceil
+  end
+
+  # Fraud team dashboard helper methods
+  def hours_until_deadline
+    hours_since_creation = ((Time.current - created_at) / 1.hour).ceil
+    48 - hours_since_creation # 48-hour BACEN deadline
+  end
+
+  def deadline_urgency_class
+    hours_left = hours_until_deadline
+    return 'deadline-critical' if hours_left <= 6
+    return 'deadline-urgent' if hours_left <= 24
+    return 'deadline-warning' if hours_left <= 48
+    'deadline-normal'
+  end
+
+  def priority_level
+    return 'high' if high_priority?
+    return 'medium' if medium_priority?
+    'standard'
+  end
+
+  def high_priority?
+    # Account takeover, SIM swap, high value transactions
+    ['ACCOUNT_TAKEOVER', 'SIM_SWAP'].include?(infraction_type) ||
+    (evidence_data.is_a?(Hash) && evidence_data['amount'].to_f > 10000) ||
+    (evidence_data.is_a?(Hash) && evidence_data['repeat_violation'] == 'true')
+  end
+
+  def medium_priority?
+    # Phishing, social engineering, suspicious patterns
+    ['PHISHING', 'SOCIAL_ENGINEERING', 'SUSPICIOUS_TRANSACTION'].include?(infraction_type) ||
+    days_since_submission > 1
+  end
+
+  def risk_level
+    return 'high' if high_priority?
+    return 'medium' if medium_priority?
+    'low'
+  end
+
+  def status_description
+    Jdpi::StatusCodes::InfractionStatus::DESCRIPTIONS[status] || status.humanize
   end
   
   def overdue_for_analysis?

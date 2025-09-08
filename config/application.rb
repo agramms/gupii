@@ -33,6 +33,13 @@ module Gupii
     # Fallback to English if translation missing
     config.i18n.fallbacks = [:"pt-BR", :en]
     
+    # Configure relative URL root for subpath deployment
+    # This allows Rails to work correctly when deployed under /app/ path via nginx
+    if ENV['RAILS_RELATIVE_URL_ROOT']
+      config.relative_url_root = ENV['RAILS_RELATIVE_URL_ROOT']
+      routes.default_url_options[:script_name] = ENV['RAILS_RELATIVE_URL_ROOT']
+    end
+    
     # Load locale files from subdirectories
     config.i18n.load_path += Dir[Rails.root.join('config', 'locales', '**', '*.{rb,yml}')]
     

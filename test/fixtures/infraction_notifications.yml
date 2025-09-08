@@ -7,6 +7,7 @@ fraud_notification:
   description: "Suspected fraudulent activity on PIX key"
   evidence_data: { "risk_score": 0.85, "detection_method": "automated" }
   status: "SUBMITTED"
+  created_by: "CUSTOMER_SERVICE"
   submitted_at: <%= 1.day.ago %>
   idempotency_key: <%= SecureRandom.uuid %>
 
@@ -17,6 +18,7 @@ aml_notification:
   description: "Anti-money laundering violation detected"
   evidence_data: { "suspicious_patterns": ["velocity", "amount"] }
   status: "PROCESSING"
+  created_by: "CUSTOMER_EXPERIENCE"
   submitted_at: <%= 2.hours.ago %>
   last_status_change_at: <%= 1.hour.ago %>
   idempotency_key: <%= SecureRandom.uuid %>
@@ -27,6 +29,7 @@ completed_notification:
   infraction_type: "ACCOUNT_MISUSE"
   description: "Inappropriate account usage patterns"
   status: "COMPLETED"
+  created_by: "DICT_AUTOMATIC"
   analysis_result: "CONFIRMED"
   analysis_notes: "Evidence confirmed violation"
   submitted_at: <%= 1.week.ago %>

@@ -155,7 +155,7 @@
       "protocol": "http"
     }
   },
-  "postCreateCommand": "gem install bundler && bundle install && bundle exec rails new . --force --database=postgresql --css=tailwind --javascript=importmap --skip-git",
+  "postCreateCommand": ".devcontainer/setup.sh",
   "remoteUser": "vscode"
 }
 

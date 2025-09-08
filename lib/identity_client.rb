@@ -53,8 +53,8 @@ module IdentityClient
 
   def from_hash(hash) = OAuth2::AccessToken.from_hash(oauth2_client, hash)
 
-  def authorize_url(redirect_host:)
-    redirect_uri = "#{redirect_host}/oauth2/callback"
+  def authorize_url(redirect_host:, subpath: '')
+    redirect_uri = "#{redirect_host}#{subpath}/oauth2/callback"
     oauth2_client.auth_code.authorize_url(redirect_uri:)
   end
 
@@ -69,11 +69,20 @@ module IdentityClient
   end
 
   def client_access_token(audience_key)
-    oauth2_client
-      .client_credentials
-      .get_token(
-        audience: platform_audience(audience_key, :app_id)
-      )
+    audience = platform_audience(audience_key, :app_id)
+    cache_key = "client_access_token/#{audience_key}/#{audience}"
+    
+    Rails.cache.fetch(cache_key, expires_in: 50.minutes) do
+      token = oauth2_client
+        .client_credentials
+        .get_token(audience: audience)
+      
+      Rails.logger.debug "[IdentityClient] New client token obtained for audience: #{audience_key}"
+      token
+    end
+  rescue OAuth2::Error => e
+    Rails.logger.error "[IdentityClient] Failed to get client access token for #{audience_key}: #{e.message}"
+    raise e
   end
 
   def bearer_access_token(audience_key) = "Bearer #{client_access_token(audience_key).token}"

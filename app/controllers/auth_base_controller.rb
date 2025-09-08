@@ -13,13 +13,26 @@ class AuthBaseController < ApplicationController
 
   def refresh_auth_vars
     @current_user = session[:user_id]
+    return unless @current_user
+    
     access_token = read_access_token
     return unless access_token
 
-    workspaces = JSON.parse(access_token.get(CONSOLE_WORKSPACES_URL).body)
+    # Cache workspace information to avoid API calls on every request
+    workspaces = Rails.cache.fetch("#{@current_user}/workspaces", expires_in: 30.minutes) do
+      begin
+        JSON.parse(access_token.get(CONSOLE_WORKSPACES_URL).body)
+      rescue OAuth2::Error => e
+        # If token is expired, let the main authentication flow handle it
+        raise e if e.code == 'Expired JWT'
+        # For other errors, return empty workspaces to avoid blocking the request
+        Rails.logger.error "[AuthBaseController] Failed to fetch workspaces: #{e.message}"
+        { 'current' => nil, 'workspaces' => [] }
+      end
+    end
 
     @current_workspace = workspaces['current']
-    @current_workspace_name = workspaces['workspaces'].find { |d| d['id'] == workspaces['current'] }['name']
+    @current_workspace_name = workspaces['workspaces'].find { |d| d['id'] == workspaces['current'] }&.dig('name')
   end
 
   def handle_oauth2_errors(exception)
@@ -32,25 +45,33 @@ class AuthBaseController < ApplicationController
 
   def redirect_user_to_auth
     redirect_host = request.protocol + request.host_with_port
-
-    redirect_uri = "#{redirect_host}/oauth2/callback"
-    authorization_url = IdentityClient.oauth2_client.auth_code.authorize_url(redirect_uri:)
+    # Handle subpath deployment - use the script name from nginx proxy headers
+    subpath = request.headers['X-Script-Name'] || ''
+    
+    authorization_url = IdentityClient.authorize_url(redirect_host: redirect_host, subpath: subpath)
     redirect_to authorization_url, allow_other_host: true
   end
 
   def logged?
     access_token = read_access_token
+    return false if access_token.nil?
 
-    return false if access_token.nil? || access_token.expired?
+    # If token is not expired, we're good to go
+    return true unless access_token.expired?
 
+    # Only refresh if token is expired
     begin
       new_access_token = access_token.refresh!
-
-      return false if IdentityClient.validate_token(new_access_token.token).error.present?
-
+      
+      # Store the refreshed token
       JwtCache.write_access_token(session[:user_id], new_access_token)
+      
+      # Clear workspace cache when token is refreshed to ensure fresh data
+      Rails.cache.delete("#{session[:user_id]}/workspaces")
+      
       true
-    rescue OAuth2::Error
+    rescue OAuth2::Error => e
+      Rails.logger.info "[AuthBaseController] Token refresh failed: #{e.message}"
       false
     end
   end

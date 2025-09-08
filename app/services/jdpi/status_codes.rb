@@ -109,6 +109,21 @@ module Jdpi
       ALL = DESCRIPTIONS.keys.freeze
     end
     
+    # Infraction Notification Sources
+    module InfractionSources
+      CUSTOMER_SERVICE = 'CUSTOMER_SERVICE'
+      CUSTOMER_EXPERIENCE = 'CUSTOMER_EXPERIENCE'
+      DICT_AUTOMATIC = 'DICT_AUTOMATIC'
+      
+      DESCRIPTIONS = {
+        CUSTOMER_SERVICE => 'Customer Service Department',
+        CUSTOMER_EXPERIENCE => 'Customer Experience Department',
+        DICT_AUTOMATIC => 'Automatic DICT System'
+      }.freeze
+      
+      ALL = DESCRIPTIONS.keys.freeze
+    end
+    
     # Infraction Status Lifecycle
     module InfractionStatus
       SUBMITTED = 'SUBMITTED'
@@ -120,6 +135,16 @@ module Jdpi
       CANCELLED = 'CANCELLED'
       
       ALL = [SUBMITTED, PROCESSING, ANALYZING, APPROVED, REJECTED, COMPLETED, CANCELLED].freeze
+      
+      DESCRIPTIONS = {
+        SUBMITTED => 'Submetido',
+        PROCESSING => 'Processando',
+        ANALYZING => 'Analisando',
+        APPROVED => 'Aprovado',
+        REJECTED => 'Rejeitado',
+        COMPLETED => 'Concluído',
+        CANCELLED => 'Cancelado'
+      }.freeze
       
       # Valid status transitions
       TRANSITIONS = {

@@ -39,6 +39,7 @@ en:
     home: "Home"
     pix_keys: "PIX Keys"
     infraction_reports: "Infraction Reports"
+    infraction_notifications: "Infraction Notifications"
     
   header:
     workspace: "Workspace"
@@ -113,3 +114,247 @@ en:
         description_required: "Description is required"
         notification_id_required: "Notification ID is required"
         analysis_result_required: "Analysis result is required"
+
+  # Titles for pages
+  pages:
+    dashboard:
+      title: "Dashboard"
+      subtitle: "PIX system overview"
+    pix_keys:
+      title: "PIX Keys"
+      subtitle: "PIX key management"
+    infraction_reports:
+      title: "Infraction Reports"
+      subtitle: "PIX infraction reports"
+    infraction_notifications:
+      title: "Infraction Notifications"
+      subtitle: "PIX infraction notification management"
+    transaction_refunds:
+      title: "Transaction Refunds"
+      subtitle: "Refund management"
+
+  # PIX specific terms
+  pix:
+    terms:
+      pix_keys: "PIX Keys"
+    dashboard:
+      recent_activities: "Recent Activities"
+      no_activities: "No recent activity"
+
+  # Infraction notifications
+  infraction_notifications:
+    title: "Infraction Notifications"
+    subtitle: "PIX infraction notification management"
+    new:
+      title: "New Infraction Notification"
+      subtitle: "Create new notification for PIX system"
+      help_title: "How to fill out this notification"
+      help_text: "Fill in all required fields with accurate information. The notification will be automatically sent to the Central Bank's JDPI system."
+    
+    fields:
+      pix_key:
+        label: "PIX Key"
+        placeholder: "Ex: user@email.com, +5511999999999, 12345678901, or UUID"
+        help: "Enter the PIX key related to the infraction. Can be email, phone, CPF/CNPJ or random key (UUID)."
+        validation: "The PIX key must be in a valid format according to Central Bank regulations."
+      
+      infraction_type:
+        label: "Infraction Type"
+        help: "Select the infraction type according to Central Bank classification. This information determines the analysis flow."
+        validation: "Infraction type is required and must comply with JDPI standards."
+      
+      created_by:
+        label: "Responsible Department"
+        help: "Identifies which department is creating this notification. This information is used for auditing and internal control. Automatic DICT system notifications are not created manually."
+        validation: "Responsible department is required for traceability."
+      
+      description:
+        label: "Detailed Description"
+        placeholder: "Describe the infraction details, including evidence, context and observed impact..."
+        help: "Provide a complete and objective description of the infraction. Include evidence, temporal context, observed impact and any relevant information for analysis."
+        validation: "Description is required and must be between 20 and 500 characters. Be specific and objective."
+      
+      pi_payer_id:
+        label: "Payer ID (Optional)"
+        placeholder: "ID of the payer involved in the transaction"
+        help: "If applicable, provide the identifier of the payer involved in the irregular transaction. Optional field."
+      
+      ispb:
+        label: "Institution ISPB (Optional)"
+        placeholder: "8-digit ISPB code"
+        help: "ISPB code of the involved institution, if different from ours. Used for infractions involving multiple institutions."
+        validation: "If provided, must contain exactly 8 numeric digits."
+    
+    status:
+      submitted: "Submitted"
+      processing: "Processing"
+      analyzing: "Analyzing"
+      approved: "Approved"
+      rejected: "Rejected"
+      completed: "Completed"
+      cancelled: "Cancelled"
+    
+    sources:
+      customer_service: "Customer Service"
+      customer_experience: "Customer Experience"
+      dict_automatic: "Automatic DICT System"
+    
+    types:
+      fraud: "Fraud"
+      aml_violation: "Anti-Money Laundering Violation"
+      account_misuse: "Inappropriate Account Usage"
+      invalid_key: "Invalid PIX Key"
+      unauthorized_use: "Unauthorized Use"
+    
+    # Dropdown option translations
+    dropdown_options:
+      infraction_types:
+        FRAUD: "Fraud"
+        AML_VIOLATION: "Anti-Money Laundering Violation"
+        ACCOUNT_MISUSE: "Inappropriate Account Usage"
+        INVALID_KEY: "Invalid PIX Key"
+        UNAUTHORIZED_USE: "Unauthorized Use"
+      
+      sources:
+        CUSTOMER_SERVICE: "Customer Service"
+        CUSTOMER_EXPERIENCE: "Customer Experience"
+        DICT_AUTOMATIC: "DICT System (Automatic)"
+    
+    help:
+      what_is: "What are PIX Infraction Notifications?"
+      what_is_text: "PIX infraction notifications are official communications sent to the Central Bank's JDPI system to report irregularities related to PIX keys and transactions."
+      
+      when_create: "When to create a notification?"
+      when_create_items:
+        - "Suspected fraud in PIX transactions"
+        - "Inappropriate or unauthorized use of PIX keys"
+        - "Anti-money laundering policy violations"
+        - "PIX keys with invalid or problematic format"
+        - "Any irregularity that compromises system security"
+      
+      process: "How does the process work?"
+      process_steps:
+        - "Create notification with detailed data"
+        - "Automatic submission to Central Bank's JDPI system"
+        - "Analysis by competent team"
+        - "Decision on appropriate measures"
+        - "Feedback on analysis result"
+    
+    examples:
+      title: "Description Examples"
+      fraud: "Customer reported unrecognized PIX transaction of R$ 500.00 made on [date/time]. PIX key used does not belong to customer. Evidence: bank statement screenshot and customer statement."
+      invalid_key: "PIX key registered with invalid email format, causing transaction failures. Email: [example@domain]. System consistently returns validation error."
+      unauthorized: "PIX key registered without account holder authorization. Customer denies having requested registration. Registration date: [date]. Cancellation request filed."
+
+    # Fraud Dashboard
+    fraud_dashboard:
+      title: "PIX Anti-Fraud Center"
+      subtitle: "Infraction Notifications"
+      
+      alerts:
+        critical_deadlines: "Critical Deadlines (%{count} items)"
+        burning_deadlines_msg: "%{count} notifications expire in less than 6 hours"
+        view_all: "View All"
+        
+      stats:
+        pending_actions: "Pending Actions"
+        under_review: "Under Review"
+        expiring_today: "Expiring Today"
+        high_priority: "High Priority"
+        
+      actions:
+        bulk_analysis: "Bulk Analysis"
+        export_report: "Export Report"
+        investigate: "🔍 Investigate"
+        load_more: "Load More Notifications"
+        
+      filters:
+        search_placeholder: "ID, PIX key, description..."
+        all_status: "All"
+        all_priority: "All"
+        all_types: "All"
+        
+      status_options:
+        pending: "🟡 Pending"
+        processing: "🔄 Processing"
+        analyzing: "🔍 Analyzing"
+        completed: "✅ Completed"
+        cancelled: "❌ Cancelled"
+        
+      priority_options:
+        high: "🔴 High"
+        medium: "🟠 Medium"
+        standard: "⚪ Standard"
+        
+      type_options:
+        fraud: "Fraud"
+        account_takeover: "Account Takeover"
+        sim_swap: "SIM Swap"
+        phishing: "Phishing"
+        
+      priority_labels:
+        high: "HIGH"
+        medium: "MED"
+        standard: "STANDARD"
+        
+      risk_levels:
+        high: "HIGH"
+        medium: "MEDIUM"
+        low: "LOW"
+        
+      details:
+        infraction: "Infraction"
+        pix_key: "PIX Key"
+        risk_level: "Risk Level"
+        type_label: "Type"
+        amount_label: "Amount"
+        source_label: "Source"
+        
+      timeline:
+        submitted: "Submitted"
+        last_update: "Last Update"
+        analyst: "Analyst"
+        unassigned: "Unassigned"
+        created_ago: "%{time} ago"
+        hours_left: "%{hours}h left"
+        hours_remaining: "%{hours}h remaining"
+        
+      empty_state:
+        title: "No notifications found"
+        message: "Start by creating a new infraction notification or adjust the filters."
+        
+      buttons:
+        view: "View"
+        cancel: "Cancel"
+        confirm_cancel: "Are you sure you want to cancel this notification?"
+        
+      tabs:
+        sent: "Sent"
+        received: "Received"
+        sent_count: "Sent (%{count})"
+        received_count: "Received (%{count})"
+        
+      date_filters:
+        created_from: "Created From"
+        created_to: "Created To"
+        expiring_from: "Expires From"
+        expiring_to: "Expires To"
+        clear_filters: "Clear Filters"
+        active_filters: "Active filters:"
+        
+      # Enhanced Date Range Filters
+      date_filters:
+        title: "Date Filters"
+        created_period: "Creation Period"
+        expiring_period: "Expiring Period"
+        select_period: "Select period"
+        select_period_aria: "Select period for %{label}"
+        instruction: "Click to select period"
+        clear: "Clear"
+        cancel: "Cancel"
+        apply: "Apply"
+        quick_presets: "Quick Periods"
+        today: "Today"
+        last_7_days: "Last 7 days"
+        last_30_days: "Last 30 days"
+        last_3_months: "Last 3 months"

@@ -10,6 +10,7 @@ Rails.application.routes.draw do
   # get "service-worker" => "rails/pwa#service_worker", as: :pwa_service_worker
 
   # OAuth2 Authentication routes
+  get "authorize", to: "authentication#authorize"
   get "oauth2/callback", to: "authentication#callback"
   get "logout", to: "authentication#logout"
 
@@ -22,6 +23,13 @@ Rails.application.routes.draw do
   
   # PIX Key Management
   resources :pix_keys
+  
+  # Infraction Notifications Management
+  resources :infraction_notifications, except: [:destroy, :edit, :update] do
+    member do
+      patch :cancel
+    end
+  end
 
   # API routes for client applications
   namespace :api do
@@ -31,6 +39,13 @@ Rails.application.routes.draw do
       
       # PIX operations
       resources :pix_operations, only: [:create, :show, :index]
+      
+      # Infraction Notifications API
+      resources :infraction_notifications, except: [:destroy, :edit, :update] do
+        member do
+          patch :cancel
+        end
+      end
       
       # Health check
       get "health", to: "health#show"

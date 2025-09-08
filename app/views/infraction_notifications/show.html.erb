@@ -1,0 +1,407 @@
+<div class="min-h-screen bg-gray-50">
+  <!-- Critical Alert Banner -->
+  <% if @infraction_notification.hours_until_deadline <= 6 %>
+    <div class="sticky top-0 z-50 bg-red-50 border-l-4 border-red-500 p-4">
+      <div class="flex items-center">
+        <div class="flex-shrink-0">
+          <svg class="animate-pulse h-5 w-5 text-red-400" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"/>
+          </svg>
+        </div>
+        <div class="ml-3">
+          <h3 class="text-sm font-medium text-red-800">
+            🔥 Prazo Crítico - <%= pluralize([@infraction_notification.hours_until_deadline, 0].max, 'hora restante', 'horas restantes') %>
+          </h3>
+          <div class="mt-1 text-sm text-red-700">
+            Esta notificação deve ser processada urgentemente para cumprir os prazos do BACEN.
+          </div>
+        </div>
+      </div>
+    </div>
+  <% end %>
+
+  <!-- Enhanced Header with Priority Context -->
+  <div class="bg-white shadow">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between items-center py-6">
+        <div class="flex items-center space-x-4">
+          <!-- Priority Indicator -->
+          <div class="priority-badge">
+            <% if @infraction_notification.high_priority? %>
+              <div class="flex items-center space-x-2 bg-red-100 px-3 py-1 rounded-full">
+                <div class="h-2 w-2 bg-red-500 rounded-full animate-pulse"></div>
+                <span class="text-xs font-bold text-red-700 uppercase">Alta Prioridade</span>
+                <svg class="h-4 w-4 text-red-500" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M10 2L3 7v11a1 1 0 001 1h3v-9h6v9h3a1 1 0 001-1V7l-7-5z"/>
+                </svg>
+              </div>
+            <% elsif @infraction_notification.medium_priority? %>
+              <div class="flex items-center space-x-2 bg-orange-100 px-3 py-1 rounded-full">
+                <div class="h-2 w-2 bg-orange-500 rounded-full"></div>
+                <span class="text-xs font-semibold text-orange-700 uppercase">Prioridade Média</span>
+              </div>
+            <% else %>
+              <div class="flex items-center space-x-2 bg-gray-100 px-3 py-1 rounded-full">
+                <div class="h-2 w-2 bg-gray-400 rounded-full"></div>
+                <span class="text-xs text-gray-600 uppercase">Prioridade Padrão</span>
+              </div>
+            <% end %>
+          </div>
+
+          <div>
+            <h1 class="text-3xl font-bold text-gray-900">Investigação de Infração</h1>
+            <p class="text-sm text-gray-500 mt-1">ID: <%= @infraction_notification.id.to_s[0..8] %> • <%= @infraction_notification.infraction_type_description %></p>
+          </div>
+
+          <!-- Status with Professional Styling -->
+          <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium
+                       <%= case @infraction_notification.status
+                           when 'CANCELLED' then 'bg-red-100 text-red-800'
+                           when 'COMPLETED' then 'bg-green-100 text-green-800'
+                           when 'ANALYZING' then 'bg-blue-100 text-blue-800'
+                           when 'PROCESSING' then 'bg-blue-100 text-blue-800'
+                           when 'SUBMITTED' then 'bg-yellow-100 text-yellow-800'
+                           else 'bg-gray-100 text-gray-800'
+                           end %>">
+            <%= case @infraction_notification.status
+                when 'SUBMITTED' then t('infraction_notifications.fraud_dashboard.status_options.pending')
+                when 'PROCESSING' then t('infraction_notifications.fraud_dashboard.status_options.processing')
+                when 'ANALYZING' then t('infraction_notifications.fraud_dashboard.status_options.analyzing')
+                when 'COMPLETED' then t('infraction_notifications.fraud_dashboard.status_options.completed')
+                when 'CANCELLED' then t('infraction_notifications.fraud_dashboard.status_options.cancelled')
+                else @infraction_notification.status.humanize
+                end %>
+          </span>
+        </div>
+
+        <!-- Action Buttons with Improved Styling -->
+        <div class="flex items-center space-x-3">
+          <%= link_to 'Voltar', infraction_notifications_path, 
+                      class: "bg-gray-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-gray-700 transition-all duration-200" %>
+          <% if @infraction_notification.can_be_cancelled? %>
+            <%= link_to "Cancelar Investigação", cancel_infraction_notification_path(@infraction_notification), 
+                        method: :patch,
+                        data: { confirm: 'Tem certeza que deseja cancelar esta investigação?' },
+                        class: "bg-red-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-red-700 transition-all duration-200" %>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Content Area -->
+  <div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+    <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
+      <!-- Main Information -->
+      <div class="lg:col-span-2 space-y-6">
+        
+        <!-- Investigation Overview Card -->
+        <div class="bg-white shadow-lg rounded-lg overflow-hidden">
+          <div class="px-6 py-4 bg-gradient-to-r from-indigo-500 to-indigo-600">
+            <div class="flex items-center justify-between">
+              <h3 class="text-lg font-semibold text-white">Visão Geral da Investigação</h3>
+              <div class="text-indigo-100 text-sm">
+                Criado há <%= time_ago_in_words(@infraction_notification.created_at) %>
+              </div>
+            </div>
+          </div>
+          <div class="p-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <!-- PIX Key Info -->
+              <div class="space-y-3">
+                <div>
+                  <label class="text-xs font-medium text-gray-500 uppercase tracking-wide">Chave PIX Investigada</label>
+                  <div class="mt-1">
+                    <code class="bg-gray-100 px-3 py-2 rounded-md text-sm font-mono block">
+                      <%= @infraction_notification.masked_pix_key %>
+                    </code>
+                    <p class="text-xs text-gray-600 mt-1">
+                      Tipo: <%= @infraction_notification.pix_key_type&.upcase || 'Desconhecido' %>
+                    </p>
+                  </div>
+                </div>
+                
+                <!-- Risk Assessment -->
+                <div>
+                  <label class="text-xs font-medium text-gray-500 uppercase tracking-wide">Nível de Risco</label>
+                  <div class="mt-1 flex items-center space-x-2">
+                    <% case @infraction_notification.risk_level %>
+                    <% when 'high' %>
+                      <div class="h-3 w-3 bg-red-500 rounded-full"></div>
+                      <span class="text-sm font-semibold text-red-700">Alto Risco</span>
+                    <% when 'medium' %>
+                      <div class="h-3 w-3 bg-orange-500 rounded-full"></div>
+                      <span class="text-sm font-medium text-orange-700">Risco Médio</span>
+                    <% else %>
+                      <div class="h-3 w-3 bg-green-500 rounded-full"></div>
+                      <span class="text-sm text-green-700">Baixo Risco</span>
+                    <% end %>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Infraction Details -->
+              <div class="space-y-3">
+                <div>
+                  <label class="text-xs font-medium text-gray-500 uppercase tracking-wide">Tipo de Infração</label>
+                  <div class="mt-1">
+                    <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-red-100 text-red-800">
+                      <%= @infraction_notification.infraction_type_description %>
+                    </span>
+                  </div>
+                </div>
+                
+                <div>
+                  <label class="text-xs font-medium text-gray-500 uppercase tracking-wide">Fonte da Denúncia</label>
+                  <div class="mt-1 text-sm text-gray-900">
+                    <%= @infraction_notification.created_by_description %>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Evidence and Description Card -->
+        <div class="bg-white shadow-lg rounded-lg overflow-hidden">
+          <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+            <h3 class="text-lg font-medium text-gray-900 flex items-center">
+              <svg class="mr-2 h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+              </svg>
+              Evidências e Detalhes
+            </h3>
+          </div>
+          <div class="p-6">
+            <% if @infraction_notification.description.present? %>
+              <div class="mb-6">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Descrição da Infração</label>
+                <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                  <p class="text-sm text-gray-900 leading-relaxed">
+                    <%= simple_format(@infraction_notification.description) %>
+                  </p>
+                </div>
+              </div>
+            <% end %>
+
+            <!-- Evidence Data Display -->
+            <% if @infraction_notification.evidence_data.present? && @infraction_notification.evidence_data.is_a?(Hash) %>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-3">Dados de Evidência</label>
+                <div class="bg-blue-50 rounded-lg p-4 border border-blue-200">
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <% @infraction_notification.evidence_data.each do |key, value| %>
+                      <div class="flex justify-between">
+                        <span class="text-sm font-medium text-blue-800"><%= key.humanize %>:</span>
+                        <span class="text-sm text-blue-900 font-mono">
+                          <% if key == 'amount' && value.present? %>
+                            R$ <%= number_with_precision(value, precision: 2, delimiter: '.', separator: ',') %>
+                          <% else %>
+                            <%= value %>
+                          <% end %>
+                        </span>
+                      </div>
+                    <% end %>
+                  </div>
+                </div>
+              </div>
+            <% end %>
+          </div>
+        </div>
+
+        <!-- JDPI Integration Card -->
+        <% if @infraction_notification.jdpi_notification_id.present? %>
+          <div class="bg-white shadow-lg rounded-lg overflow-hidden">
+            <div class="px-6 py-4 bg-green-50 border-b border-green-200">
+              <h3 class="text-lg font-medium text-gray-900 flex items-center">
+                <svg class="mr-2 h-5 w-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                Integração JDPI
+              </h3>
+            </div>
+            <div class="p-6">
+              <div class="flex items-center justify-between mb-4">
+                <div>
+                  <label class="text-xs font-medium text-gray-500 uppercase tracking-wide">ID JDPI</label>
+                  <div class="mt-1">
+                    <code class="bg-gray-100 px-3 py-2 rounded-md text-sm font-mono">
+                      <%= @infraction_notification.jdpi_notification_id %>
+                    </code>
+                  </div>
+                </div>
+                <div class="text-right">
+                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                    <svg class="mr-1 h-3 w-3" fill="currentColor" viewBox="0 0 20 20">
+                      <path d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"/>
+                    </svg>
+                    Sincronizado
+                  </span>
+                </div>
+              </div>
+
+              <% if @infraction_notification.jdpi_response.present? %>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">Resposta JDPI</label>
+                  <div class="bg-gray-50 rounded-lg p-3 border border-gray-200">
+                    <pre class="text-xs text-gray-800 overflow-auto"><%= JSON.pretty_generate(@infraction_notification.jdpi_response) %></pre>
+                  </div>
+                </div>
+              <% end %>
+            </div>
+          </div>
+        <% end %>
+      </div>
+
+      <!-- Enhanced Sidebar -->
+      <div class="lg:col-span-1 space-y-6">
+        <!-- Deadline and Priority Card -->
+        <div class="bg-white shadow-lg rounded-lg overflow-hidden">
+          <div class="px-4 py-3 bg-gradient-to-r from-red-500 to-orange-500">
+            <h3 class="text-base font-semibold text-white flex items-center">
+              <svg class="mr-2 h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z"/>
+              </svg>
+              Prazo BACEN
+            </h3>
+          </div>
+          <div class="p-4">
+            <div class="text-center">
+              <% hours_left = [@infraction_notification.hours_until_deadline, 0].max %>
+              <div class="text-3xl font-bold 
+                          <%= hours_left <= 6 ? 'text-red-600' : hours_left <= 24 ? 'text-orange-600' : 'text-yellow-600' %>">
+                <%= hours_left %>h
+              </div>
+              <p class="text-sm text-gray-600 mt-1">restantes para análise</p>
+              
+              <% if hours_left <= 6 %>
+                <div class="mt-3 p-2 bg-red-50 rounded-lg border border-red-200">
+                  <p class="text-xs text-red-700 font-semibold">
+                    ⚠️ PRAZO CRÍTICO
+                  </p>
+                </div>
+              <% end %>
+            </div>
+          </div>
+        </div>
+
+        <!-- Timeline Card -->
+        <div class="bg-white shadow-lg rounded-lg overflow-hidden">
+          <div class="px-4 py-3 bg-gray-50 border-b border-gray-200">
+            <h3 class="text-base font-semibold text-gray-900 flex items-center">
+              <svg class="mr-2 h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+              </svg>
+              Linha do Tempo
+            </h3>
+          </div>
+          <div class="p-4">
+            <div class="space-y-4">
+              <div class="flex items-start space-x-3">
+                <div class="flex-shrink-0 h-2 w-2 bg-green-500 rounded-full mt-2"></div>
+                <div class="min-w-0 flex-1">
+                  <p class="text-sm font-medium text-gray-900">Criação</p>
+                  <p class="text-xs text-gray-500"><%= l(@infraction_notification.created_at, format: :long) %></p>
+                </div>
+              </div>
+              
+              <div class="flex items-start space-x-3">
+                <div class="flex-shrink-0 h-2 w-2 bg-blue-500 rounded-full mt-2"></div>
+                <div class="min-w-0 flex-1">
+                  <p class="text-sm font-medium text-gray-900">Última Atualização</p>
+                  <p class="text-xs text-gray-500"><%= l(@infraction_notification.updated_at, format: :long) %></p>
+                </div>
+              </div>
+              
+              <% if @infraction_notification.cancelled_at.present? %>
+                <div class="flex items-start space-x-3">
+                  <div class="flex-shrink-0 h-2 w-2 bg-red-500 rounded-full mt-2"></div>
+                  <div class="min-w-0 flex-1">
+                    <p class="text-sm font-medium text-red-700">Cancelamento</p>
+                    <p class="text-xs text-red-600"><%= l(@infraction_notification.cancelled_at, format: :long) %></p>
+                    <% if @infraction_notification.cancellation_reason.present? %>
+                      <p class="text-xs text-red-600 mt-1"><%= @infraction_notification.cancellation_reason %></p>
+                    <% end %>
+                  </div>
+                </div>
+              <% end %>
+            </div>
+          </div>
+        </div>
+
+        <!-- Investigation Logs Card -->
+        <% if @infraction_notification.infraction_logs.present? %>
+          <div class="bg-white shadow-lg rounded-lg overflow-hidden">
+            <div class="px-4 py-3 bg-gray-50 border-b border-gray-200">
+              <h3 class="text-base font-semibold text-gray-900 flex items-center">
+                <svg class="mr-2 h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                </svg>
+                Log de Investigação
+              </h3>
+            </div>
+            <div class="p-4 max-h-64 overflow-y-auto">
+              <div class="space-y-3">
+                <% @infraction_notification.infraction_logs.recent.limit(10).each do |log| %>
+                  <div class="border-l-2 
+                             <%= log.level == 'error' ? 'border-red-400' : 
+                                 log.level == 'warn' ? 'border-yellow-400' : 
+                                 'border-blue-400' %> pl-3">
+                    <p class="text-sm 
+                             <%= log.level == 'error' ? 'text-red-800' : 
+                                 log.level == 'warn' ? 'text-yellow-800' : 
+                                 'text-gray-800' %>">
+                      <%= log.message %>
+                    </p>
+                    <p class="text-xs text-gray-500 mt-1">
+                      <%= l(log.occurred_at, format: :long) %>
+                    </p>
+                  </div>
+                <% end %>
+              </div>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Enhanced CSS -->
+<style>
+  /* Critical deadline animations */
+  .deadline-critical {
+    animation: pulse-red 2s infinite;
+  }
+  
+  @keyframes pulse-red {
+    0%, 100% { 
+      opacity: 1; 
+      box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
+    }
+    50% { 
+      opacity: 0.8;
+      box-shadow: 0 0 0 10px rgba(239, 68, 68, 0);
+    }
+  }
+  
+  /* Enhanced card shadows */
+  .shadow-lg {
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  }
+  
+  /* Professional transitions */
+  .transition-all {
+    transition: all 0.2s ease-in-out;
+  }
+  
+  /* Gradient backgrounds for card headers */
+  .bg-gradient-to-r {
+    background-image: linear-gradient(to right, var(--tw-gradient-stops));
+  }
+  
+  /* Enhanced hover states */
+  .hover\:scale-105:hover {
+    transform: scale(1.05);
+  }
+</style>

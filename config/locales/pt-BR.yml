@@ -114,6 +114,242 @@ pt-BR:
     infraction_reports:
       title: "Relatórios de Infração"
       subtitle: "Relatórios de infrações PIX"
+    infraction_notifications:
+      title: "Notificações de Infração"
+      subtitle: "Gerenciamento de notificações de infração"
     transaction_refunds:
       title: "Estornos de Transação"
       subtitle: "Gerenciamento de estornos"
+
+  # PIX specific terms
+  pix:
+    terms:
+      pix_keys: "Chaves PIX"
+    dashboard:
+      recent_activities: "Atividades Recentes"
+      no_activities: "Nenhuma atividade recente"
+
+  # Infraction notifications
+  infraction_notifications:
+    title: "Notificações de Infração"
+    subtitle: "Gerenciamento de notificações de infração PIX"
+    new:
+      title: "Nova Notificação de Infração"
+      subtitle: "Criar nova notificação para o sistema PIX"
+      help_title: "Como preencher esta notificação"
+      help_text: "Preencha todos os campos obrigatórios com informações precisas. A notificação será enviada automaticamente ao sistema DICT do Banco Central."
+    
+    fields:
+      pix_key:
+        label: "Chave PIX"
+        placeholder: "Ex: usuario@email.com, +5511999999999, 12345678901, ou UUID"
+        help: "Insira a chave PIX relacionada à infração. Pode ser email, telefone, CPF/CNPJ ou chave aleatória (UUID)."
+        validation: "A chave PIX deve estar em um formato válido conforme regulamentação do Banco Central."
+      
+      infraction_type:
+        label: "Tipo de Infração"
+        help: "Selecione o tipo de infração conforme classificação do Banco Central. Esta informação determina o fluxo de análise."
+        validation: "Tipo de infração é obrigatório e deve estar de acordo com as normas JDPI."
+      
+      created_by:
+        label: "Departamento Responsável"
+        help: "Identifica qual departamento está criando esta notificação. Esta informação é usada para auditoria e controle interno. Notificações automáticas do sistema DICT não são criadas manualmente."
+        validation: "Departamento responsável é obrigatório para rastreabilidade."
+      
+      description:
+        label: "Descrição Detalhada"
+        placeholder: "Descreva os detalhes da infração, incluindo evidências, contexto e impacto observado..."
+        help: "Forneça uma descrição completa e objetiva da infração. Inclua evidências, contexto temporal, impacto observado e qualquer informação relevante para análise."
+        validation: "Descrição é obrigatória e deve ter entre 20 e 500 caracteres. Seja específico e objetivo."
+      
+      pi_payer_id:
+        label: "ID do Pagador"
+        placeholder: "ID do pagador envolvido na transação"
+        help: "Se aplicável, informe o identificador do pagador envolvido na transação irregular. Campo opcional."
+      
+      ispb:
+        label: "ISPB da Instituição"
+        placeholder: "Código ISPB de 8 dígitos"
+        help: "Código ISPB da instituição envolvida, se diferente da nossa. Usado para casos de infrações envolvendo múltiplas instituições."
+        validation: "Se informado, deve conter exatamente 8 dígitos numéricos."
+    
+    status:
+      submitted: "Submetido"
+      processing: "Processando"
+      analyzing: "Analisando"
+      approved: "Aprovado"
+      rejected: "Rejeitado"
+      completed: "Concluído"
+      cancelled: "Cancelado"
+    
+    sources:
+      customer_service: "Atendimento ao Cliente"
+      customer_experience: "Experiência do Cliente"
+      dict_automatic: "Sistema DICT Automático"
+    
+    types:
+      fraud: "Fraude"
+      aml_violation: "Violação Anti-Lavagem de Dinheiro"
+      account_misuse: "Uso Inadequado de Conta"
+      invalid_key: "Chave PIX Inválida"
+      unauthorized_use: "Uso Não Autorizado"
+    
+    # Dropdown option translations
+    dropdown_options:
+      infraction_types:
+        FRAUD: "Fraude"
+        AML_VIOLATION: "Violação Anti-Lavagem de Dinheiro"
+        ACCOUNT_MISUSE: "Uso Inadequado de Conta"
+        INVALID_KEY: "Chave PIX Inválida"
+        UNAUTHORIZED_USE: "Uso Não Autorizado"
+      
+      sources:
+        CUSTOMER_SERVICE: "Atendimento ao Cliente"
+        CUSTOMER_EXPERIENCE: "Experiência do Cliente"
+        DICT_AUTOMATIC: "Sistema DICT (Automático)"
+    
+    help:
+      what_is: "O que são Notificações de Infração PIX?"
+      what_is_text: "As notificações de infração PIX são comunicações oficiais enviadas ao sistema JDPI do Banco Central para reportar irregularidades relacionadas a chaves PIX e transações."
+      
+      when_create: "Quando criar uma notificação?"
+      when_create_items:
+        - "Suspeita de fraude em transações PIX"
+        - "Uso inadequado ou não autorizado de chaves PIX"
+        - "Violações de políticas anti-lavagem de dinheiro"
+        - "Chaves PIX com formato inválido ou problemático"
+        - "Qualquer irregularidade que comprometa a segurança do sistema"
+      
+      process: "Como funciona o processo?"
+      process_steps:
+        - "Criação da notificação com dados detalhados"
+        - "Envio automático ao sistema DICT do Banco Central"
+        - "Análise pela equipe competente"
+        - "Decisão sobre medidas cabíveis"
+        - "Feedback sobre o resultado da análise"
+    
+    examples:
+      title: "Exemplos de Descrições"
+      fraud: "Cliente reportou transação PIX não reconhecida de R$ 500,00 realizada em [data/hora]. Chave PIX utilizada não pertence ao cliente. Evidências: print do extrato e declaração do cliente."
+      invalid_key: "Chave PIX cadastrada com formato de email inválido, causando falhas em transações. Email: [exemplo@dominio]. Sistema retorna erro de validação consistentemente."
+      unauthorized: "Chave PIX cadastrada sem autorização do titular da conta. Cliente nega ter solicitado o cadastro. Data do cadastro: [data]. Solicitação de cancelamento protocolada."
+
+    # Dashboard Anti-Fraude
+    fraud_dashboard:
+      title: "Central Anti-Fraude PIX"
+      subtitle: "Notificações de Infração"
+      
+      alerts:
+        critical_deadlines: "Prazos Críticos (%{count} itens)"
+        burning_deadlines_msg: "%{count} notificações expiram em menos de 6 horas"
+        view_all: "Ver Todas"
+        
+      stats:
+        pending_actions: "Ações Pendentes"
+        under_review: "Em Análise"
+        expiring_today: "Expiram Hoje"
+        high_priority: "Alta Prioridade"
+        
+      actions:
+        bulk_analysis: "Análise em Lote"
+        export_report: "Exportar Relatório"
+        investigate: "🔍 Investigar"
+        load_more: "Carregar Mais Notificações"
+        
+      filters:
+        search_label: "Buscar"
+        search_placeholder: "ID, chave PIX, descrição..."
+        status_label: "Status"
+        priority_label: "Prioridade"
+        type_label: "Tipo"
+        filter_button: "Filtrar"
+        all_status: "Todos"
+        all_priority: "Todas"
+        all_types: "Todos"
+        
+      status_options:
+        pending: "🟡 Pendente"
+        processing: "🔄 Processando"
+        analyzing: "🔍 Analisando"
+        completed: "✅ Concluído"
+        cancelled: "❌ Cancelado"
+        
+      priority_options:
+        high: "🔴 Alta"
+        medium: "🟠 Média"
+        standard: "⚪ Padrão"
+        
+      type_options:
+        fraud: "Fraude"
+        account_takeover: "Takeover"
+        sim_swap: "SIM Swap"
+        phishing: "Phishing"
+        
+      priority_labels:
+        high: "ALTA"
+        medium: "MÉD"
+        standard: "PADRÃO"
+        
+      risk_levels:
+        high: "ALTO"
+        medium: "MÉDIO"
+        low: "BAIXO"
+        
+      details:
+        infraction: "Infração"
+        pix_key: "Chave PIX"
+        risk_level: "Nível de Risco"
+        type_label: "Tipo"
+        amount_label: "Valor"
+        source_label: "Origem"
+        unknown: "Desconhecido"
+        
+      timeline:
+        submitted: "Submetido"
+        last_update: "Última Atualização"
+        analyst: "Analista"
+        unassigned: "Não Atribuído"
+        created_ago: "%{time} atrás"
+        hours_left: "%{hours}h restam"
+        hours_remaining: "%{hours}h restantes"
+        
+      empty_state:
+        title: "Nenhuma notificação encontrada"
+        message: "Comece criando uma nova notificação de infração ou ajuste os filtros."
+        
+      buttons:
+        view: "Ver"
+        cancel: "Cancelar"
+        confirm_cancel: "Tem certeza que deseja cancelar esta notificação?"
+        
+      tabs:
+        sent: "Enviadas"
+        received: "Recebidas" 
+        sent_count: "Enviadas (%{count})"
+        received_count: "Recebidas (%{count})"
+        
+      date_filters:
+        created_from: "Data de Criação - De"
+        created_to: "Data de Criação - Até"
+        expiring_from: "Data de Expiração - De"
+        expiring_to: "Data de Expiração - Até"
+        clear_filters: "Limpar Filtros"
+        active_filters: "Filtros ativos:"
+        
+      # Enhanced Date Range Filters
+      date_filters:
+        title: "Filtros de Data"
+        created_period: "Período de Criação"
+        expiring_period: "Período de Expiração"
+        select_period: "Selecione o período"
+        select_period_aria: "Selecionar período para %{label}"
+        instruction: "Clique para selecionar período"
+        keyboard_help: "Pressione Enter para abrir o calendário. Use as setas para navegar entre as datas."
+        clear: "Limpar"
+        cancel: "Cancelar"
+        apply: "Aplicar"
+        quick_presets: "Períodos Rápidos"
+        today: "Hoje"
+        last_7_days: "Últimos 7 dias"
+        last_30_days: "Últimos 30 dias"
+        last_3_months: "Últimos 3 meses"

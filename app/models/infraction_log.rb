@@ -36,8 +36,7 @@ class InfractionLog < ApplicationRecord
     end
   end
 
-  # JSON serialization for metadata
-  serialize :metadata, JSON
+  # metadata column is already JSON type in database - no serialization needed
 
   private
 

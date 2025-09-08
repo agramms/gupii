@@ -1,0 +1,178 @@
+<%
+  # Date Range Picker Component
+  # Usage: render 'shared/form/date_range_picker', 
+  #          label_text: 'Data de Criação',
+  #          field_prefix: 'created',
+  #          current_from: params[:created_from],
+  #          current_to: params[:created_to]
+
+  current_from_date = current_from.present? ? (Date.parse(current_from) rescue nil) : nil
+  current_to_date = current_to.present? ? (Date.parse(current_to) rescue nil) : nil
+  
+  display_value = if current_from_date && current_to_date
+                   "#{current_from_date.strftime('%d/%m/%Y')} - #{current_to_date.strftime('%d/%m/%Y')}"
+                 elsif current_from_date
+                   current_from_date.strftime('%d/%m/%Y')
+                 else
+                   ''
+                 end
+%>
+
+<div class="date-range-picker relative" 
+     data-controller="daterange"
+     data-field-prefix="<%= field_prefix %>"
+     role="combobox"
+     aria-haspopup="grid"
+     aria-expanded="false">
+     
+  <label for="<%= field_prefix %>-range" 
+         class="block text-sm font-medium text-gray-700">
+    <%= label_text %>
+  </label>
+  
+  <div class="relative">
+    <input type="text" 
+           id="<%= field_prefix %>-range"
+           data-daterange-target="display"
+           data-action="click->daterange#toggle focus->daterange#toggle"
+           class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm py-2.5 px-6 pr-16 cursor-pointer bg-white"
+           placeholder="<%= t('infraction_notifications.fraud_dashboard.date_filters.select_period', default: 'Selecione o período') %>"
+           value="<%= display_value %>"
+           aria-describedby="<%= field_prefix %>-range-help"
+           aria-label="<%= t('infraction_notifications.fraud_dashboard.date_filters.select_period_aria', label: label_text, default: "Selecionar período para #{label_text.downcase}") %>"
+           readonly>
+    
+    <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+      <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+      </svg>
+    </div>
+    
+    <!-- Clear button (when range is selected) -->
+    <% if display_value.present? %>
+      <button type="button" 
+              data-action="click->daterange#clear"
+              class="absolute inset-y-0 right-8 pr-1 flex items-center text-gray-400 hover:text-gray-600 transition-colors">
+        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
+        <span class="sr-only"><%= t('infraction_notifications.fraud_dashboard.date_filters.clear', default: 'Limpar') %></span>
+      </button>
+    <% end %>
+    
+    <!-- Hidden inputs for form submission -->
+    <%= hidden_field_tag "#{field_prefix}_from", current_from, data: { daterange_target: "startDate" } %>
+    <%= hidden_field_tag "#{field_prefix}_to", current_to, data: { daterange_target: "endDate" } %>
+  </div>
+  
+  <!-- Calendar dropdown -->
+  <div class="absolute z-50 mt-2 bg-white rounded-lg shadow-lg border border-gray-200 hidden w-80" 
+       data-daterange-target="calendar"
+       data-action="click->daterange#preventClose"
+       role="dialog"
+       aria-modal="true"
+       aria-labelledby="calendar-title">
+    
+    <!-- Mobile backdrop -->
+    <div class="fixed inset-0 bg-black bg-opacity-25 sm:hidden" data-action="click->daterange#close"></div>
+    
+    <!-- Calendar Header -->
+    <div class="flex items-center justify-between p-4 border-b border-gray-200">
+      <button type="button" 
+              data-action="click->daterange#previousMonth"
+              class="p-1 rounded-md hover:bg-gray-100 transition-colors">
+        <svg class="h-5 w-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+        </svg>
+      </button>
+      
+      <div id="calendar-title" class="text-sm font-medium text-gray-900" data-daterange-target="monthYear">
+        <!-- Current month/year will be inserted here -->
+      </div>
+      
+      <button type="button" 
+              data-action="click->daterange#nextMonth"
+              class="p-1 rounded-md hover:bg-gray-100 transition-colors">
+        <svg class="h-5 w-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+        </svg>
+      </button>
+    </div>
+    
+    <!-- Calendar Grid -->
+    <div class="p-4">
+      <!-- Weekday headers -->
+      <div class="grid grid-cols-7 gap-1 mb-2">
+        <div class="text-xs font-medium text-gray-500 text-center py-2">Dom</div>
+        <div class="text-xs font-medium text-gray-500 text-center py-2">Seg</div>
+        <div class="text-xs font-medium text-gray-500 text-center py-2">Ter</div>
+        <div class="text-xs font-medium text-gray-500 text-center py-2">Qua</div>
+        <div class="text-xs font-medium text-gray-500 text-center py-2">Qui</div>
+        <div class="text-xs font-medium text-gray-500 text-center py-2">Sex</div>
+        <div class="text-xs font-medium text-gray-500 text-center py-2">Sáb</div>
+      </div>
+      
+      <!-- Calendar days -->
+      <div class="grid grid-cols-7 gap-1" data-daterange-target="calendarGrid">
+        <!-- Calendar days will be inserted here dynamically -->
+      </div>
+    </div>
+    
+    <!-- Calendar Footer -->
+    <div class="flex items-center justify-between p-4 border-t border-gray-200 bg-gray-50 rounded-b-lg">
+      <button type="button" 
+              data-action="click->daterange#clear"
+              class="text-sm text-gray-600 hover:text-gray-800 transition-colors">
+        <%= t('infraction_notifications.fraud_dashboard.date_filters.clear', default: 'Limpar') %>
+      </button>
+      
+      <div class="flex space-x-2">
+        <button type="button" 
+                data-action="click->daterange#cancel"
+                class="px-3 py-1 text-sm text-gray-600 hover:text-gray-800 transition-colors">
+          <%= t('infraction_notifications.fraud_dashboard.date_filters.cancel', default: 'Cancelar') %>
+        </button>
+        <button type="button" 
+                data-action="click->daterange#apply"
+                class="px-3 py-1 text-sm bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
+                data-daterange-target="applyButton"
+                disabled>
+          <%= t('infraction_notifications.fraud_dashboard.date_filters.apply', default: 'Aplicar') %>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+/* Force calendar grid layout */
+.date-range-picker [data-daterange-target="calendarGrid"] {
+  display: grid !important;
+  grid-template-columns: repeat(7, 1fr) !important;
+  gap: 0.25rem !important;
+}
+
+.date-range-picker [data-daterange-target="calendarGrid"] > * {
+  width: 2rem !important;
+  height: 2rem !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+/* Force weekday headers grid layout */
+.date-range-picker .grid-cols-7 {
+  display: grid !important;
+  grid-template-columns: repeat(7, 1fr) !important;
+  gap: 0.25rem !important;
+}
+
+.date-range-picker .grid-cols-7 > * {
+  width: 2rem !important;
+  height: auto !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  text-align: center !important;
+}
+</style>

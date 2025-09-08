@@ -1,0 +1,570 @@
+<div class="min-h-screen bg-gray-50">
+  <!-- Header Section -->
+  <div class="bg-white shadow">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between items-center py-6">
+        <div class="flex items-center">
+          <h1 class="text-3xl font-bold text-gray-900"><%= t('infraction_notifications.new.title') %></h1>
+          <span class="ml-3 text-sm text-gray-500"><%= t('infraction_notifications.new.subtitle') %></span>
+        </div>
+        <div class="flex items-center space-x-4">
+          <%= link_to t('actions.back'), infraction_notifications_path, 
+                      class: "bg-gray-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-gray-700" %>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+    <div class="lg:grid lg:grid-cols-12 lg:gap-6">
+      <!-- Form Column -->
+      <div class="lg:col-span-8">
+        <!-- Instructions Card -->
+        <div class="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-6">
+          <div class="flex">
+            <div class="flex-shrink-0">
+              <svg class="h-5 w-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              </svg>
+            </div>
+            <div class="ml-3">
+              <h3 class="text-sm font-medium text-blue-800"><%= t('infraction_notifications.new.help_title') %></h3>
+              <div class="mt-2 text-sm text-blue-700">
+                <p><%= t('infraction_notifications.new.help_text') %></p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Form Card -->
+        <div class="bg-white shadow overflow-hidden sm:rounded-lg">
+          <div class="px-4 py-5 sm:p-6">
+            <%= form_with model: @infraction_notification, local: true, class: "space-y-8" do |form| %>
+              <!-- Error Messages -->
+              <% if @infraction_notification.errors.any? %>
+                <div class="bg-red-50 border border-red-200 rounded-md p-4">
+                  <div class="flex">
+                    <div class="flex-shrink-0">
+                      <svg class="h-5 w-5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                      </svg>
+                    </div>
+                    <div class="ml-3">
+                      <h3 class="text-sm font-medium text-red-800">
+                        <%= pluralize(@infraction_notification.errors.count, "erro encontrado", "erros encontrados") %>:
+                      </h3>
+                      <div class="mt-2 text-sm text-red-700">
+                        <ul class="list-disc list-inside space-y-1">
+                          <% @infraction_notification.errors.full_messages.each do |message| %>
+                            <li><%= message %></li>
+                          <% end %>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              <% end %>
+
+              <!-- Section 1: Informações Básicas -->
+              <div class="border-b border-gray-200 pb-8">
+                <!-- Enhanced Section Header -->
+                <div class="bg-gradient-to-r from-indigo-50 to-white border-l-4 border-indigo-500 px-4 py-3 mb-6 rounded-r-md">
+                  <h3 class="text-lg font-semibold text-gray-900 flex items-center">
+                    <svg class="h-5 w-5 text-indigo-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                    </svg>
+                    Informações Básicas da Infração
+                  </h3>
+                  <p class="text-sm text-gray-600 mt-1">Dados fundamentais da infração reportada</p>
+                </div>
+                
+                <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                  <!-- PIX Key -->
+                  <div class="sm:col-span-2 relative bg-white p-4 rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-all duration-200">
+                    <div class="absolute top-3 right-3">
+                      <span class="text-xs font-medium text-red-600 bg-red-100 px-2 py-1 rounded-full">Obrigatório</span>
+                    </div>
+                    <div class="flex items-center mb-2">
+                      <div class="tooltip-container mr-2">
+                        <svg class="h-4 w-4 text-gray-400 cursor-help" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <div class="tooltip"><%= t('infraction_notifications.fields.pix_key.help') %></div>
+                      </div>
+                      <%= form.label :pix_key, t('infraction_notifications.fields.pix_key.label'), 
+                                     class: "block text-sm font-semibold text-gray-800 flex-1" %>
+                    </div>
+                    <%= form.text_field :pix_key, 
+                                        placeholder: t('infraction_notifications.fields.pix_key.placeholder'),
+                                        class: "block w-full bg-gray-50 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:bg-white transition-colors duration-200 sm:text-sm px-3 py-2.5" %>
+                  </div>
+
+                  <!-- Infraction Type -->
+                  <div class="relative bg-white p-4 rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-all duration-200">
+                    <div class="absolute top-3 right-3">
+                      <span class="text-xs font-medium text-red-600 bg-red-100 px-2 py-1 rounded-full">Obrigatório</span>
+                    </div>
+                    <div class="flex items-center mb-2">
+                      <div class="tooltip-container mr-2">
+                        <svg class="h-4 w-4 text-gray-400 cursor-help" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <div class="tooltip"><%= t('infraction_notifications.fields.infraction_type.help') %></div>
+                      </div>
+                      <%= form.label :infraction_type, t('infraction_notifications.fields.infraction_type.label'), 
+                                     class: "block text-sm font-semibold text-gray-800 flex-1" %>
+                    </div>
+                    <%= form.select :infraction_type, 
+                                    options_for_select([["Selecione o tipo...", ""]] + 
+                                      Jdpi::StatusCodes::InfractionTypes::DESCRIPTIONS.keys.map { |k| [t("infraction_notifications.dropdown_options.infraction_types.#{k}"), k] }, 
+                                      @infraction_notification.infraction_type), 
+                                    {}, 
+                                    { class: "block w-full bg-white border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 sm:text-sm px-3 py-2.5" } %>
+                  </div>
+
+                  <!-- Created By -->
+                  <div class="relative bg-white p-4 rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-all duration-200">
+                    <div class="absolute top-3 right-3">
+                      <span class="text-xs font-medium text-red-600 bg-red-100 px-2 py-1 rounded-full">Obrigatório</span>
+                    </div>
+                    <div class="flex items-center mb-2">
+                      <div class="tooltip-container mr-2">
+                        <svg class="h-4 w-4 text-gray-400 cursor-help" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <div class="tooltip"><%= t('infraction_notifications.fields.created_by.help') %></div>
+                      </div>
+                      <%= form.label :created_by, t('infraction_notifications.fields.created_by.label'), 
+                                     class: "block text-sm font-semibold text-gray-800 flex-1" %>
+                    </div>
+                    <%= form.select :created_by, 
+                                    options_for_select(Jdpi::StatusCodes::InfractionSources::DESCRIPTIONS.keys.reject { |k| k == 'DICT_AUTOMATIC' }.map { |k| [t("infraction_notifications.dropdown_options.sources.#{k}"), k] }, 
+                                      @infraction_notification.created_by), 
+                                    {}, 
+                                    { class: "block w-full bg-white border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 sm:text-sm px-3 py-2.5" } %>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Section 2: Descrição Detalhada -->
+              <div class="border-b border-gray-200 pb-8">
+                <!-- Enhanced Section Header -->
+                <div class="bg-gradient-to-r from-blue-50 to-white border-l-4 border-blue-500 px-4 py-3 mb-6 rounded-r-md">
+                  <h3 class="text-lg font-semibold text-gray-900 flex items-center">
+                    <svg class="h-5 w-5 text-blue-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                    </svg>
+                    Descrição da Infração
+                  </h3>
+                  <p class="text-sm text-gray-600 mt-1">Detalhe os fatos e evidências relacionados à infração</p>
+                </div>
+                
+                <div class="relative bg-blue-50 p-4 rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-all duration-200">
+                  <div class="absolute top-3 right-3">
+                    <span class="text-xs font-medium text-red-600 bg-red-100 px-2 py-1 rounded-full">Obrigatório</span>
+                  </div>
+                  <div class="flex items-center mb-2">
+                    <div class="tooltip-container mr-2">
+                      <svg class="h-4 w-4 text-gray-400 cursor-help" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                      </svg>
+                      <div class="tooltip"><%= t('infraction_notifications.fields.description.help') %></div>
+                    </div>
+                    <%= form.label :description, t('infraction_notifications.fields.description.label'), 
+                                   class: "block text-sm font-semibold text-gray-800 flex-1" %>
+                  </div>
+                  <%= form.text_area :description, 
+                                     rows: 6,
+                                     placeholder: t('infraction_notifications.fields.description.placeholder'),
+                                     class: "block w-full bg-blue-50 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-white transition-colors duration-200 sm:text-sm px-3 py-2.5 resize-vertical" %>
+                  <div class="mt-3 flex justify-between items-center">
+                    <div class="text-xs text-gray-500 flex items-center">
+                      <svg class="h-3 w-3 text-gray-400 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                      </svg>
+                      Seja específico e inclua evidências relevantes
+                    </div>
+                    <p class="text-sm text-gray-600 font-medium char-counter">
+                      <span id="char-count">0</span>/500 caracteres
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Section 3: Informações Complementares -->
+              <div class="border-b border-gray-200 pb-8">
+                <!-- Enhanced Section Header -->
+                <div class="bg-gradient-to-r from-amber-50 to-white border-l-4 border-amber-500 px-4 py-3 mb-6 rounded-r-md">
+                  <h3 class="text-lg font-semibold text-gray-900 flex items-center">
+                    <svg class="h-5 w-5 text-amber-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4"></path>
+                    </svg>
+                    Informações Complementares
+                  </h3>
+                  <p class="text-sm text-gray-600 mt-1">Dados adicionais quando disponíveis (campos opcionais)</p>
+                </div>
+                
+                <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                  <!-- PI Payer ID -->
+                  <div class="relative bg-slate-50 p-4 rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-all duration-200">
+                    <div class="absolute top-3 right-3">
+                      <span class="text-xs font-medium text-gray-600 bg-gray-100 px-2 py-1 rounded-full">Opcional</span>
+                    </div>
+                    <div class="flex items-center mb-2">
+                      <div class="tooltip-container mr-2">
+                        <svg class="h-4 w-4 text-gray-400 cursor-help" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <div class="tooltip"><%= t('infraction_notifications.fields.pi_payer_id.help') %></div>
+                      </div>
+                      <%= form.label :pi_payer_id, t('infraction_notifications.fields.pi_payer_id.label'), 
+                                     class: "block text-sm font-semibold text-gray-800 flex-1" %>
+                    </div>
+                    <%= form.text_field :pi_payer_id, 
+                                        placeholder: t('infraction_notifications.fields.pi_payer_id.placeholder'),
+                                        class: "block w-full bg-slate-100 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:bg-white transition-colors duration-200 sm:text-sm px-3 py-2.5 placeholder-gray-400" %>
+                  </div>
+
+                  <!-- ISPB -->
+                  <div class="relative bg-slate-50 p-4 rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-all duration-200">
+                    <div class="absolute top-3 right-3">
+                      <span class="text-xs font-medium text-gray-600 bg-gray-100 px-2 py-1 rounded-full">Opcional</span>
+                    </div>
+                    <div class="flex items-center mb-2">
+                      <div class="tooltip-container mr-2">
+                        <svg class="h-4 w-4 text-gray-400 cursor-help" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <div class="tooltip"><%= t('infraction_notifications.fields.ispb.help') %></div>
+                      </div>
+                      <%= form.label :ispb, t('infraction_notifications.fields.ispb.label'), 
+                                     class: "block text-sm font-semibold text-gray-800 flex-1" %>
+                    </div>
+                    <%= form.text_field :ispb, 
+                                        placeholder: t('infraction_notifications.fields.ispb.placeholder'),
+                                        maxlength: 8,
+                                        pattern: "\\d{8}",
+                                        class: "block w-full bg-slate-100 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:bg-white transition-colors duration-200 sm:text-sm px-3 py-2.5 placeholder-gray-400" %>
+                    <div class="mt-2 text-xs text-gray-500 flex items-center">
+                      <svg class="h-3 w-3 text-gray-400 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14"></path>
+                      </svg>
+                      8 dígitos numéricos
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Form Actions -->
+              <div class="flex justify-end space-x-3">
+                <%= link_to t('actions.cancel'), infraction_notifications_path, 
+                            class: "bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" %>
+                <%= form.submit t('actions.create'), 
+                                class: "ml-3 inline-flex justify-center py-2 px-6 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" %>
+              </div>
+            <% end %>
+          </div>
+        </div>
+      </div>
+
+      <!-- Help Sidebar -->
+      <div class="lg:col-span-4 mt-6 lg:mt-0">
+        <!-- Help Card -->
+        <div class="bg-white shadow overflow-hidden sm:rounded-lg mb-6">
+          <div class="px-4 py-5 sm:p-6">
+            <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">
+              <%= t('infraction_notifications.help.what_is') %>
+            </h3>
+            <p class="text-sm text-gray-600 mb-4">
+              <%= t('infraction_notifications.help.what_is_text') %>
+            </p>
+
+            <h4 class="text-sm font-medium text-gray-900 mb-3">
+              <%= t('infraction_notifications.help.when_create') %>
+            </h4>
+            <ul class="text-sm text-gray-600 space-y-2 mb-4">
+              <% t('infraction_notifications.help.when_create_items').each do |item| %>
+                <li class="flex items-start">
+                  <svg class="h-4 w-4 text-green-500 mt-0.5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                  </svg>
+                  <%= item %>
+                </li>
+              <% end %>
+            </ul>
+
+            <h4 class="text-sm font-medium text-gray-900 mb-3">
+              <%= t('infraction_notifications.help.process') %>
+            </h4>
+            <ol class="text-sm text-gray-600 space-y-2">
+              <% t('infraction_notifications.help.process_steps').each_with_index do |step, index| %>
+                <li class="flex items-start">
+                  <span class="flex-shrink-0 h-5 w-5 bg-indigo-100 text-indigo-600 text-xs font-medium rounded-full flex items-center justify-center mr-2 mt-0.5">
+                    <%= index + 1 %>
+                  </span>
+                  <%= step %>
+                </li>
+              <% end %>
+            </ol>
+          </div>
+        </div>
+
+        <!-- Examples Card -->
+        <div class="bg-white shadow overflow-hidden sm:rounded-lg">
+          <div class="px-4 py-5 sm:p-6">
+            <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">
+              <%= t('infraction_notifications.examples.title') %>
+            </h3>
+            
+            <div class="space-y-4">
+              <div class="p-3 bg-red-50 border-l-4 border-red-400">
+                <h5 class="text-sm font-medium text-red-800 mb-1">Fraude</h5>
+                <p class="text-sm text-red-700"><%= t('infraction_notifications.examples.fraud') %></p>
+              </div>
+              
+              <div class="p-3 bg-yellow-50 border-l-4 border-yellow-400">
+                <h5 class="text-sm font-medium text-yellow-800 mb-1">Chave Inválida</h5>
+                <p class="text-sm text-yellow-700"><%= t('infraction_notifications.examples.invalid_key') %></p>
+              </div>
+              
+              <div class="p-3 bg-blue-50 border-l-4 border-blue-400">
+                <h5 class="text-sm font-medium text-blue-800 mb-1">Uso Não Autorizado</h5>
+                <p class="text-sm text-blue-700"><%= t('infraction_notifications.examples.unauthorized') %></p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  /* Enhanced form styling for better field distinction */
+  .form-field-container {
+    transition: all 0.2s ease-in-out;
+  }
+  
+  .form-field-container:hover {
+    transform: translateY(-1px);
+  }
+  
+  /* Field requirement badges */
+  .field-badge-required {
+    background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+    border: 1px solid #f87171;
+  }
+  
+  .field-badge-optional {
+    background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+    border: 1px solid #d1d5db;
+  }
+  
+  /* Enhanced input focus states */
+  input:focus, select:focus, textarea:focus {
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    border-color: #6366f1;
+  }
+  
+  /* Section headers with improved hierarchy */
+  .section-header {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.8) 0%, rgba(255, 255, 255, 0.4) 100%);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+  }
+  
+  /* Field background patterns for better distinction */
+  .field-required-bg {
+    background-image: radial-gradient(circle at 1px 1px, rgba(79, 70, 229, 0.15) 1px, transparent 0);
+    background-size: 20px 20px;
+  }
+  
+  .field-optional-bg {
+    background-image: radial-gradient(circle at 1px 1px, rgba(156, 163, 175, 0.1) 1px, transparent 0);
+    background-size: 24px 24px;
+  }
+  
+  /* Tooltip enhancements */
+  .tooltip-container {
+    position: relative;
+    display: inline-block;
+    margin-right: 8px;
+  }
+  
+  .tooltip {
+    visibility: hidden;
+    opacity: 0;
+    position: fixed;
+    top: auto;
+    left: auto;
+    background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+    color: white;
+    text-align: left;
+    padding: 12px 16px;
+    border-radius: 8px;
+    font-size: 13px;
+    line-height: 1.5;
+    z-index: 9999;
+    width: 280px;
+    max-width: 90vw;
+    transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    pointer-events: none;
+  }
+  
+  .tooltip::before {
+    content: "";
+    position: absolute;
+    bottom: 100%;
+    left: 20px;
+    border-width: 0 8px 8px 8px;
+    border-style: solid;
+    border-color: transparent transparent #1f2937 transparent;
+    filter: drop-shadow(0 -1px 2px rgba(0, 0, 0, 0.1));
+  }
+  
+  .tooltip-container:hover .tooltip {
+    visibility: visible;
+    opacity: 1;
+  }
+  
+  /* Character counter styling */
+  .char-counter {
+    font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', monospace;
+    font-variant-numeric: tabular-nums;
+  }
+  
+  /* Enhanced form actions */
+  .form-actions {
+    background: linear-gradient(to right, rgba(249, 250, 251, 0.8), rgba(243, 244, 246, 0.8));
+    backdrop-filter: blur(8px);
+    border-top: 1px solid rgba(229, 231, 235, 0.8);
+  }
+  
+  /* Mobile responsiveness improvements */
+  @media (max-width: 640px) {
+    .tooltip {
+      width: 260px;
+      font-size: 12px;
+      padding: 10px 14px;
+    }
+    
+    .tooltip-container {
+      margin-right: 6px;
+    }
+    
+    .field-required-bg, .field-optional-bg {
+      background-size: 16px 16px;
+    }
+    
+    .form-field-container {
+      padding: 12px;
+    }
+  }
+  
+  /* Accessibility improvements */
+  @media (prefers-reduced-motion: reduce) {
+    .form-field-container, input, select, textarea, .tooltip {
+      transition: none;
+    }
+    
+    .form-field-container:hover {
+      transform: none;
+    }
+  }
+  
+  /* High contrast mode support */
+  @media (prefers-contrast: high) {
+    .field-required-bg {
+      background-image: none;
+      background-color: #fef3f2;
+      border: 2px solid #ef4444;
+    }
+    
+    .field-optional-bg {
+      background-image: none;
+      background-color: #f8fafc;
+      border: 2px solid #64748b;
+    }
+    
+    .section-header {
+      background: #ffffff;
+      border: 2px solid #1e293b;
+    }
+  }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Character counter for description field
+  const descriptionField = document.querySelector('#infraction_notification_description');
+  const charCount = document.querySelector('#char-count');
+  
+  if (descriptionField && charCount) {
+    function updateCharCount() {
+      const count = descriptionField.value.length;
+      charCount.textContent = count;
+      
+      if (count > 500) {
+        charCount.parentElement.classList.add('error');
+        charCount.parentElement.classList.remove('warning');
+      } else if (count > 450) {
+        charCount.parentElement.classList.add('warning');
+        charCount.parentElement.classList.remove('error');
+      } else {
+        charCount.parentElement.classList.remove('error', 'warning');
+      }
+    }
+    
+    descriptionField.addEventListener('input', updateCharCount);
+    updateCharCount(); // Initialize
+  }
+
+  // Enhanced tooltip positioning
+  const tooltipContainers = document.querySelectorAll('.tooltip-container');
+  
+  tooltipContainers.forEach(container => {
+    const tooltip = container.querySelector('.tooltip');
+    
+    if (tooltip) {
+      container.addEventListener('mouseenter', function(e) {
+        const rect = container.getBoundingClientRect();
+        const tooltipRect = tooltip.getBoundingClientRect();
+        const viewportWidth = window.innerWidth;
+        const viewportHeight = window.innerHeight;
+        
+        // Position tooltip below the icon with some margin
+        let top = rect.bottom + 10;
+        let left = rect.left;
+        
+        // Adjust if tooltip would go off screen horizontally
+        if (left + 280 > viewportWidth) {
+          left = viewportWidth - 280 - 20; // 20px margin from edge
+        }
+        
+        if (left < 20) {
+          left = 20; // Minimum 20px from left edge
+        }
+        
+        // Adjust if tooltip would go off screen vertically
+        if (top + 100 > viewportHeight) { // Approximate tooltip height
+          top = rect.top - 110; // Position above the icon instead
+        }
+        
+        tooltip.style.top = top + 'px';
+        tooltip.style.left = left + 'px';
+      });
+    }
+  });
+  
+  // Add form field classes for better spacing
+  document.querySelectorAll('.tooltip-container').forEach(container => {
+    const parentDiv = container.closest('div');
+    if (parentDiv) {
+      parentDiv.classList.add('form-field-with-tooltip');
+    }
+  });
+});
+</script>
