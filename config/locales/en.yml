@@ -37,9 +37,22 @@ en:
   # Navigation
   sidebar:
     home: "Home"
+    dashboard: "Dashboard"
     pix_keys: "PIX Keys"
     infraction_reports: "Infraction Reports"
     infraction_notifications: "Infraction Notifications"
+    payment_service_providers: "Payment Service Providers"
+    psps: "PSPs"
+    pix_management: "PIX Management"
+    compliance: "Compliance & Reports"
+    settings: "Settings"
+    logout: "Logout"
+    main_navigation: "Main Navigation"
+    primary_navigation: "Primary Navigation"
+    skip_to_content: "Skip to main content"
+    toggle_menu: "Toggle menu"
+    more: "More"
+    gupii_logo_alt: "Gupii PIX Integration System Logo"
     
   header:
     workspace: "Workspace"
@@ -358,3 +371,25 @@ en:
         last_7_days: "Last 7 days"
         last_30_days: "Last 30 days"
         last_3_months: "Last 3 months"
+
+  # Common actions
+  actions:
+    create: "Create"
+    edit: "Edit"
+    update: "Update"
+    delete: "Delete"
+    show: "Show"
+    view: "View"
+    cancel: "Cancel"
+    save: "Save"
+    back: "Back"
+    submit: "Submit"
+    search: "Search"
+    filter: "Filter"
+    clear: "Clear"
+    manage: "Manage"
+    export: "Export"
+    import: "Import"
+    download: "Download"
+    upload: "Upload"
+    refresh: "Refresh"

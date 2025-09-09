@@ -56,6 +56,7 @@ module Jdpi
         req.body = body if body
       end
       
+      binding.break
       handle_response(response)
     end
     

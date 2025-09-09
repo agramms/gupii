@@ -1,0 +1,390 @@
+<div class="min-h-screen bg-gray-50">
+  <!-- Health Alerts Banner -->
+  <% if @health_alerts.present? %>
+    <% critical_alerts = @health_alerts.select { |alert| alert[:level] == 'error' } %>
+    <% if critical_alerts.any? %>
+      <div class="sticky top-0 z-50 bg-red-50 border-l-4 border-red-500 p-4">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center">
+            <div class="flex-shrink-0">
+              <svg class="animate-pulse h-5 w-5 text-red-400" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"/>
+              </svg>
+            </div>
+            <div class="ml-3">
+              <h3 class="text-sm font-medium text-red-800">
+                🚨 Critical PSP Issues Detected
+              </h3>
+              <div class="mt-1 text-sm text-red-700">
+                <%= critical_alerts.first[:message] %> - <%= critical_alerts.first[:action] %>
+              </div>
+            </div>
+          </div>
+          <div class="flex-shrink-0">
+            <%= link_to "View Details", payment_service_providers_path(sync_status: 'sync_failed'), 
+                        class: "bg-red-100 rounded-md px-3 py-1 text-xs font-semibold text-red-600 hover:text-red-800 transition-colors duration-200" %>
+          </div>
+        </div>
+      </div>
+    <% elsif @health_alerts.any? { |alert| alert[:level] == 'warning' } %>
+      <div class="sticky top-0 z-50 bg-yellow-50 border-l-4 border-yellow-400 p-4">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center">
+            <div class="flex-shrink-0">
+              <svg class="h-5 w-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"/>
+              </svg>
+            </div>
+            <div class="ml-3">
+              <h3 class="text-sm font-medium text-yellow-800">
+                ⚠️ PSP Maintenance Required
+              </h3>
+              <div class="mt-1 text-sm text-yellow-700">
+                <%= @health_alerts.first[:message] %>
+              </div>
+            </div>
+          </div>
+          <div class="flex-shrink-0">
+            <button class="bg-yellow-100 rounded-md p-2 text-yellow-600 hover:text-yellow-800 transition-colors duration-200">
+              <span class="text-xs font-semibold">Schedule Sync</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    <% end %>
+  <% end %>
+
+  <!-- Main Header -->
+  <div class="bg-white shadow">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center py-6 gap-4">
+        <div class="flex items-center">
+          <h1 class="text-3xl font-bold text-gray-900">Payment Service Providers</h1>
+          <span class="ml-3 text-sm text-gray-500">JDPI Integration Dashboard</span>
+        </div>
+        <div class="flex items-center space-x-4">
+          <!-- Quick Stats -->
+          <div class="hidden md:flex items-center space-x-6 text-sm text-gray-600">
+            <div class="text-center">
+              <div class="font-semibold text-lg text-indigo-600"><%= @dashboard_summary[:overview][:total_psps] %></div>
+              <div class="text-xs">Total PSPs</div>
+            </div>
+            <div class="text-center">
+              <div class="font-semibold text-lg text-green-600"><%= @dashboard_summary[:overview][:active_psps] %></div>
+              <div class="text-xs">Active</div>
+            </div>
+            <div class="text-center">
+              <div class="font-semibold text-lg text-blue-600"><%= @dashboard_summary[:overview][:pix_enabled_count] %></div>
+              <div class="text-xs">PIX Enabled</div>
+            </div>
+          </div>
+          
+          <!-- Sync Actions -->
+          <%= form_with url: sync_payment_service_providers_path, method: :post, local: true, class: "inline-flex items-center" do |form| %>
+            <%= form.hidden_field :sync_type, value: 'incremental' %>
+            <%= form.submit "⚡ Quick Sync", 
+                           class: "bg-indigo-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-indigo-700 transition-all duration-200 transform hover:scale-105 mr-2",
+                           data: { confirm: "Start incremental PSP synchronization?" } %>
+          <% end %>
+          
+          <%= link_to "📊 Metrics", metrics_payment_service_providers_path, 
+                      class: "bg-gray-100 text-gray-700 px-4 py-2 rounded-md text-sm font-medium hover:bg-gray-200 transition-all duration-200" %>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filter Tabs & Dashboard Metrics -->
+  <div class="bg-white border-b border-gray-200">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <!-- Dashboard Summary Cards (Mobile Responsive) -->
+      <div class="py-4 border-b border-gray-100">
+        <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-4">
+          <div class="text-center">
+            <div class="text-2xl font-bold text-indigo-600"><%= @dashboard_summary[:overview][:total_psps] %></div>
+            <div class="text-xs text-gray-600">Total PSPs</div>
+          </div>
+          <div class="text-center">
+            <div class="text-2xl font-bold text-green-600"><%= @dashboard_summary[:overview][:active_psps] %></div>
+            <div class="text-xs text-gray-600">Active</div>
+          </div>
+          <div class="text-center">
+            <div class="text-2xl font-bold text-blue-600"><%= @dashboard_summary[:overview][:pix_enabled_count] %></div>
+            <div class="text-xs text-gray-600">PIX Ready</div>
+          </div>
+          <div class="text-center">
+            <div class="text-2xl font-bold text-purple-600"><%= "#{@dashboard_summary[:overview][:pix_adoption_rate]}%" %></div>
+            <div class="text-xs text-gray-600">PIX Adoption</div>
+          </div>
+          <div class="text-center">
+            <div class="text-2xl font-bold <%= @dashboard_summary[:sync_health][:needs_sync] > 0 ? 'text-yellow-600' : 'text-green-600' %>">
+              <%= @dashboard_summary[:sync_health][:needs_sync] %>
+            </div>
+            <div class="text-xs text-gray-600">Need Sync</div>
+          </div>
+          <div class="text-center">
+            <div class="text-2xl font-bold <%= @dashboard_summary[:sync_health][:sync_failed] > 0 ? 'text-red-600' : 'text-green-600' %>">
+              <%= @dashboard_summary[:sync_health][:sync_failed] %>
+            </div>
+            <div class="text-xs text-gray-600">Sync Failed</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Filter Tabs -->
+      <nav class="-mb-px flex flex-wrap space-x-1 py-4" aria-label="Filter Tabs">
+        <%= link_to payment_service_providers_path, 
+                    class: "#{params[:status].blank? ? 'border-indigo-500 text-indigo-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'} whitespace-nowrap py-2 px-3 border-b-2 font-medium text-sm transition-all duration-200" do %>
+          All PSPs
+          <span class="ml-1 bg-gray-100 text-gray-900 py-0.5 px-2 rounded-full text-xs"><%= @dashboard_summary[:overview][:total_psps] %></span>
+        <% end %>
+        
+        <%= link_to payment_service_providers_path(status: 'active'), 
+                    class: "#{params[:status] == 'active' ? 'border-green-500 text-green-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'} whitespace-nowrap py-2 px-3 border-b-2 font-medium text-sm transition-all duration-200" do %>
+          Active
+          <span class="ml-1 bg-green-100 text-green-900 py-0.5 px-2 rounded-full text-xs"><%= @dashboard_summary[:overview][:active_psps] %></span>
+        <% end %>
+        
+        <%= link_to payment_service_providers_path(pix_enabled: 'true'), 
+                    class: "#{params[:pix_enabled] == 'true' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'} whitespace-nowrap py-2 px-3 border-b-2 font-medium text-sm transition-all duration-200" do %>
+          PIX Enabled
+          <span class="ml-1 bg-blue-100 text-blue-900 py-0.5 px-2 rounded-full text-xs"><%= @dashboard_summary[:overview][:pix_enabled_count] %></span>
+        <% end %>
+        
+        <%= link_to payment_service_providers_path(sync_status: 'needs_sync'), 
+                    class: "#{params[:sync_status] == 'needs_sync' ? 'border-yellow-500 text-yellow-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'} whitespace-nowrap py-2 px-3 border-b-2 font-medium text-sm transition-all duration-200" do %>
+          Needs Sync
+          <span class="ml-1 bg-yellow-100 text-yellow-900 py-0.5 px-2 rounded-full text-xs"><%= @dashboard_summary[:sync_health][:needs_sync] %></span>
+        <% end %>
+        
+        <%= link_to payment_service_providers_path(sync_status: 'sync_failed'), 
+                    class: "#{params[:sync_status] == 'sync_failed' ? 'border-red-500 text-red-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'} whitespace-nowrap py-2 px-3 border-b-2 font-medium text-sm transition-all duration-200" do %>
+          Sync Issues
+          <span class="ml-1 bg-red-100 text-red-900 py-0.5 px-2 rounded-full text-xs"><%= @dashboard_summary[:sync_health][:sync_failed] %></span>
+        <% end %>
+      </nav>
+    </div>
+  </div>
+
+  <!-- Search and Filters -->
+  <div class="bg-white border-b border-gray-200">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+      <%= form_with url: payment_service_providers_path, method: :get, local: true, class: "space-y-4" do |form| %>
+        <div class="flex flex-col sm:flex-row gap-4">
+          <!-- Search Field -->
+          <div class="flex-1">
+            <%= form.text_field :search, placeholder: "Search by name, ISPB, or email...", 
+                               value: params[:search],
+                               class: "block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" %>
+          </div>
+          
+          <!-- Filter Dropdowns (Mobile Responsive) -->
+          <div class="flex flex-wrap gap-2 sm:gap-4">
+            <%= form.select :psp_type, 
+                           options_from_collection_for_select(PaymentServiceProvider.distinct.pluck(:psp_type).compact.map{|t| [t.humanize, t]}, :last, :first, params[:psp_type]),
+                           { prompt: "PSP Type" },
+                           { class: "border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm" } %>
+            
+            <%= form.select :state, 
+                           options_from_collection_for_select(PaymentServiceProvider.distinct.pluck(:state).compact.sort.map{|s| [s, s]}, :last, :first, params[:state]),
+                           { prompt: "State" },
+                           { class: "border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm" } %>
+            
+            <%= form.select :regulatory_status, 
+                           [["Authorized", "authorized"], ["Provisional", "provisional"], ["Suspended", "suspended"], ["Revoked", "revoked"]],
+                           { prompt: "Regulatory Status", selected: params[:regulatory_status] },
+                           { class: "border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm" } %>
+          </div>
+          
+          <!-- Action Buttons -->
+          <div class="flex gap-2">
+            <%= form.submit "Search", class: "bg-indigo-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-indigo-700 transition-colors duration-200" %>
+            <%= link_to "Clear", payment_service_providers_path, 
+                        class: "bg-gray-100 text-gray-700 px-4 py-2 rounded-md text-sm font-medium hover:bg-gray-200 transition-colors duration-200" %>
+          </div>
+        </div>
+        
+        <!-- Preserve existing filter params -->
+        <%= form.hidden_field :status, value: params[:status] if params[:status].present? %>
+        <%= form.hidden_field :pix_enabled, value: params[:pix_enabled] if params[:pix_enabled].present? %>
+        <%= form.hidden_field :sync_status, value: params[:sync_status] if params[:sync_status].present? %>
+      <% end %>
+    </div>
+  </div>
+
+  <!-- Data Freshness Indicator -->
+  <% if @dashboard_summary[:recent_activity][:last_synced] %>
+    <div class="bg-blue-50 border-b border-blue-200 px-4 sm:px-6 lg:px-8 py-2">
+      <div class="max-w-7xl mx-auto">
+        <div class="flex items-center justify-between text-sm">
+          <div class="text-blue-700">
+            📡 Last synced: <%= time_ago_in_words(@dashboard_summary[:recent_activity][:last_synced]) %> ago
+            <% if @dashboard_summary[:data_freshness][:stale_data_count] > 0 %>
+              • <span class="text-yellow-600"><%= @dashboard_summary[:data_freshness][:stale_data_count] %> PSPs have stale data</span>
+            <% end %>
+          </div>
+          <div class="text-blue-600">
+            <%= link_to "🔄 Refresh Now", payment_service_providers_path, 
+                        class: "hover:text-blue-800 transition-colors duration-200 font-medium" %>
+          </div>
+        </div>
+      </div>
+    </div>
+  <% end %>
+
+  <!-- PSP List -->
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+    <% if @psps.any? %>
+      <!-- Results Summary -->
+      <div class="mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div class="text-sm text-gray-600">
+          Showing <%= @pagy.from %>-<%= @pagy.to %> of <%= @pagy.count %> PSPs
+          <% if params[:search].present? %>
+            for "<%= params[:search] %>"
+          <% end %>
+        </div>
+        <div class="flex items-center space-x-4">
+          <div class="flex items-center space-x-2 text-sm text-gray-600">
+            <span>Sort by:</span>
+            <%= link_to "Name", payment_service_providers_path(request.params.merge(sort: 'name', direction: params[:direction] == 'asc' ? 'desc' : 'asc')), 
+                        class: "text-indigo-600 hover:text-indigo-800 font-medium" %>
+            <span>•</span>
+            <%= link_to "Last Sync", payment_service_providers_path(request.params.merge(sort: 'last_sync_at', direction: params[:direction] == 'asc' ? 'desc' : 'asc')), 
+                        class: "text-indigo-600 hover:text-indigo-800 font-medium" %>
+          </div>
+        </div>
+      </div>
+
+      <!-- PSP Cards Grid (Mobile-First Responsive) -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <% @psps.each do |psp| %>
+          <div class="bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-all duration-200 overflow-hidden">
+            <!-- Card Header -->
+            <div class="px-6 py-4 border-b border-gray-100">
+              <div class="flex items-start justify-between">
+                <div class="flex-1 min-w-0">
+                  <h3 class="text-lg font-semibold text-gray-900 truncate">
+                    <%= link_to psp.display_name, payment_service_provider_path(psp), 
+                                class: "hover:text-indigo-600 transition-colors duration-200" %>
+                  </h3>
+                  <p class="text-sm text-indigo-600 font-medium">
+                    ID: <%= link_to psp.display_id, payment_service_provider_path(psp), 
+                                   class: "hover:text-indigo-800 transition-colors duration-200" %>
+                  </p>
+                  <p class="text-sm text-gray-500 mt-1">ISPB: <%= psp.ispb %></p>
+                </div>
+                <div class="flex flex-col items-end space-y-2">
+                  <span class="<%= psp.sync_status_badge_class %> inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium">
+                    <%= psp.sync_status.humanize %>
+                  </span>
+                  <% if psp.pix_enabled? %>
+                    <span class="bg-blue-100 text-blue-800 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium">
+                      PIX Ready
+                    </span>
+                  <% end %>
+                </div>
+              </div>
+            </div>
+
+            <!-- Card Body -->
+            <div class="px-6 py-4">
+              <div class="space-y-3">
+                <!-- Status Row -->
+                <div class="flex items-center justify-between text-sm">
+                  <span class="text-gray-600">Status:</span>
+                  <span class="font-medium <%= psp.status == 'active' ? 'text-green-600' : 'text-gray-600' %>">
+                    <%= psp.status.humanize %>
+                  </span>
+                </div>
+                
+                <!-- Location Row -->
+                <% if psp.state.present? %>
+                  <div class="flex items-center justify-between text-sm">
+                    <span class="text-gray-600">Location:</span>
+                    <span class="font-medium text-gray-900">
+                      <%= psp.city %><%= ", #{psp.state}" if psp.state.present? %>
+                    </span>
+                  </div>
+                <% end %>
+                
+                <!-- Services Row -->
+                <div class="flex items-center justify-between text-sm">
+                  <span class="text-gray-600">Services:</span>
+                  <span class="font-medium text-gray-900">
+                    <%= psp.services_offered.count %> services
+                  </span>
+                </div>
+                
+                <!-- Sync Health Row -->
+                <div class="flex items-center justify-between text-sm">
+                  <span class="text-gray-600">Health Score:</span>
+                  <div class="flex items-center space-x-2">
+                    <span class="font-medium <%= psp.sync_health_score >= 75 ? 'text-green-600' : psp.sync_health_score >= 50 ? 'text-yellow-600' : 'text-red-600' %>">
+                      <%= psp.sync_health_score %>/100
+                    </span>
+                    <div class="w-12 bg-gray-200 rounded-full h-2">
+                      <div class="bg-<%= psp.sync_health_score >= 75 ? 'green' : psp.sync_health_score >= 50 ? 'yellow' : 'red' %>-400 h-2 rounded-full" 
+                           style="width: <%= psp.sync_health_score %>%"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Card Footer -->
+            <div class="px-6 py-3 bg-gray-50 border-t border-gray-100">
+              <div class="flex items-center justify-between text-xs text-gray-500">
+                <span>
+                  <% if psp.last_sync_at %>
+                    Synced <%= time_ago_in_words(psp.last_sync_at) %> ago
+                  <% else %>
+                    Never synced
+                  <% end %>
+                </span>
+                <span>Updated <%= time_ago_in_words(psp.updated_at) %> ago</span>
+              </div>
+            </div>
+          </div>
+        <% end %>
+      </div>
+
+      <!-- Pagination -->
+      <div class="mt-8">
+        <%== pagy_nav(@pagy, 
+                     link_extra: "class='relative inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 transition-colors duration-200'",
+                     page_link_extra: "class='relative inline-flex items-center px-4 py-2 text-sm font-medium text-indigo-600 bg-indigo-50 border border-indigo-300 hover:bg-indigo-100 transition-colors duration-200'") if @pagy.pages > 1 %>
+      </div>
+      
+    <% else %>
+      <!-- Empty State -->
+      <div class="text-center py-8">
+        <div class="mx-auto h-12 w-12 text-gray-400 mb-3">
+          <svg fill="currentColor" viewBox="0 0 24 24">
+            <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/>
+          </svg>
+        </div>
+        <h3 class="text-base font-medium text-gray-700 mb-2">No PSPs Found</h3>
+        <p class="text-sm text-gray-500 mb-4">
+          <% if params.to_unsafe_h.except('controller', 'action').any? %>
+            No Payment Service Providers match your current filters. Try adjusting your search criteria.
+          <% else %>
+            No Payment Service Providers have been synchronized yet.
+          <% end %>
+        </p>
+        <div class="space-y-3">
+          <% if params.to_unsafe_h.except('controller', 'action').any? %>
+            <%= link_to "Clear Filters", payment_service_providers_path, 
+                        class: "inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors duration-200" %>
+          <% else %>
+            <%= form_with url: sync_payment_service_providers_path, method: :post, local: true, class: "inline" do |form| %>
+              <%= form.hidden_field :sync_type, value: 'full' %>
+              <%= form.submit "🔄 Start Initial Sync", 
+                             class: "inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 transition-colors duration-200",
+                             data: { confirm: "This will fetch all PSPs from JDPI. Continue?" } %>
+            <% end %>
+          <% end %>
+        </div>
+      </div>
+    <% end %>
+  </div>
+</div>

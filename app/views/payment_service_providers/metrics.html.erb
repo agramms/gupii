@@ -1,0 +1,405 @@
+<div class="min-h-screen bg-gray-50">
+  <!-- Breadcrumb -->
+  <div class="bg-white shadow">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center space-x-4 py-4 text-sm">
+        <%= link_to "PSP Dashboard", payment_service_providers_path, 
+                    class: "text-indigo-600 hover:text-indigo-800 transition-colors duration-200" %>
+        <svg class="h-4 w-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+        </svg>
+        <span class="text-gray-700 font-medium">Metrics Dashboard</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Header -->
+  <div class="bg-white shadow">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div>
+          <h1 class="text-3xl font-bold text-gray-900">PSP Metrics Dashboard</h1>
+          <p class="mt-2 text-sm text-gray-600">
+            Comprehensive analytics and monitoring for Payment Service Providers
+          </p>
+          <p class="text-xs text-gray-500">
+            Generated at <%= Time.current.strftime("%B %d, %Y at %I:%M %p %Z") %>
+          </p>
+        </div>
+        <div class="flex items-center space-x-4">
+          <%= link_to "🔄 Refresh", metrics_payment_service_providers_path, 
+                      class: "bg-indigo-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-indigo-700 transition-all duration-200" %>
+          <a href="#" onclick="window.print()" 
+             class="bg-gray-100 text-gray-700 px-4 py-2 rounded-md text-sm font-medium hover:bg-gray-200 transition-colors duration-200">
+            🖨️ Print Report
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Alerts Section -->
+  <% if @health_alerts.any? %>
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <div class="bg-white rounded-lg shadow">
+        <div class="px-6 py-4 border-b border-gray-200">
+          <h2 class="text-lg font-semibold text-gray-900">🚨 Active Alerts</h2>
+        </div>
+        <div class="p-6">
+          <div class="space-y-4">
+            <% @health_alerts.each do |alert| %>
+              <div class="flex items-start p-4 rounded-lg border-l-4 
+                          <%= case alert[:level]
+                              when 'error' then 'bg-red-50 border-red-400'
+                              when 'warning' then 'bg-yellow-50 border-yellow-400'  
+                              else 'bg-blue-50 border-blue-400'
+                              end %>">
+                <div class="flex-shrink-0">
+                  <div class="text-lg">
+                    <%= case alert[:level]
+                        when 'error' then '🚨'
+                        when 'warning' then '⚠️'
+                        else 'ℹ️'
+                        end %>
+                  </div>
+                </div>
+                <div class="ml-3 flex-1">
+                  <h3 class="text-sm font-medium <%= case alert[:level]
+                                                    when 'error' then 'text-red-800'
+                                                    when 'warning' then 'text-yellow-800'
+                                                    else 'text-blue-800'
+                                                    end %>">
+                    <%= alert[:message] %>
+                  </h3>
+                  <p class="mt-1 text-sm <%= case alert[:level]
+                                            when 'error' then 'text-red-700'
+                                            when 'warning' then 'text-yellow-700'
+                                            else 'text-blue-700'
+                                            end %>">
+                    Recommended Action: <%= alert[:action] %>
+                  </p>
+                  <% if alert[:count] %>
+                    <p class="mt-1 text-xs font-medium <%= case alert[:level]
+                                                          when 'error' then 'text-red-600'
+                                                          when 'warning' then 'text-yellow-600'
+                                                          else 'text-blue-600'
+                                                          end %>">
+                      Affected PSPs: <%= alert[:count] %>
+                    </p>
+                  <% end %>
+                </div>
+              </div>
+            <% end %>
+          </div>
+        </div>
+      </div>
+    </div>
+  <% end %>
+
+  <!-- Main Metrics Content -->
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12">
+    <div class="space-y-8">
+      
+      <!-- Overview Cards -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div class="bg-white overflow-hidden shadow rounded-lg">
+          <div class="p-5">
+            <div class="flex items-center">
+              <div class="flex-shrink-0">
+                <div class="text-2xl">🏢</div>
+              </div>
+              <div class="ml-5 w-0 flex-1">
+                <dl>
+                  <dt class="text-sm font-medium text-gray-500 truncate">Total PSPs</dt>
+                  <dd class="text-3xl font-semibold text-gray-900"><%= @dashboard_data[:overview][:total_psps] %></dd>
+                </dl>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-white overflow-hidden shadow rounded-lg">
+          <div class="p-5">
+            <div class="flex items-center">
+              <div class="flex-shrink-0">
+                <div class="text-2xl">✅</div>
+              </div>
+              <div class="ml-5 w-0 flex-1">
+                <dl>
+                  <dt class="text-sm font-medium text-gray-500 truncate">Active PSPs</dt>
+                  <dd class="text-3xl font-semibold text-green-600"><%= @dashboard_data[:overview][:active_psps] %></dd>
+                </dl>
+              </div>
+            </div>
+            <div class="mt-3">
+              <div class="text-sm text-gray-600">
+                <%= ((@dashboard_data[:overview][:active_psps].to_f / @dashboard_data[:overview][:total_psps]) * 100).round(1) %>% of total
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-white overflow-hidden shadow rounded-lg">
+          <div class="p-5">
+            <div class="flex items-center">
+              <div class="flex-shrink-0">
+                <div class="text-2xl">💳</div>
+              </div>
+              <div class="ml-5 w-0 flex-1">
+                <dl>
+                  <dt class="text-sm font-medium text-gray-500 truncate">PIX Enabled</dt>
+                  <dd class="text-3xl font-semibold text-blue-600"><%= @dashboard_data[:overview][:pix_enabled_count] %></dd>
+                </dl>
+              </div>
+            </div>
+            <div class="mt-3">
+              <div class="text-sm text-gray-600">
+                <%= @dashboard_data[:overview][:pix_adoption_rate] %>% adoption rate
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-white overflow-hidden shadow rounded-lg">
+          <div class="p-5">
+            <div class="flex items-center">
+              <div class="flex-shrink-0">
+                <div class="text-2xl">🔄</div>
+              </div>
+              <div class="ml-5 w-0 flex-1">
+                <dl>
+                  <dt class="text-sm font-medium text-gray-500 truncate">Sync Health</dt>
+                  <dd class="text-3xl font-semibold <%= @dashboard_data[:sync_health][:needs_sync] == 0 ? 'text-green-600' : 'text-yellow-600' %>">
+                    <%= @dashboard_data[:sync_health][:total] - @dashboard_data[:sync_health][:needs_sync] %>/<%= @dashboard_data[:sync_health][:total] %>
+                  </dd>
+                </dl>
+              </div>
+            </div>
+            <div class="mt-3">
+              <div class="text-sm text-gray-600">
+                <%= @dashboard_data[:sync_health][:needs_sync] %> need sync
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Operational Status Breakdown -->
+      <div class="bg-white shadow rounded-lg">
+        <div class="px-6 py-4 border-b border-gray-200">
+          <h2 class="text-lg font-semibold text-gray-900">Operational Status Breakdown</h2>
+        </div>
+        <div class="p-6">
+          <div class="grid grid-cols-2 sm:grid-cols-5 gap-4">
+            <% @dashboard_data[:operational_status].each do |status, count| %>
+              <div class="text-center">
+                <div class="text-2xl font-bold <%= case status.to_s
+                                                   when 'operational' then 'text-green-600'
+                                                   when 'degraded' then 'text-yellow-600'
+                                                   when 'inactive' then 'text-gray-600'
+                                                   when 'unauthorized' then 'text-red-600'
+                                                   when 'pix_disabled' then 'text-orange-600'
+                                                   else 'text-gray-600'
+                                                   end %>">
+                  <%= count %>
+                </div>
+                <div class="text-sm text-gray-600 capitalize">
+                  <%= status.to_s.humanize %>
+                </div>
+                <% if @dashboard_data[:overview][:total_psps] > 0 %>
+                  <div class="text-xs text-gray-500">
+                    <%= ((count.to_f / @dashboard_data[:overview][:total_psps]) * 100).round(1) %>%
+                  </div>
+                <% end %>
+              </div>
+            <% end %>
+          </div>
+        </div>
+      </div>
+
+      <!-- Data Freshness & Sync Status -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div class="bg-white shadow rounded-lg">
+          <div class="px-6 py-4 border-b border-gray-200">
+            <h2 class="text-lg font-semibold text-gray-900">Data Freshness</h2>
+          </div>
+          <div class="p-6">
+            <dl class="space-y-4">
+              <div class="flex justify-between">
+                <dt class="text-sm text-gray-600">Fresh data (< 1 hour)</dt>
+                <dd class="text-sm font-medium text-green-600">
+                  <%= @dashboard_data[:data_freshness][:fresh_data_count] %> PSPs
+                </dd>
+              </div>
+              <div class="flex justify-between">
+                <dt class="text-sm text-gray-600">Stale data (> 1 hour)</dt>
+                <dd class="text-sm font-medium text-yellow-600">
+                  <%= @dashboard_data[:data_freshness][:stale_data_count] %> PSPs
+                </dd>
+              </div>
+              <div class="flex justify-between">
+                <dt class="text-sm text-gray-600">Very stale (> 24 hours)</dt>
+                <dd class="text-sm font-medium text-red-600">
+                  <%= @dashboard_data[:data_freshness][:very_stale_count] %> PSPs
+                </dd>
+              </div>
+              <% if @dashboard_data[:data_freshness][:avg_data_age_hours] %>
+                <div class="flex justify-between">
+                  <dt class="text-sm text-gray-600">Average data age</dt>
+                  <dd class="text-sm font-medium text-gray-900">
+                    <%= @dashboard_data[:data_freshness][:avg_data_age_hours] %> hours
+                  </dd>
+                </div>
+              <% end %>
+            </dl>
+            
+            <% if @dashboard_data[:recent_activity][:last_synced] %>
+              <div class="mt-6 pt-6 border-t border-gray-200">
+                <p class="text-sm text-gray-600">
+                  <strong>Last sync:</strong> <%= time_ago_in_words(@dashboard_data[:recent_activity][:last_synced]) %> ago
+                </p>
+              </div>
+            <% end %>
+          </div>
+        </div>
+
+        <div class="bg-white shadow rounded-lg">
+          <div class="px-6 py-4 border-b border-gray-200">
+            <h2 class="text-lg font-semibold text-gray-900">Sync Performance</h2>
+          </div>
+          <div class="p-6">
+            <dl class="space-y-4">
+              <div class="flex justify-between">
+                <dt class="text-sm text-gray-600">Total PSPs tracked</dt>
+                <dd class="text-sm font-medium text-gray-900">
+                  <%= @dashboard_data[:sync_health][:total] %>
+                </dd>
+              </div>
+              <div class="flex justify-between">
+                <dt class="text-sm text-gray-600">Needs sync</dt>
+                <dd class="text-sm font-medium text-yellow-600">
+                  <%= @dashboard_data[:sync_health][:needs_sync] %>
+                </dd>
+              </div>
+              <div class="flex justify-between">
+                <dt class="text-sm text-gray-600">Sync failures</dt>
+                <dd class="text-sm font-medium text-red-600">
+                  <%= @dashboard_data[:sync_health][:sync_failed] %>
+                </dd>
+              </div>
+              
+              <!-- Sync Success Rate -->
+              <% if @dashboard_data[:sync_health][:total] > 0 %>
+                <% success_rate = ((@dashboard_data[:sync_health][:total] - @dashboard_data[:sync_health][:needs_sync] - @dashboard_data[:sync_health][:sync_failed]).to_f / @dashboard_data[:sync_health][:total] * 100).round(1) %>
+                <div class="pt-4 border-t border-gray-100">
+                  <div class="flex justify-between items-center mb-2">
+                    <span class="text-sm text-gray-600">Sync Success Rate</span>
+                    <span class="text-lg font-bold <%= success_rate >= 90 ? 'text-green-600' : success_rate >= 75 ? 'text-yellow-600' : 'text-red-600' %>">
+                      <%= success_rate %>%
+                    </span>
+                  </div>
+                  <div class="w-full bg-gray-200 rounded-full h-2">
+                    <div class="bg-<%= success_rate >= 90 ? 'green' : success_rate >= 75 ? 'yellow' : 'red' %>-400 h-2 rounded-full transition-all duration-500" 
+                         style="width: <%= success_rate %>%"></div>
+                  </div>
+                </div>
+              <% end %>
+            </dl>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recent Activity -->
+      <div class="bg-white shadow rounded-lg">
+        <div class="px-6 py-4 border-b border-gray-200">
+          <h2 class="text-lg font-semibold text-gray-900">Recent Activity Summary</h2>
+        </div>
+        <div class="p-6">
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div>
+              <h4 class="text-sm font-medium text-gray-500">Last Created</h4>
+              <p class="mt-1 text-sm text-gray-900">
+                <% if @dashboard_data[:recent_activity][:last_created] %>
+                  <%= time_ago_in_words(@dashboard_data[:recent_activity][:last_created]) %> ago
+                <% else %>
+                  No new PSPs
+                <% end %>
+              </p>
+            </div>
+            
+            <div>
+              <h4 class="text-sm font-medium text-gray-500">Last Updated</h4>
+              <p class="mt-1 text-sm text-gray-900">
+                <% if @dashboard_data[:recent_activity][:last_updated] %>
+                  <%= time_ago_in_words(@dashboard_data[:recent_activity][:last_updated]) %> ago
+                <% else %>
+                  No recent updates
+                <% end %>
+              </p>
+            </div>
+            
+            <div>
+              <h4 class="text-sm font-medium text-gray-500">Last Sync</h4>
+              <p class="mt-1 text-sm text-gray-900">
+                <% if @dashboard_data[:recent_activity][:last_synced] %>
+                  <%= time_ago_in_words(@dashboard_data[:recent_activity][:last_synced]) %> ago
+                <% else %>
+                  No syncs yet
+                <% end %>
+              </p>
+            </div>
+            
+            <div>
+              <h4 class="text-sm font-medium text-gray-500">Recent Changes</h4>
+              <p class="mt-1 text-sm text-gray-900">
+                <%= @dashboard_data[:recent_activity][:recent_changes_count] %> PSPs updated
+              </p>
+              <p class="text-xs text-gray-500">in the last hour</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Actions -->
+      <div class="bg-white shadow rounded-lg">
+        <div class="px-6 py-4 border-b border-gray-200">
+          <h2 class="text-lg font-semibold text-gray-900">Quick Actions</h2>
+        </div>
+        <div class="p-6">
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <%= form_with url: sync_payment_service_providers_path, method: :post, local: true, class: "inline-block w-full" do |form| %>
+              <%= form.hidden_field :sync_type, value: 'full' %>
+              <%= form.submit "🔄 Full Sync", 
+                             class: "w-full bg-indigo-600 text-white px-4 py-3 rounded-md text-sm font-medium hover:bg-indigo-700 transition-all duration-200 text-center",
+                             data: { confirm: "Start full PSP synchronization from JDPI?" } %>
+            <% end %>
+            
+            <%= form_with url: sync_payment_service_providers_path, method: :post, local: true, class: "inline-block w-full" do |form| %>
+              <%= form.hidden_field :sync_type, value: 'incremental' %>
+              <%= form.submit "⚡ Incremental Sync", 
+                             class: "w-full bg-green-600 text-white px-4 py-3 rounded-md text-sm font-medium hover:bg-green-700 transition-all duration-200 text-center",
+                             data: { confirm: "Sync only PSPs that need updates?" } %>
+            <% end %>
+            
+            <%= link_to "📋 View All PSPs", payment_service_providers_path, 
+                        class: "w-full bg-gray-600 text-white px-4 py-3 rounded-md text-sm font-medium hover:bg-gray-700 transition-all duration-200 text-center inline-block" %>
+            
+            <%= link_to "⚠️ View Issues", payment_service_providers_path(sync_status: 'sync_failed'), 
+                        class: "w-full bg-red-600 text-white px-4 py-3 rounded-md text-sm font-medium hover:bg-red-700 transition-all duration-200 text-center inline-block" %>
+          </div>
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <div class="text-center text-sm text-gray-500 pt-8">
+        <p>
+          PSP Metrics Dashboard • Generated at <%= Time.current.strftime("%B %d, %Y at %I:%M %p %Z") %> • 
+          <%= link_to "Refresh Data", metrics_payment_service_providers_path, class: "text-indigo-600 hover:text-indigo-800" %>
+        </p>
+        <p class="mt-2">
+          For technical support or questions about these metrics, please contact the development team.
+        </p>
+      </div>
+    </div>
+  </div>
+</div>

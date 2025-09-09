@@ -40,6 +40,7 @@ Rails.application.configure do
   # Allow connections from nginx container and localhost for development
   config.hosts << "localhost"
   config.hosts << /.*\.docker\.internal/
+  config.hosts << "172.18.0.1"
 
   # Print deprecation notices to the Rails logger.
   config.active_support.deprecation = :log

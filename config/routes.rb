@@ -30,6 +30,16 @@ Rails.application.routes.draw do
       patch :cancel
     end
   end
+  
+  # Payment Service Providers Management (Read-only)
+  resources :payment_service_providers, only: [:index, :show] do
+    collection do
+      post :sync
+      get :sync_status
+      get :metrics
+      get :health
+    end
+  end
 
   # API routes for client applications
   namespace :api do
@@ -44,6 +54,17 @@ Rails.application.routes.draw do
       resources :infraction_notifications, except: [:destroy, :edit, :update] do
         member do
           patch :cancel
+        end
+      end
+      
+      # Payment Service Providers API (Read-only)
+      resources :payment_service_providers, only: [:index, :show] do
+        collection do
+          get :search
+          get :active
+          get :pix_enabled
+          get :stats
+          get "by_ispb/:ispb", to: "payment_service_providers#by_ispb", as: :by_ispb
         end
       end
       

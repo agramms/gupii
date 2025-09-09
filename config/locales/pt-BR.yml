@@ -8,8 +8,22 @@ pt-BR:
   # Navegação
   sidebar:
     home: "Início"
+    dashboard: "Painel"
     pix_keys: "Chaves PIX"
     infraction_reports: "Notificações de Infração"
+    infraction_notifications: "Notificações de Infração"
+    payment_service_providers: "Provedores de Serviços de Pagamento"
+    psps: "PSPs"
+    pix_management: "Gestão PIX"
+    compliance: "Compliance e Relatórios"
+    settings: "Configurações"
+    logout: "Sair"
+    main_navigation: "Navegação Principal"
+    primary_navigation: "Navegação Primária"
+    skip_to_content: "Pular para o conteúdo principal"
+    toggle_menu: "Alternar menu"
+    more: "Mais"
+    gupii_logo_alt: "Logo do Sistema de Integração PIX Gupii"
     
   header:
     workspace: "Workspace"

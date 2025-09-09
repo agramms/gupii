@@ -1,5 +1,6 @@
 class Api::V1::BaseController < ApplicationController
   # Base controller for API endpoints
+  include Pagy::Backend
   
   before_action :authenticate_api_client!
   before_action :set_default_format
@@ -52,5 +53,24 @@ class Api::V1::BaseController < ApplicationController
         code: code
       }
     }, status: status
+  end
+  
+  # Alias for backward compatibility
+  alias_method :render_api_error, :render_error
+  
+  # Helper method to extract pagination metadata from pagy object
+  def pagy_metadata(pagy)
+    {
+      items: pagy.items,
+      count: pagy.count,
+      page: pagy.page,
+      pages: pagy.pages,
+      first: 1,
+      last: pagy.pages,
+      prev: pagy.prev,
+      next: pagy.next,
+      from: pagy.from,
+      to: pagy.to
+    }
   end
 end

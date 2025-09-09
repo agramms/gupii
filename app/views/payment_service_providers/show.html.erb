@@ -1,0 +1,394 @@
+<div class="min-h-screen bg-gray-50">
+  <!-- Breadcrumb -->
+  <div class="bg-white shadow">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center space-x-4 py-4 text-sm">
+        <%= link_to "PSP Dashboard", payment_service_providers_path, 
+                    class: "text-indigo-600 hover:text-indigo-800 transition-colors duration-200" %>
+        <svg class="h-4 w-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+        </svg>
+        <span class="text-gray-700 font-medium"><%= @psp.display_name %></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- PSP Header -->
+  <div class="bg-white shadow">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
+        <div class="flex-1">
+          <div class="flex items-center space-x-3">
+            <h1 class="text-3xl font-bold text-gray-900"><%= @psp.display_name %></h1>
+            <span class="<%= @psp.sync_status_badge_class %> inline-flex items-center px-3 py-1 rounded-full text-sm font-medium">
+              <%= @psp.sync_status.humanize %>
+            </span>
+            <% if @psp.pix_enabled? %>
+              <span class="bg-blue-100 text-blue-800 inline-flex items-center px-3 py-1 rounded-full text-sm font-medium">
+                PIX Enabled
+              </span>
+            <% end %>
+          </div>
+          <div class="mt-2 space-y-1">
+            <p class="text-lg text-gray-600"><%= @psp.short_name %></p>
+            <p class="text-sm text-gray-500">
+              ID: <%= @psp.display_id %> • ISPB: <%= @psp.ispb %> • 
+              Type: <%= @psp.psp_type.humanize %>
+            </p>
+          </div>
+        </div>
+        
+        <div class="flex items-center space-x-4">
+          <!-- Quick Actions -->
+          <%= form_with url: sync_payment_service_providers_path, method: :post, local: true, class: "inline" do |form| %>
+            <%= form.hidden_field :sync_type, value: 'single' %>
+            <%= form.hidden_field :ispb, value: @psp.ispb %>
+            <%= form.submit "🔄 Sync Now", 
+                           class: "bg-indigo-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-indigo-700 transition-all duration-200",
+                           data: { confirm: "Sync this PSP from JDPI?" } %>
+          <% end %>
+          
+          <%= link_to "📊 Full Metrics", metrics_payment_service_providers_path, 
+                      class: "bg-gray-100 text-gray-700 px-4 py-2 rounded-md text-sm font-medium hover:bg-gray-200 transition-colors duration-200" %>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Content -->
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      
+      <!-- Main Content -->
+      <div class="lg:col-span-2 space-y-8">
+        
+        <!-- Basic Information -->
+        <div class="bg-white shadow rounded-lg">
+          <div class="px-6 py-4 border-b border-gray-200">
+            <h2 class="text-lg font-semibold text-gray-900">Basic Information</h2>
+          </div>
+          <div class="px-6 py-6">
+            <dl class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              <div>
+                <dt class="text-sm font-medium text-gray-500">Legal Name</dt>
+                <dd class="mt-1 text-sm text-gray-900"><%= @psp.name %></dd>
+              </div>
+              <div>
+                <dt class="text-sm font-medium text-gray-500">Short Name</dt>
+                <dd class="mt-1 text-sm text-gray-900"><%= @psp.short_name || "Not provided" %></dd>
+              </div>
+              <div>
+                <dt class="text-sm font-medium text-gray-500">Document</dt>
+                <dd class="mt-1 text-sm text-gray-900">
+                  <%= @psp.formatted_document %> 
+                  <span class="text-gray-500">(<%= @psp.document_type %>)</span>
+                </dd>
+              </div>
+              <div>
+                <dt class="text-sm font-medium text-gray-500">ISPB</dt>
+                <dd class="mt-1 text-sm font-mono text-gray-900"><%= @psp.ispb %></dd>
+              </div>
+              <div>
+                <dt class="text-sm font-medium text-gray-500">PSP Type</dt>
+                <dd class="mt-1 text-sm text-gray-900"><%= @psp.psp_type.humanize %></dd>
+              </div>
+              <div>
+                <dt class="text-sm font-medium text-gray-500">Status</dt>
+                <dd class="mt-1">
+                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium <%= @psp.status == 'active' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800' %>">
+                    <%= @psp.status.humanize %>
+                  </span>
+                </dd>
+              </div>
+            </dl>
+          </div>
+        </div>
+
+        <!-- Contact & Location -->
+        <div class="bg-white shadow rounded-lg">
+          <div class="px-6 py-4 border-b border-gray-200">
+            <h2 class="text-lg font-semibold text-gray-900">Contact & Location</h2>
+          </div>
+          <div class="px-6 py-6">
+            <dl class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              <div>
+                <dt class="text-sm font-medium text-gray-500">Legal Address</dt>
+                <dd class="mt-1 text-sm text-gray-900"><%= @psp.legal_address || "Not provided" %></dd>
+              </div>
+              <div>
+                <dt class="text-sm font-medium text-gray-500">City & State</dt>
+                <dd class="mt-1 text-sm text-gray-900">
+                  <%= [@psp.city, @psp.state].compact.join(", ") if @psp.city || @psp.state %>
+                  <%= "Not provided" if @psp.city.blank? && @psp.state.blank? %>
+                </dd>
+              </div>
+              <div>
+                <dt class="text-sm font-medium text-gray-500">Contact Email</dt>
+                <dd class="mt-1 text-sm text-gray-900">
+                  <% if @psp.contact_email.present? %>
+                    <%= mail_to @psp.contact_email, @psp.contact_email, class: "text-indigo-600 hover:text-indigo-800" %>
+                  <% else %>
+                    Not provided
+                  <% end %>
+                </dd>
+              </div>
+              <div>
+                <dt class="text-sm font-medium text-gray-500">Contact Phone</dt>
+                <dd class="mt-1 text-sm text-gray-900"><%= @psp.contact_phone || "Not provided" %></dd>
+              </div>
+              <div class="sm:col-span-2">
+                <dt class="text-sm font-medium text-gray-500">Website</dt>
+                <dd class="mt-1 text-sm text-gray-900">
+                  <% if @psp.website.present? %>
+                    <%= link_to @psp.website, @psp.website, target: "_blank", 
+                               class: "text-indigo-600 hover:text-indigo-800 break-all" %>
+                  <% else %>
+                    Not provided
+                  <% end %>
+                </dd>
+              </div>
+            </dl>
+          </div>
+        </div>
+
+        <!-- Services Offered -->
+        <div class="bg-white shadow rounded-lg">
+          <div class="px-6 py-4 border-b border-gray-200">
+            <h2 class="text-lg font-semibold text-gray-900">Services Offered</h2>
+          </div>
+          <div class="px-6 py-6">
+            <% if @psp.services_offered.any? %>
+              <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                <% @psp.services_offered.each do |service| %>
+                  <div class="flex items-center justify-center p-3 bg-gray-50 rounded-md">
+                    <span class="text-sm font-medium text-gray-900 text-center">
+                      <%= service.to_s.humanize %>
+                    </span>
+                  </div>
+                <% end %>
+              </div>
+              
+              <% pix_services = @psp.pix_services %>
+              <% if pix_services.any? %>
+                <div class="mt-6">
+                  <h3 class="text-sm font-medium text-gray-700 mb-3">PIX Services</h3>
+                  <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                    <% pix_services.each do |service| %>
+                      <div class="flex items-center justify-center p-3 bg-blue-50 border border-blue-200 rounded-md">
+                        <span class="text-sm font-medium text-blue-800 text-center">
+                          <%= service.to_s.humanize %>
+                        </span>
+                      </div>
+                    <% end %>
+                  </div>
+                </div>
+              <% end %>
+            <% else %>
+              <div class="text-center py-6 text-gray-500">
+                <p>No services information available</p>
+              </div>
+            <% end %>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sidebar -->
+      <div class="lg:col-span-1 space-y-8">
+        
+        <!-- Health & Sync Status -->
+        <div class="bg-white shadow rounded-lg">
+          <div class="px-6 py-4 border-b border-gray-200">
+            <h2 class="text-lg font-semibold text-gray-900">Health & Sync Status</h2>
+          </div>
+          <div class="px-6 py-6 space-y-6">
+            
+            <!-- Health Score -->
+            <div>
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-sm font-medium text-gray-700">Health Score</span>
+                <span class="text-lg font-bold <%= @psp.sync_health_score >= 75 ? 'text-green-600' : @psp.sync_health_score >= 50 ? 'text-yellow-600' : 'text-red-600' %>">
+                  <%= @psp.sync_health_score %>/100
+                </span>
+              </div>
+              <div class="w-full bg-gray-200 rounded-full h-3">
+                <div class="bg-<%= @psp.sync_health_score >= 75 ? 'green' : @psp.sync_health_score >= 50 ? 'yellow' : 'red' %>-400 h-3 rounded-full transition-all duration-500" 
+                     style="width: <%= @psp.sync_health_score %>%"></div>
+              </div>
+            </div>
+
+            <!-- Sync Information -->
+            <dl class="space-y-4">
+              <div>
+                <dt class="text-sm font-medium text-gray-500">Operational Status</dt>
+                <dd class="mt-1">
+                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium 
+                               <%= @psp.operational_status == 'operational' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800' %>">
+                    <%= @psp.operational_status.humanize %>
+                  </span>
+                </dd>
+              </div>
+              
+              <div>
+                <dt class="text-sm font-medium text-gray-500">Last Sync</dt>
+                <dd class="mt-1 text-sm text-gray-900">
+                  <% if @sync_history[:last_sync] %>
+                    <%= time_ago_in_words(@sync_history[:last_sync]) %> ago
+                  <% else %>
+                    Never synced
+                  <% end %>
+                </dd>
+              </div>
+              
+              <div>
+                <dt class="text-sm font-medium text-gray-500">Last Successful Sync</dt>
+                <dd class="mt-1 text-sm text-gray-900">
+                  <% if @sync_history[:last_successful_sync] %>
+                    <%= time_ago_in_words(@sync_history[:last_successful_sync]) %> ago
+                  <% else %>
+                    Never successful
+                  <% end %>
+                </dd>
+              </div>
+              
+              <div>
+                <dt class="text-sm font-medium text-gray-500">Sync Attempts</dt>
+                <dd class="mt-1 text-sm text-gray-900"><%= @sync_history[:sync_attempts] || 0 %></dd>
+              </div>
+              
+              <div>
+                <dt class="text-sm font-medium text-gray-500">Data Source</dt>
+                <dd class="mt-1 text-sm text-gray-900"><%= @sync_history[:data_source].humanize %></dd>
+              </div>
+            </dl>
+          </div>
+        </div>
+
+        <!-- Operational Metrics -->
+        <div class="bg-white shadow rounded-lg">
+          <div class="px-6 py-4 border-b border-gray-200">
+            <h2 class="text-lg font-semibold text-gray-900">Operational Metrics</h2>
+          </div>
+          <div class="px-6 py-6">
+            <dl class="space-y-4">
+              <div>
+                <dt class="text-sm font-medium text-gray-500">Total Transactions</dt>
+                <dd class="mt-1 text-lg font-semibold text-gray-900">
+                  <%= number_with_delimiter(@operational_metrics[:total_transactions]) %>
+                </dd>
+              </div>
+              
+              <div>
+                <dt class="text-sm font-medium text-gray-500">Total Volume</dt>
+                <dd class="mt-1 text-lg font-semibold text-gray-900">
+                  <%= number_to_currency(@operational_metrics[:total_volume] || 0, locale: :'pt-BR') %>
+                </dd>
+              </div>
+              
+              <% if @operational_metrics[:availability] %>
+                <div>
+                  <dt class="text-sm font-medium text-gray-500">Availability</dt>
+                  <dd class="mt-1 text-sm text-gray-900">
+                    <span class="font-semibold <%= @operational_metrics[:availability] >= 99 ? 'text-green-600' : 'text-yellow-600' %>">
+                      <%= @operational_metrics[:availability] %>%
+                    </span>
+                  </dd>
+                </div>
+              <% end %>
+              
+              <% if @operational_metrics[:avg_response_time] %>
+                <div>
+                  <dt class="text-sm font-medium text-gray-500">Avg Response Time</dt>
+                  <dd class="mt-1 text-sm text-gray-900">
+                    <%= @operational_metrics[:avg_response_time] %>ms
+                  </dd>
+                </div>
+              <% end %>
+              
+              <div>
+                <dt class="text-sm font-medium text-gray-500">Errors (24h)</dt>
+                <dd class="mt-1 text-sm font-semibold <%= @operational_metrics[:error_count_24h] > 0 ? 'text-red-600' : 'text-green-600' %>">
+                  <%= @operational_metrics[:error_count_24h] %>
+                </dd>
+              </div>
+              
+              <div>
+                <dt class="text-sm font-medium text-gray-500">Last Transaction</dt>
+                <dd class="mt-1 text-sm text-gray-900">
+                  <% if @operational_metrics[:last_transaction] %>
+                    <%= time_ago_in_words(@operational_metrics[:last_transaction]) %> ago
+                  <% else %>
+                    No transactions
+                  <% end %>
+                </dd>
+              </div>
+            </dl>
+          </div>
+        </div>
+
+        <!-- Regulatory Information -->
+        <div class="bg-white shadow rounded-lg">
+          <div class="px-6 py-4 border-b border-gray-200">
+            <h2 class="text-lg font-semibold text-gray-900">Regulatory Information</h2>
+          </div>
+          <div class="px-6 py-6">
+            <dl class="space-y-4">
+              <div>
+                <dt class="text-sm font-medium text-gray-500">Regulatory Status</dt>
+                <dd class="mt-1">
+                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium 
+                               <%= @psp.regulatory_status == 'authorized' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800' %>">
+                    <%= @psp.regulatory_status.humanize %>
+                  </span>
+                </dd>
+              </div>
+              
+              <% if @psp.bacen_authorization_number.present? %>
+                <div>
+                  <dt class="text-sm font-medium text-gray-500">BACEN Authorization</dt>
+                  <dd class="mt-1 text-sm text-gray-900"><%= @psp.bacen_authorization_number %></dd>
+                </div>
+              <% end %>
+              
+              <% if @psp.authorization_date.present? %>
+                <div>
+                  <dt class="text-sm font-medium text-gray-500">Authorization Date</dt>
+                  <dd class="mt-1 text-sm text-gray-900"><%= @psp.authorization_date.strftime("%B %d, %Y") %></dd>
+                </div>
+              <% end %>
+              
+              <% if @psp.authorization_expiry.present? %>
+                <div>
+                  <dt class="text-sm font-medium text-gray-500">Authorization Expiry</dt>
+                  <dd class="mt-1 text-sm text-gray-900">
+                    <span class="<%= @psp.authorization_expiry < 6.months.from_now ? 'text-yellow-600 font-medium' : 'text-gray-900' %>">
+                      <%= @psp.authorization_expiry.strftime("%B %d, %Y") %>
+                    </span>
+                  </dd>
+                </div>
+              <% end %>
+            </dl>
+          </div>
+        </div>
+
+        <!-- Recent Sync Errors (if any) -->
+        <% if @sync_history[:last_sync_errors].any? %>
+          <div class="bg-white shadow rounded-lg">
+            <div class="px-6 py-4 border-b border-gray-200">
+              <h2 class="text-lg font-semibold text-gray-900">Recent Sync Issues</h2>
+            </div>
+            <div class="px-6 py-6">
+              <div class="space-y-3">
+                <% @sync_history[:last_sync_errors].each do |error| %>
+                  <div class="bg-red-50 border border-red-200 rounded-md p-3">
+                    <p class="text-sm text-red-800"><%= error %></p>
+                  </div>
+                <% end %>
+              </div>
+            </div>
+          </div>
+        <% end %>
+        
+      </div>
+    </div>
+  </div>
+</div>

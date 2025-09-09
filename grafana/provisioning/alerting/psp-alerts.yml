@@ -1,0 +1,287 @@
+apiVersion: 1
+
+groups:
+  - name: PSP Health Monitoring
+    interval: 1m
+    rules:
+      - uid: psp-sync-failure-rate
+        title: High PSP Sync Failure Rate
+        condition: C
+        data:
+          - refId: A
+            queryType: ''
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasource:
+              type: statsd
+              uid: statsd-datasource
+            model:
+              expr: rate(gupii_jdpi_psp_sync_error[5m])
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: A
+          - refId: B
+            queryType: ''
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasource:
+              type: statsd
+              uid: statsd-datasource
+            model:
+              expr: rate(gupii_jdpi_psp_sync_completed[5m])
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: B
+          - refId: C
+            queryType: ''
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasource:
+              type: __expr__
+              uid: __expr__
+            model:
+              conditions:
+                - evaluator:
+                    params:
+                      - 0.1
+                      - 0
+                    type: gt
+                  operator:
+                    type: and
+                  query:
+                    params:
+                      - A
+                  reducer:
+                    params: []
+                    type: last
+                  type: query
+              datasource:
+                name: Expression
+                type: __expr__
+                uid: __expr__
+              expression: A / (A + B)
+              hide: false
+              intervalMs: 1000
+              maxDataPoints: 43200
+              reducer: last
+              refId: C
+              type: math
+        noDataState: NoData
+        execErrState: Alerting
+        for: 2m
+        annotations:
+          description: 'PSP sync failure rate is above 10% for the past 5 minutes. Current rate: {{ $value }}%'
+          runbook_url: 'https://docs.example.com/psp-sync-troubleshooting'
+          summary: 'High failure rate in PSP synchronization process'
+        labels:
+          severity: warning
+          component: psp-sync
+          team: platform
+
+      - uid: psp-sync-down
+        title: PSP Sync Process Down
+        condition: A
+        data:
+          - refId: A
+            queryType: ''
+            relativeTimeRange:
+              from: 600
+              to: 0
+            datasource:
+              type: statsd
+              uid: statsd-datasource
+            model:
+              expr: increase(gupii_jdpi_psp_sync_completed[10m]) + increase(gupii_jdpi_psp_sync_error[10m])
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: A
+        noDataState: Alerting
+        execErrState: Alerting
+        for: 5m
+        annotations:
+          description: 'No PSP sync activity detected in the past 10 minutes. The sync process may be down.'
+          runbook_url: 'https://docs.example.com/psp-sync-troubleshooting'
+          summary: 'PSP sync process appears to be inactive'
+        labels:
+          severity: critical
+          component: psp-sync
+          team: platform
+
+      - uid: psp-data-quality-low
+        title: Low PSP Data Quality Score
+        condition: A
+        data:
+          - refId: A
+            queryType: ''
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasource:
+              type: statsd
+              uid: statsd-datasource
+            model:
+              expr: gupii_psp_data_quality_score
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: A
+        noDataState: NoData
+        execErrState: Alerting
+        for: 2m
+        annotations:
+          description: 'PSP data quality score has dropped below 75%. Current score: {{ $value }}%'
+          runbook_url: 'https://docs.example.com/psp-data-quality'
+          summary: 'PSP data quality degraded'
+        labels:
+          severity: warning
+          component: psp-data-quality
+          team: platform
+
+      - uid: psp-stale-data
+        title: High Number of PSPs with Stale Data
+        condition: A
+        data:
+          - refId: A
+            queryType: ''
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasource:
+              type: statsd
+              uid: statsd-datasource
+            model:
+              expr: gupii_psp_sync_needs_sync
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: A
+        noDataState: NoData
+        execErrState: Alerting
+        for: 5m
+        annotations:
+          description: 'More than 20 PSPs have stale data (need synchronization). Current count: {{ $value }}'
+          runbook_url: 'https://docs.example.com/psp-sync-troubleshooting'
+          summary: 'High number of PSPs with stale data'
+        labels:
+          severity: warning
+          component: psp-data-freshness
+          team: platform
+
+      - uid: psp-operational-status-critical
+        title: High Number of Non-Operational PSPs
+        condition: C
+        data:
+          - refId: A
+            queryType: ''
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasource:
+              type: statsd
+              uid: statsd-datasource
+            model:
+              expr: gupii_psp_operational_status_operational
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: A
+          - refId: B
+            queryType: ''
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasource:
+              type: statsd
+              uid: statsd-datasource
+            model:
+              expr: gupii_psp_total_count
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: B
+          - refId: C
+            queryType: ''
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasource:
+              type: __expr__
+              uid: __expr__
+            model:
+              expression: (A / B) * 100
+              intervalMs: 1000
+              maxDataPoints: 43200
+              reducer: last
+              refId: C
+              type: math
+        noDataState: NoData
+        execErrState: Alerting
+        for: 3m
+        annotations:
+          description: 'Less than 90% of PSPs are operational. Current operational percentage: {{ $value }}%'
+          runbook_url: 'https://docs.example.com/psp-operational-status'
+          summary: 'High number of non-operational PSPs detected'
+        labels:
+          severity: critical
+          component: psp-operational-status
+          team: platform
+
+  - name: PSP Performance Monitoring  
+    interval: 2m
+    rules:
+      - uid: psp-response-time-high
+        title: High PSP API Response Time
+        condition: A
+        data:
+          - refId: A
+            queryType: ''
+            relativeTimeRange:
+              from: 600
+              to: 0
+            datasource:
+              type: statsd
+              uid: statsd-datasource
+            model:
+              expr: gupii_jdpi_psp_api_fetch_list_duration
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: A
+        noDataState: NoData
+        execErrState: Alerting
+        for: 3m
+        annotations:
+          description: 'PSP API response time is consistently above 5000ms. Current response time: {{ $value }}ms'
+          runbook_url: 'https://docs.example.com/psp-performance'
+          summary: 'High response time for PSP API calls'
+        labels:
+          severity: warning
+          component: psp-api-performance
+          team: platform
+
+      - uid: psp-pix-adoption-low
+        title: Low PIX Adoption Rate
+        condition: A
+        data:
+          - refId: A
+            queryType: ''
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasource:
+              type: statsd
+              uid: statsd-datasource
+            model:
+              expr: gupii_psp_pix_adoption_rate
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: A
+        noDataState: NoData
+        execErrState: Alerting
+        for: 10m
+        annotations:
+          description: 'PIX adoption rate has dropped below 80%. Current rate: {{ $value }}%'
+          runbook_url: 'https://docs.example.com/psp-pix-adoption'
+          summary: 'Low PIX adoption rate among PSPs'
+        labels:
+          severity: info
+          component: psp-pix-adoption
+          team: business
