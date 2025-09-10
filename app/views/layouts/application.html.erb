@@ -27,13 +27,13 @@
       <%= render 'shared/header' %>
     </header>
 
-    <aside class="hidden z-40 fixed inset-y-0 w-44 h-full mt-16 py-6 bg-white border-l-xl shadow-xl lg:flex">
-      <div class="flex flex-col gap-y-5 w-full">
+    <aside id="sidebar" class="sidebar-expanded z-40 fixed inset-y-0 h-full mt-16 bg-white shadow-xl lg:flex hidden transition-all duration-300">
+      <div class="flex flex-col w-full">
         <%= render 'shared/sidebar' %>
       </div>
     </aside>
 
-    <main class="z-0 ml-0 mt-16 overflow-y-auto p-3 lg:ml-44">
+    <main id="main-content" class="main-expanded z-0 mt-16 overflow-y-auto p-3 transition-all duration-300">
       <%= yield %>
     </main>
 

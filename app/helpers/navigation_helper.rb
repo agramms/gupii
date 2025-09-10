@@ -1,9 +1,9 @@
 module NavigationHelper
   def nav_link(path, icon_name, text, active: false, disabled: false, method: :get)
     css_classes = [
-      "group flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200",
-      active ? "bg-indigo-50 text-indigo-700 border-r-2 border-indigo-600" : "text-gray-700",
-      disabled ? "opacity-50 cursor-not-allowed" : "hover:bg-gray-50 hover:text-indigo-600",
+      "group flex items-center px-3 py-3 text-sm font-medium rounded-lg transition-all duration-300",
+      active ? "bg-indigo-100 text-indigo-700 shadow-sm" : "text-gray-700",
+      disabled ? "opacity-50 cursor-not-allowed" : "hover:bg-gray-50 hover:text-indigo-600 hover:shadow-sm",
       "focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-1"
     ].join(" ")
 
@@ -11,10 +11,29 @@ module NavigationHelper
             class: css_classes, 
             method: method,
             "aria-current": (active ? "page" : nil),
-            tabindex: (disabled ? -1 : 0) do
-      content_tag(:div, class: "flex items-center w-full") do
+            tabindex: (disabled ? -1 : 0),
+            title: text,
+            data: { tooltip: text } do
+      content_tag(:div, class: "flex items-center w-full min-w-0") do
         heroicon_svg(icon_name, active: active) +
-        content_tag(:span, text, class: "truncate")
+        content_tag(:span, text, class: "sidebar-text leading-tight break-words overflow-hidden", style: "hyphens: auto; word-break: break-word;")
+      end
+    end
+  end
+
+  def sidebar_toggle_button
+    content_tag(:button, 
+                class: "flex items-center justify-center w-8 h-8 rounded-lg bg-gray-100 hover:bg-gray-200 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500",
+                onclick: "toggleSidebar()",
+                title: "Toggle sidebar",
+                "aria-label": "Toggle sidebar") do
+      content_tag(:svg, class: "w-4 h-4 text-gray-600 transform transition-transform duration-300", 
+                  id: "sidebar-arrow",
+                  fill: "none", 
+                  viewBox: "0 0 24 24", 
+                  "stroke-width": "2", 
+                  stroke: "currentColor") do
+        content_tag(:path, nil, "stroke-linecap": "round", "stroke-linejoin": "round", d: "M15 19l-7-7 7-7")
       end
     end
   end
