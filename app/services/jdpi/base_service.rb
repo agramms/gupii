@@ -55,8 +55,7 @@ module Jdpi
         req.headers["PI-PayerId"] = pi_payer_id || BusinessRules::DEFAULT_PI_PAYER_ID
         req.body = body if body
       end
-      
-      binding.break
+
       handle_response(response)
     end
     

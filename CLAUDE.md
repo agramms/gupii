@@ -243,6 +243,43 @@ The **Disputes Management System** handles internal dispute processes for infrac
 - **Status transition validation** with proper workflow
 - **Timeline constraints** between 1-14 days
 
+## SPI Transaction Lookup System
+
+The **SPI Transaction Lookup** provides real-time consultation of PIX transactions directly from the SPI (Sistema de Pagamentos Instantâneos) via JDPI API integration.
+
+### Key Features
+- **Real-time SPI Consultation**: Direct API calls to JDPI endpoint 8.4.7 without local persistence
+- **End-to-End ID Validation**: 32-character E2E ID format validation with real-time feedback
+- **Comprehensive Transaction Details**: Full transaction data display including status, institutions, payment methods
+- **Professional UX**: Consistent design matching existing dispute/infraction notification forms
+- **Complete i18n Support**: Full Portuguese localization for all interface elements
+
+### Technical Implementation
+- **Service**: `app/services/jdpi/spi_transaction_service.rb` with comprehensive API integration
+- **Controller**: `app/controllers/spi_transactions_controller.rb` with form handling and error management
+- **Views**: Responsive interface with search form, results display, and help sidebar
+- **Routes**: `/spi_transactions` endpoint for transaction lookup functionality
+- **Navigation**: Integrated in sidebar with magnifying-glass icon
+
+### API Integration
+- **JDPI Endpoint**: `GET /jdpi/spi/api/v2/lancamento/{endToEndId}`
+- **Authentication**: Bearer token with JWT validation
+- **Response Normalization**: Comprehensive data mapping and status translations
+- **Error Handling**: Custom exceptions for invalid format, not found, and API errors
+
+### User Experience
+- **Form-based Interface**: Single field for E2E ID input with validation
+- **Character Counter**: Real-time feedback for 32-character requirement
+- **Results Display**: Color-coded sections for transaction details (status, payment, institutions, technical)
+- **Help Sidebar**: Contextual guidance with examples and usage instructions
+- **Error States**: User-friendly error messages for all failure scenarios
+
+### Business Value
+- **Customer Support**: Instant transaction verification without database queries
+- **Real-time Data**: Direct access to SPI transaction status and details
+- **No Local Storage**: Stateless consultation maintaining data privacy
+- **Regulatory Compliance**: Official JDPI API integration following Central Bank specifications
+
 ## Important Notes
 
 - **PIX Focus**: Brazilian Central Bank PIX integration with MED (Mecanismo Especial de Devolução)
@@ -252,6 +289,7 @@ The **Disputes Management System** handles internal dispute processes for infrac
 - **API Strategy**: Polling-based client communication pattern
 - **Service Architecture**: Clean JDPI integration in `app/services/jdpi/`
 - **Disputes System**: Complete lifecycle management with 6-day customer response SLA
+- **SPI Transaction Lookup**: Real-time consultation via JDPI API 8.4.7 without local persistence
 - **Reference Templates**: Use `tmp/platform2-app-boleto` for Tailwind patterns only
 - **JDPI Documentation**: API specification in `tmp/jdpi-api-doc.5.2.1.pdf`
 - **Mascot**: Gupii 🐹 represents friendly, accessible PIX payments

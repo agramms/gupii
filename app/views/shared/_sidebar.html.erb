@@ -36,6 +36,10 @@
     <!-- Disputes -->
     <%= nav_link(disputes_path, 'scale', t('sidebar.disputes'), 
                  active: controller_name == 'disputes') %>
+
+    <!-- SPI Transactions -->
+    <%= nav_link(spi_transactions_path, 'magnifying-glass', t('sidebar.spi_transactions'), 
+                 active: controller_name == 'spi_transactions') %>
   </nav>
 </div>
 
