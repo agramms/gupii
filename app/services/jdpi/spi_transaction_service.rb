@@ -54,8 +54,10 @@ module Jdpi
           raise SpiApiError, "Erro na consulta SPI: #{error_message}"
         end
       end
+    end
 
-      # Normalize API response to consistent format
+    class << self
+      # Normalize API response to consistent format  
       def normalize_response(api_response)
         {
           # Primary identifiers
@@ -173,7 +175,7 @@ module Jdpi
     
     # Instance method to perform the actual lookup
     def perform_lookup(end_to_end_id)
-      path = "/jdpi/#{ENDPOINT_PATH}/#{API_VERSION}/lancamento/#{end_to_end_id}"
+      path = "/spi-api/jdpi/#{ENDPOINT_PATH}/#{API_VERSION}/lancamento/#{end_to_end_id}"
       
       response_body = execute_request(:get, path)
       
