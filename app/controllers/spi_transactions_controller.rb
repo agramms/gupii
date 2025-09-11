@@ -148,18 +148,24 @@ class SpiTransactionsController < AuthBaseController
   # Format ISPB for display (mask middle digits)
   def format_ispb(ispb)
     return 'N/A' unless ispb.present?
-    return ispb unless ispb.length == 8
     
-    "#{ispb[0..2]}*****#{ispb[-1]}"
+    # Convert to string to handle both string and integer inputs
+    ispb_str = ispb.to_s
+    return ispb_str unless ispb_str.length == 8
+    
+    "#{ispb_str[0..2]}*****#{ispb_str[-1]}"
   end
   helper_method :format_ispb
 
   # Format CNPJ for display (mask middle digits)
   def format_cnpj(cnpj)
     return 'N/A' unless cnpj.present?
-    return cnpj unless cnpj.length == 14
     
-    "#{cnpj[0..2]}.***.***/****-#{cnpj[-2..-1]}"
+    # Convert to string to handle both string and integer inputs
+    cnpj_str = cnpj.to_s
+    return cnpj_str unless cnpj_str.length == 14
+    
+    "#{cnpj_str[0..2]}.***.***/****-#{cnpj_str[-2..-1]}"
   end
   helper_method :format_cnpj
 
