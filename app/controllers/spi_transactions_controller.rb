@@ -103,6 +103,19 @@ class SpiTransactionsController < AuthBaseController
   end
   helper_method :format_currency
 
+  # Format transaction value directly (API returns in reais)
+  def format_transaction_value(value)
+    return 'N/A' unless value.present?
+    
+    begin
+      real_value = value.to_f
+      "R$ #{number_with_precision(real_value, precision: 2, delimiter: '.', separator: ',')}"
+    rescue StandardError
+      value.to_s
+    end
+  end
+  helper_method :format_transaction_value
+
   # Format datetime for Brazilian locale
   def format_datetime(datetime_string)
     return 'N/A' unless datetime_string.present?
@@ -184,4 +197,90 @@ class SpiTransactionsController < AuthBaseController
     )
   end
   helper_method :has_agent_info?
+
+  # Check if transaction has payer information
+  def has_payer_info?(transaction_data)
+    transaction_data.present? && 
+    transaction_data['raw_api_response'].present? &&
+    transaction_data['raw_api_response']['pagador'].present?
+  end
+  helper_method :has_payer_info?
+
+  # Check if transaction has receiver information  
+  def has_receiver_info?(transaction_data)
+    transaction_data.present? && 
+    transaction_data['raw_api_response'].present? &&
+    transaction_data['raw_api_response']['recebedor'].present?
+  end
+  helper_method :has_receiver_info?
+
+  # Check if transaction has error information
+  def has_error_info?(transaction_data)
+    transaction_data.present? && 
+    transaction_data['raw_api_response'].present? &&
+    (transaction_data['raw_api_response']['codigoErro'].present? ||
+     transaction_data['raw_api_response']['descCodigoErro'].present?)
+  end
+  helper_method :has_error_info?
+
+  # Format account type for display
+  def format_account_type(tipo_conta)
+    case tipo_conta
+    when 0 then 'Conta Corrente'
+    when 1 then 'Conta Poupança'  
+    when 2 then 'Conta de Pagamento'
+    when 3 then 'Conta Salário'
+    else 'Tipo Desconhecido'
+    end
+  end
+  helper_method :format_account_type
+
+  # Format person type for display
+  def format_person_type(tipo_pessoa)
+    case tipo_pessoa
+    when 0 then 'Pessoa Física'
+    when 1 then 'Pessoa Jurídica'
+    else 'Tipo Desconhecido'
+    end
+  end
+  helper_method :format_person_type
+
+  # Format account number for display
+  def format_account_number(account_number)
+    return 'N/A' unless account_number.present?
+    account_number.to_s
+  end
+  helper_method :format_account_number
+
+  # Format agency number for display
+  def format_agency_number(agency_number)
+    return 'N/A' unless agency_number.present?
+    agency_number.to_s
+  end
+  helper_method :format_agency_number
+
+  # Format full name (no masking as requested)
+  def format_full_name(name)
+    return 'N/A' unless name.present?
+    name.to_s.strip
+  end
+  helper_method :format_full_name
+
+  # Format CPF/CNPJ without masking (as requested)
+  def format_cpf_cnpj_full(document)
+    return 'N/A' unless document.present?
+    
+    doc_str = document.to_s
+    case doc_str.length
+    when 11
+      # CPF format: 000.000.000-00
+      "#{doc_str[0..2]}.#{doc_str[3..5]}.#{doc_str[6..8]}-#{doc_str[9..10]}"
+    when 14
+      # CNPJ format: 00.000.000/0000-00
+      "#{doc_str[0..1]}.#{doc_str[2..4]}.#{doc_str[5..7]}/#{doc_str[8..11]}-#{doc_str[12..13]}"
+    else
+      doc_str
+    end
+  end
+  helper_method :format_cpf_cnpj_full
 end
