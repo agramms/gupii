@@ -76,6 +76,10 @@ module NavigationHelper
       content_tag(:svg, class: icon_class, fill: "none", viewBox: "0 0 24 24", "stroke-width": "1.5", stroke: "currentColor") do
         content_tag(:path, nil, "stroke-linecap": "round", "stroke-linejoin": "round", d: "M12 3v17.25m0 0c-1.472 0-2.882.265-4.185.75M12 20.25c1.472 0 2.882.265 4.185.75M18.75 4.97A48.416 48.416 0 0012 4.5c-2.291 0-4.545.16-6.75.47m13.5 0c1.01.143 2.01.317 3 .52m-3-.52v15.627c0 .934.348 1.836.97 2.49M5.25 4.97c-1.01.143-2.01.317-3 .52m3-.52v15.627c0 .934-.348 1.836-.97 2.49m0 0A48.355 48.355 0 015.25 21m12.75-1.636A48.355 48.355 0 0118.75 21m-13.5 0c2.25.357 4.5.357 6.75 0m6.75 0c-2.25.357-4.5.357-6.75 0")
       end
+    when 'magnifying-glass'
+      content_tag(:svg, class: icon_class, fill: "none", viewBox: "0 0 24 24", "stroke-width": "1.5", stroke: "currentColor") do
+        content_tag(:path, nil, "stroke-linecap": "round", "stroke-linejoin": "round", d: "M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z")
+      end
     else
       # Default generic icon
       content_tag(:div, class: icon_class)

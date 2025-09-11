@@ -47,6 +47,13 @@ Rails.application.routes.draw do
     end
   end
   
+  # SPI Transaction Lookup (Read-only consultation)
+  resources :spi_transactions, only: [:index] do
+    collection do
+      get :lookup, to: 'spi_transactions#index'
+    end
+  end
+  
   # Payment Service Providers Management (Read-only)
   resources :payment_service_providers, only: [:index, :show] do
     collection do

@@ -25,6 +25,108 @@ pt-BR:
     more: "Mais"
     gupii_logo_alt: "Logo do Sistema de Integração PIX Gupii"
     disputes: "Disputas"
+    spi_transactions: "Consulta SPI"
+
+  # SPI Transactions - Comprehensive translations
+  spi_transactions:
+    title: "Consulta SPI"
+    subtitle: "Busca por End-to-End ID"
+    
+    # Instructions section
+    instructions:
+      title: "Consulta de Transação SPI"
+      description: "Consulte informações detalhadas de uma transação PIX através do seu End-to-End ID (E2E ID)."
+    
+    # Form section
+    form:
+      title: "Buscar Transação"
+      subtitle: "Digite o End-to-End ID para consultar a transação"
+      submit: "Consultar Transação"
+      
+      fields:
+        end_to_end_id:
+          label: "End-to-End ID (E2E ID)"
+          placeholder: "Ex: E12345678202401011234ABCDEF01234"
+          help: "Informe o End-to-End ID completo de 32 caracteres. Este é o identificador único da transação PIX no SPI."
+          format_help: "Formato: E + 8 dígitos (ISPB) + 12 dígitos (yyyyMMddHHmm UTC) + 11 caracteres alfanuméricos"
+    
+    # Error handling
+    errors:
+      title: "Erro na consulta"
+      invalid_format: "Formato de End-to-End ID inválido. O ID deve ter exatamente 32 caracteres."
+      not_found: "Transação não encontrada para o End-to-End ID informado."
+      api_error: "Erro na comunicação com a API SPI. Tente novamente."
+      internal_error: "Erro interno do sistema. Tente novamente em alguns instantes."
+    
+    # Results section
+    results:
+      title: "Detalhes da Transação"
+      subtitle: "Informações completas retornadas pela API SPI"
+      
+      sections:
+        status:
+          title: "Status e Identificadores"
+        payment:
+          title: "Informações de Pagamento"
+        institutions:
+          title: "Instituições Envolvidas"
+          direct_psp: "PSP Direto"
+          origin: "Origem"
+          initiator: "Iniciador"
+        agent:
+          title: "Informações do Agente"
+        technical:
+          title: "Detalhes Técnicos"
+      
+      fields:
+        end_to_end_id: "End-to-End ID"
+        original_end_to_end_id: "End-to-End ID Original"
+        status: "Status"
+        transaction_type: "Tipo de Transação"
+        status_datetime: "Data/Hora do Status"
+        initiation_type: "Método de Iniciação"
+        priority: "Prioridade"
+        priority_type: "Tipo de Prioridade"
+        purpose: "Finalidade"
+        ispb: "ISPB"
+        cnpj: "CNPJ"
+        agent_modality: "Modalidade do Agente"
+        agent_type: "Tipo de Agente"
+        pss_ispb: "ISPB PSS"
+        source_message: "Mensagem de Origem"
+    
+    # Sidebar help sections
+    sidebar:
+      what_is_spi:
+        title: "O que é SPI?"
+        description: "O Sistema de Pagamentos Instantâneos (SPI) é a infraestrutura do PIX que processa transações em tempo real 24/7."
+        e2e_title: "End-to-End ID (E2E ID)"
+        features:
+          unique_identifier: "Identificador único de 32 caracteres"
+          full_tracking: "Permite rastreamento completo da transação"
+          format_description: "Formato: E + 8 dígitos (ISPB) + 12 dígitos (yyyyMMddHHmm UTC) + 11 caracteres alfanuméricos"
+      
+      examples:
+        title: "Exemplos de Consulta"
+        liquidated:
+          title: "Transação Liquidada"
+          example: "E12345678202401011234ABCDEF01234"
+          description: "Transação concluída com sucesso"
+        processing:
+          title: "Transação Processando"
+          example: "E87654321202401011234FEDCBA98765"
+          description: "Ainda em processamento no SPI"
+        not_found:
+          title: "Transação Não Encontrada"
+          description: "ID inválido ou transação inexistente"
+          help: "Verifique o formato do E2E ID"
+      
+      guidelines:
+        title: "Diretrizes de Uso"
+        step_1: "Digite o E2E ID completo de 32 caracteres"
+        step_2: "Verifique se o formato está correto antes de consultar"
+        step_3: "Consulta não armazena dados localmente"
+        step_4: "Dados retornados diretamente da API SPI"
 
   # Disputas - Comprehensive translations
   disputes:
@@ -175,6 +277,12 @@ pt-BR:
     search: "Buscar"
     filter: "Filtrar"
     export: "Exportar"
+
+  # Form fields
+  fields:
+    required: "Obrigatório"
+    optional: "Opcional"
+    characters: "caracteres"
     import: "Importar"
     view: "Visualizar"
     manage: "Gerenciar"
