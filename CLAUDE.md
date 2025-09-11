@@ -136,6 +136,14 @@ The `tmp/platform2-app-boleto` contains a reference Rails project for Tailwind t
 - **External References**: Separate models for API data vs local data
 - **Best Practices**: Clean separation between internal and external systems
 
+**Enhanced Logging (BaseService)**:
+- **Request/Response Logging**: All HTTP requests and responses are logged with timing
+- **Request ID Tracking**: Each request gets a unique ID for end-to-end tracking
+- **Sensitive Data Masking**: Automatic sanitization of CPF, CNPJ, PIX keys, and account info
+- **Performance Monitoring**: Request duration in milliseconds
+- **Error Context**: Detailed error logging with stack traces in development
+- **Security**: Sensitive fields are automatically masked in logs (preserves format for debugging)
+
 ### API Design Patterns
 - **Client Communication**: Polling-based strategy
 - **Event Updates**: Dedicated polling endpoints per entity
