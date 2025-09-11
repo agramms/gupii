@@ -1,0 +1,638 @@
+<% content_for :title, t('disputes.new.title') %>
+
+<div class="min-h-screen bg-gray-50">
+  <!-- Header Section -->
+  <div class="bg-white shadow">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between items-center py-6">
+        <div class="flex items-center">
+          <h1 class="text-3xl font-bold text-gray-900"><%= t('disputes.new.page_title') %></h1>
+          <span class="ml-3 text-sm text-gray-500">para infração #<%= @infraction_notification.short_id %></span>
+        </div>
+        <div class="flex items-center space-x-4">
+          <%= link_to t('actions.back'), @infraction_notification, 
+                      class: "bg-gray-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-gray-700" %>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+    <div class="lg:grid lg:grid-cols-12 lg:gap-6">
+      <!-- Form Column -->
+      <div class="lg:col-span-8">
+        <!-- Instructions Card -->
+        <div class="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-6">
+          <div class="flex">
+            <div class="flex-shrink-0">
+              <svg class="h-5 w-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              </svg>
+            </div>
+            <div class="ml-3">
+              <h3 class="text-sm font-medium text-blue-800"><%= t('disputes.new.help_title') %></h3>
+              <div class="mt-2 text-sm text-blue-700">
+                <p>Conteste esta infração fornecendo justificativas detalhadas e evidências que comprovem sua posição.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Form Card -->
+        <div class="bg-white shadow overflow-hidden sm:rounded-lg">
+          <div class="px-4 py-5 sm:p-6">
+            <%= form_with model: [@infraction_notification, @dispute], local: true, class: "space-y-8" do |form| %>
+              <!-- Error Messages -->
+              <% if @dispute.errors.any? %>
+                <div class="bg-red-50 border border-red-200 rounded-md p-4">
+                  <div class="flex">
+                    <div class="flex-shrink-0">
+                      <svg class="h-5 w-5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                      </svg>
+                    </div>
+                    <div class="ml-3">
+                      <h3 class="text-sm font-medium text-red-800">
+                        <%= pluralize(@dispute.errors.count, "erro encontrado", "erros encontrados") %>:
+                      </h3>
+                      <div class="mt-2 text-sm text-red-700">
+                        <ul class="list-disc list-inside space-y-1">
+                          <% @dispute.errors.full_messages.each do |message| %>
+                            <li><%= message %></li>
+                          <% end %>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              <% end %>
+
+              <!-- Section 1: Informações Básicas -->
+              <div class="border-b border-gray-200 pb-8">
+                <!-- Enhanced Section Header -->
+                <div class="bg-gradient-to-r from-indigo-50 to-white border-l-4 border-indigo-500 px-4 py-3 mb-6 rounded-r-md">
+                  <h3 class="text-lg font-semibold text-gray-900 flex items-center">
+                    <svg class="h-5 w-5 text-indigo-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                    </svg>
+                    Informações Básicas da Contestação
+                  </h3>
+                  <p class="text-sm text-gray-600 mt-1">Defina o tipo de contestação para esta infração</p>
+                </div>
+                
+                <div class="grid grid-cols-1 gap-6 sm:grid-cols-1">
+                  <!-- Dispute Type -->
+                  <div class="relative bg-white p-4 rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-all duration-200">
+                    <div class="absolute top-3 right-3">
+                      <span class="text-xs font-medium text-red-600 bg-red-100 px-2 py-1 rounded-full">Obrigatório</span>
+                    </div>
+                    <div class="flex items-center mb-2">
+                      <div class="tooltip-container mr-2">
+                        <svg class="h-4 w-4 text-gray-400 cursor-help" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <div class="tooltip">Selecione o tipo de contestação que melhor se aplica ao seu caso. Cada tipo tem requisitos específicos de evidência.</div>
+                      </div>
+                      <%= form.label :dispute_type, t('disputes.fields.dispute_type.label'), 
+                                     class: "block text-sm font-semibold text-gray-800 flex-1" %>
+                    </div>
+                    <%= form.select :dispute_type, 
+                                    options_for_select([["Selecione o tipo...", ""]] + 
+                                      Dispute.dispute_types.map { |type, _value| 
+                                        [t("disputes.types.#{type}"), type]
+                                      }, 
+                                      @dispute.dispute_type), 
+                                    {}, 
+                                    { class: "block w-full bg-white border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 sm:text-sm px-3 py-2.5",
+                                      required: true,
+                                      data: { 'dispute-type-select': true } } %>
+                    
+                    <!-- Type Description Display -->
+                    <div id="dispute-type-description" class="hidden mt-4 bg-blue-50 border border-blue-200 rounded-lg p-4">
+                      <div class="flex">
+                        <div class="flex-shrink-0">
+                          <svg class="h-5 w-5 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
+                          </svg>
+                        </div>
+                        <div class="ml-3">
+                          <p id="dispute-type-description-text" class="text-sm text-blue-700"></p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Section 2: Justificativa -->
+              <div class="border-b border-gray-200 pb-8">
+                <!-- Enhanced Section Header -->
+                <div class="bg-gradient-to-r from-blue-50 to-white border-l-4 border-blue-500 px-4 py-3 mb-6 rounded-r-md">
+                  <h3 class="text-lg font-semibold text-gray-900 flex items-center">
+                    <svg class="h-5 w-5 text-blue-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                    </svg>
+                    Justificativa da Contestação
+                  </h3>
+                  <p class="text-sm text-gray-600 mt-1">Explique detalhadamente os motivos pelos quais contesta esta infração</p>
+                </div>
+                
+                <div class="relative bg-blue-50 p-4 rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-all duration-200">
+                  <div class="absolute top-3 right-3">
+                    <span class="text-xs font-medium text-red-600 bg-red-100 px-2 py-1 rounded-full">Obrigatório</span>
+                  </div>
+                  <div class="flex items-center mb-2">
+                    <div class="tooltip-container mr-2">
+                      <svg class="h-4 w-4 text-gray-400 cursor-help" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                      </svg>
+                      <div class="tooltip">Descreva claramente os fatos que fundamentam sua contestação. Seja específico e objetivo, incluindo datas, valores e circunstâncias relevantes.</div>
+                    </div>
+                    <%= form.label :justification, t('disputes.fields.justification.label'), 
+                                   class: "block text-sm font-semibold text-gray-800 flex-1" %>
+                  </div>
+                  <%= form.text_area :justification, 
+                                     rows: 6,
+                                     placeholder: t('disputes.fields.justification.placeholder'),
+                                     class: "block w-full bg-blue-50 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-white transition-colors duration-200 sm:text-sm px-3 py-2.5 resize-vertical",
+                                     required: true %>
+                  <div class="mt-3 flex justify-between items-center">
+                    <div class="text-xs text-gray-500 flex items-center">
+                      <svg class="h-3 w-3 text-gray-400 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                      </svg>
+                      Seja detalhado e inclua fatos específicos
+                    </div>
+                    <p class="text-sm text-gray-600 font-medium char-counter">
+                      <span id="justification-count">0</span>/1000 caracteres
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Section 3: Evidências -->
+              <div class="border-b border-gray-200 pb-8">
+                <!-- Enhanced Section Header -->
+                <div class="bg-gradient-to-r from-amber-50 to-white border-l-4 border-amber-500 px-4 py-3 mb-6 rounded-r-md">
+                  <h3 class="text-lg font-semibold text-gray-900 flex items-center">
+                    <svg class="h-5 w-5 text-amber-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4"></path>
+                    </svg>
+                    Evidências e Documentação
+                  </h3>
+                  <p class="text-sm text-gray-600 mt-1">Forneça evidências que sustentem sua contestação (campo opcional)</p>
+                </div>
+                
+                <div class="relative bg-slate-50 p-4 rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-all duration-200">
+                  <div class="absolute top-3 right-3">
+                    <span class="text-xs font-medium text-gray-600 bg-gray-100 px-2 py-1 rounded-full">Opcional</span>
+                  </div>
+                  <div class="flex items-center mb-2">
+                    <div class="tooltip-container mr-2">
+                      <svg class="h-4 w-4 text-gray-400 cursor-help" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                      </svg>
+                      <div class="tooltip">Descreva evidências como comprovantes de transação, comunicações, logs de sistema ou qualquer documentação que suporte sua contestação.</div>
+                    </div>
+                    <%= form.label :evidence_notes, t('disputes.fields.evidence_notes.label'), 
+                                   class: "block text-sm font-semibold text-gray-800 flex-1" %>
+                  </div>
+                  <%= form.text_area :evidence_notes, 
+                                     rows: 8,
+                                     placeholder: t('disputes.fields.evidence_notes.placeholder'),
+                                     class: "block w-full bg-slate-100 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:bg-white transition-colors duration-200 sm:text-sm px-3 py-2.5 placeholder-gray-400 resize-vertical" %>
+                  <div class="mt-3 flex justify-between items-center">
+                    <div class="text-xs text-gray-500 flex items-center">
+                      <svg class="h-3 w-3 text-gray-400 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14"></path>
+                      </svg>
+                      Inclua referências a documentos e evidências relevantes
+                    </div>
+                    <p class="text-sm text-gray-600 font-medium char-counter">
+                      <span id="evidence-count">0</span>/2000 caracteres
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Form Actions -->
+              <div class="flex justify-end space-x-3">
+                <%= link_to t('actions.cancel'), @infraction_notification, 
+                            class: "bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" %>
+                <%= form.submit t('disputes.actions.create'), 
+                                class: "ml-3 inline-flex justify-center py-2 px-6 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" %>
+              </div>
+            <% end %>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sidebar Column -->
+      <div class="lg:col-span-4 space-y-6">
+        <!-- Infraction Info Card -->
+        <div class="bg-white shadow overflow-hidden sm:rounded-lg">
+          <div class="px-4 py-5 sm:p-6">
+            <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">
+              Informações da Infração
+            </h3>
+            
+            <div class="space-y-4">
+              <div>
+                <dt class="text-sm font-medium text-gray-500">ID da Infração</dt>
+                <dd class="mt-1 text-sm text-gray-900 font-mono">#<%= @infraction_notification.short_id %></dd>
+              </div>
+              
+              <div>
+                <dt class="text-sm font-medium text-gray-500">Chave PIX</dt>
+                <dd class="mt-1 text-sm text-gray-900 break-all"><%= @infraction_notification.pix_key %></dd>
+              </div>
+              
+              <div>
+                <dt class="text-sm font-medium text-gray-500">Tipo de Infração</dt>
+                <dd class="mt-1 text-sm text-gray-900">
+                  <%= t("infraction_notifications.dropdown_options.infraction_types.#{@infraction_notification.infraction_type}", default: @infraction_notification.infraction_type) %>
+                </dd>
+              </div>
+              
+              <div>
+                <dt class="text-sm font-medium text-gray-500">Status</dt>
+                <dd class="mt-1">
+                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                               <%= case @infraction_notification.status
+                                   when 'CANCELLED' then 'bg-red-100 text-red-800'
+                                   when 'COMPLETED' then 'bg-green-100 text-green-800'
+                                   when 'ANALYZING' then 'bg-blue-100 text-blue-800'
+                                   when 'PROCESSING' then 'bg-blue-100 text-blue-800'
+                                   when 'SUBMITTED' then 'bg-yellow-100 text-yellow-800'
+                                   else 'bg-gray-100 text-gray-800'
+                                   end %>">
+                    <%= case @infraction_notification.status
+                        when 'SUBMITTED' then t('infraction_notifications.fraud_dashboard.status_options.pending')
+                        when 'PROCESSING' then t('infraction_notifications.fraud_dashboard.status_options.processing')
+                        when 'ANALYZING' then t('infraction_notifications.fraud_dashboard.status_options.analyzing')
+                        when 'COMPLETED' then t('infraction_notifications.fraud_dashboard.status_options.completed')
+                        when 'CANCELLED' then t('infraction_notifications.fraud_dashboard.status_options.cancelled')
+                        else @infraction_notification.status.humanize
+                        end %>
+                  </span>
+                </dd>
+              </div>
+              
+              <div>
+                <dt class="text-sm font-medium text-gray-500">Criada em</dt>
+                <dd class="mt-1 text-sm text-gray-900">
+                  <%= l(@infraction_notification.created_at, format: :long) %>
+                </dd>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Help Card -->
+        <div class="bg-white shadow overflow-hidden sm:rounded-lg">
+          <div class="px-4 py-5 sm:p-6">
+            <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">
+              Como Contestar
+            </h3>
+            <p class="text-sm text-gray-600 mb-4">
+              Para contestar uma infração, você deve fornecer justificativas detalhadas e evidências que comprovem sua posição.
+            </p>
+
+            <h4 class="text-sm font-medium text-gray-900 mb-3">
+              Tipos de Contestação
+            </h4>
+            <ul class="text-sm text-gray-600 space-y-2 mb-4">
+              <li class="flex items-start">
+                <svg class="h-4 w-4 text-green-500 mt-0.5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                </svg>
+                Contestação de Validade - questiona a validade da infração
+              </li>
+              <li class="flex items-start">
+                <svg class="h-4 w-4 text-green-500 mt-0.5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                </svg>
+                Evidência Insuficiente - alega falta de evidências
+              </li>
+              <li class="flex items-start">
+                <svg class="h-4 w-4 text-green-500 mt-0.5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                </svg>
+                Erro Processual - aponta erros no processo
+              </li>
+            </ul>
+
+            <h4 class="text-sm font-medium text-gray-900 mb-3">
+              Processo de Análise
+            </h4>
+            <ol class="text-sm text-gray-600 space-y-2">
+              <li class="flex items-start">
+                <span class="flex-shrink-0 h-5 w-5 bg-indigo-100 text-indigo-600 text-xs font-medium rounded-full flex items-center justify-center mr-2 mt-0.5">
+                  1
+                </span>
+                Envio da contestação com justificativas e evidências
+              </li>
+              <li class="flex items-start">
+                <span class="flex-shrink-0 h-5 w-5 bg-indigo-100 text-indigo-600 text-xs font-medium rounded-full flex items-center justify-center mr-2 mt-0.5">
+                  2
+                </span>
+                Análise técnica e jurídica da contestação
+              </li>
+              <li class="flex items-start">
+                <span class="flex-shrink-0 h-5 w-5 bg-indigo-100 text-indigo-600 text-xs font-medium rounded-full flex items-center justify-center mr-2 mt-0.5">
+                  3
+                </span>
+                Decisão final sobre a contestação
+              </li>
+            </ol>
+          </div>
+        </div>
+      </div>
+    </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  /* Enhanced form styling for better field distinction */
+  .form-field-container {
+    transition: all 0.2s ease-in-out;
+  }
+  
+  .form-field-container:hover {
+    transform: translateY(-1px);
+  }
+  
+  /* Field requirement badges */
+  .field-badge-required {
+    background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+    border: 1px solid #f87171;
+  }
+  
+  .field-badge-optional {
+    background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+    border: 1px solid #d1d5db;
+  }
+  
+  /* Enhanced input focus states */
+  input:focus, select:focus, textarea:focus {
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    border-color: #6366f1;
+  }
+  
+  /* Section headers with improved hierarchy */
+  .section-header {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.8) 0%, rgba(255, 255, 255, 0.4) 100%);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+  }
+  
+  /* Field background patterns for better distinction */
+  .field-required-bg {
+    background-image: radial-gradient(circle at 1px 1px, rgba(79, 70, 229, 0.15) 1px, transparent 0);
+    background-size: 20px 20px;
+  }
+  
+  .field-optional-bg {
+    background-image: radial-gradient(circle at 1px 1px, rgba(156, 163, 175, 0.1) 1px, transparent 0);
+    background-size: 24px 24px;
+  }
+  
+  /* Tooltip enhancements */
+  .tooltip-container {
+    position: relative;
+    display: inline-block;
+    margin-right: 8px;
+  }
+  
+  .tooltip {
+    visibility: hidden;
+    opacity: 0;
+    position: fixed;
+    top: auto;
+    left: auto;
+    background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+    color: white;
+    text-align: left;
+    padding: 12px 16px;
+    border-radius: 8px;
+    font-size: 13px;
+    line-height: 1.5;
+    z-index: 9999;
+    width: 280px;
+    max-width: 90vw;
+    transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    pointer-events: none;
+  }
+  
+  .tooltip::before {
+    content: "";
+    position: absolute;
+    bottom: 100%;
+    left: 20px;
+    border-width: 0 8px 8px 8px;
+    border-style: solid;
+    border-color: transparent transparent #1f2937 transparent;
+    filter: drop-shadow(0 -1px 2px rgba(0, 0, 0, 0.1));
+  }
+  
+  .tooltip-container:hover .tooltip {
+    visibility: visible;
+    opacity: 1;
+  }
+  
+  /* Character counter styling */
+  .char-counter {
+    font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', monospace;
+    font-variant-numeric: tabular-nums;
+  }
+  
+  /* Enhanced form actions */
+  .form-actions {
+    background: linear-gradient(to right, rgba(249, 250, 251, 0.8), rgba(243, 244, 246, 0.8));
+    backdrop-filter: blur(8px);
+    border-top: 1px solid rgba(229, 231, 235, 0.8);
+  }
+  
+  /* Mobile responsiveness improvements */
+  @media (max-width: 640px) {
+    .tooltip {
+      width: 260px;
+      font-size: 12px;
+      padding: 10px 14px;
+    }
+    
+    .tooltip-container {
+      margin-right: 6px;
+    }
+    
+    .field-required-bg, .field-optional-bg {
+      background-size: 16px 16px;
+    }
+    
+    .form-field-container {
+      padding: 12px;
+    }
+  }
+  
+  /* Accessibility improvements */
+  @media (prefers-reduced-motion: reduce) {
+    .form-field-container, input, select, textarea, .tooltip {
+      transition: none;
+    }
+    
+    .form-field-container:hover {
+      transform: none;
+    }
+  }
+  
+  /* High contrast mode support */
+  @media (prefers-contrast: high) {
+    .field-required-bg {
+      background-image: none;
+      background-color: #fef3f2;
+      border: 2px solid #ef4444;
+    }
+    
+    .field-optional-bg {
+      background-image: none;
+      background-color: #f8fafc;
+      border: 2px solid #64748b;
+    }
+    
+    .section-header {
+      background: #ffffff;
+      border: 2px solid #1e293b;
+    }
+  }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Character counters for text areas
+  const justificationField = document.querySelector('#dispute_justification');
+  const evidenceField = document.querySelector('#dispute_evidence_notes');
+  const justificationCount = document.querySelector('#justification-count');
+  const evidenceCount = document.querySelector('#evidence-count');
+  
+  if (justificationField && justificationCount) {
+    function updateJustificationCount() {
+      const count = justificationField.value.length;
+      justificationCount.textContent = count;
+      
+      if (count > 1000) {
+        justificationCount.parentElement.classList.add('error');
+        justificationCount.parentElement.classList.remove('warning');
+      } else if (count > 900) {
+        justificationCount.parentElement.classList.add('warning');
+        justificationCount.parentElement.classList.remove('error');
+      } else {
+        justificationCount.parentElement.classList.remove('error', 'warning');
+      }
+    }
+    
+    justificationField.addEventListener('input', updateJustificationCount);
+    updateJustificationCount(); // Initialize
+  }
+  
+  if (evidenceField && evidenceCount) {
+    function updateEvidenceCount() {
+      const count = evidenceField.value.length;
+      evidenceCount.textContent = count;
+      
+      if (count > 2000) {
+        evidenceCount.parentElement.classList.add('error');
+        evidenceCount.parentElement.classList.remove('warning');
+      } else if (count > 1800) {
+        evidenceCount.parentElement.classList.add('warning');
+        evidenceCount.parentElement.classList.remove('error');
+      } else {
+        evidenceCount.parentElement.classList.remove('error', 'warning');
+      }
+    }
+    
+    evidenceField.addEventListener('input', updateEvidenceCount);
+    updateEvidenceCount(); // Initialize
+  }
+
+  // Handle dispute type dropdown change
+  const disputeTypeSelect = document.querySelector('[data-dispute-type-select]');
+  const descriptionDiv = document.getElementById('dispute-type-description');
+  const descriptionText = document.getElementById('dispute-type-description-text');
+  
+  const descriptions = {
+    'validity_challenge': 'Questiona a validade legal ou técnica da infração, alegando que a mesma não deveria ter sido aplicada.',
+    'insufficient_evidence': 'Alega que as evidências apresentadas são insuficientes para comprovar a infração.',
+    'procedural_error': 'Aponta erros no processo de aplicação da infração, incluindo falhas procedimentais.',
+    'escalation_required': 'Solicita escalação para instância superior devido à complexidade do caso.',
+    'technical_issue': 'Identifica problemas técnicos que podem ter causado a infração incorretamente.'
+  };
+
+  if (disputeTypeSelect && descriptionDiv && descriptionText) {
+    disputeTypeSelect.addEventListener('change', function() {
+      const selectedValue = this.value;
+      
+      if (selectedValue && descriptions[selectedValue]) {
+        descriptionText.innerHTML = descriptions[selectedValue];
+        descriptionDiv.classList.remove('hidden');
+      } else {
+        descriptionDiv.classList.add('hidden');
+      }
+    });
+    
+    // Initialize if there's already a selected value
+    if (disputeTypeSelect.value && descriptions[disputeTypeSelect.value]) {
+      descriptionText.innerHTML = descriptions[disputeTypeSelect.value];
+      descriptionDiv.classList.remove('hidden');
+    }
+  }
+
+  // Enhanced tooltip positioning
+  const tooltipContainers = document.querySelectorAll('.tooltip-container');
+  
+  tooltipContainers.forEach(container => {
+    const tooltip = container.querySelector('.tooltip');
+    
+    if (tooltip) {
+      container.addEventListener('mouseenter', function(e) {
+        const rect = container.getBoundingClientRect();
+        const tooltipRect = tooltip.getBoundingClientRect();
+        const viewportWidth = window.innerWidth;
+        const viewportHeight = window.innerHeight;
+        
+        // Position tooltip below the icon with some margin
+        let top = rect.bottom + 10;
+        let left = rect.left;
+        
+        // Adjust if tooltip would go off screen horizontally
+        if (left + 280 > viewportWidth) {
+          left = viewportWidth - 280 - 20; // 20px margin from edge
+        }
+        
+        if (left < 20) {
+          left = 20; // Minimum 20px from left edge
+        }
+        
+        // Adjust if tooltip would go off screen vertically
+        if (top + 100 > viewportHeight) { // Approximate tooltip height
+          top = rect.top - 110; // Position above the icon instead
+        }
+        
+        tooltip.style.top = top + 'px';
+        tooltip.style.left = left + 'px';
+      });
+    }
+  });
+  
+  // Add form field classes for better spacing
+  document.querySelectorAll('.tooltip-container').forEach(container => {
+    const parentDiv = container.closest('div');
+    if (parentDiv) {
+      parentDiv.classList.add('form-field-with-tooltip');
+    }
+  });
+});
+</script>

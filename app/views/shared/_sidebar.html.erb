@@ -32,6 +32,10 @@
     <%= nav_link(infraction_notifications_path, 'exclamation-triangle', 
                  t('sidebar.infraction_reports'), 
                  active: controller_name == 'infraction_notifications') %>
+
+    <!-- Disputes -->
+    <%= nav_link(disputes_path, 'scale', t('sidebar.disputes'), 
+                 active: controller_name == 'disputes') %>
   </nav>
 </div>
 

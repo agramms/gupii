@@ -6,6 +6,17 @@ class InfractionNotification < ApplicationRecord
   include Jdpi::StatusCodes
   include ShortId
   
+  # Enums
+  enum :dispute_status, {
+    none: 0,
+    pending: 1,
+    under_review: 2,
+    approved: 3,
+    rejected: 4,
+    auto_declined: 5,
+    escalated: 6
+  }, prefix: true, default: :none
+  
   # Validations
   validates :pix_key, presence: true, length: { maximum: 77 }
   validates :infraction_type, presence: true, inclusion: { in: InfractionTypes::ALL }
@@ -36,10 +47,12 @@ class InfractionNotification < ApplicationRecord
   # Callbacks
   before_validation :normalize_data, on: :create
   before_create :set_default_values
+  before_save :update_days_remaining
   after_update :log_status_change, if: :saved_change_to_status?
   
   # Associations
   has_many :infraction_logs, dependent: :destroy
+  has_one :dispute, dependent: :destroy
   
   # Instance Methods
   
@@ -122,14 +135,14 @@ class InfractionNotification < ApplicationRecord
   # Fraud team dashboard helper methods
   def hours_until_deadline
     hours_since_creation = ((Time.current - created_at) / 1.hour).ceil
-    48 - hours_since_creation # 48-hour BACEN deadline
+    168 - hours_since_creation # 168-hour (7-day) BACEN deadline
   end
 
   def deadline_urgency_class
     hours_left = hours_until_deadline
-    return 'deadline-critical' if hours_left <= 6
-    return 'deadline-urgent' if hours_left <= 24
-    return 'deadline-warning' if hours_left <= 48
+    return 'deadline-critical' if hours_left <= 24  # Last day
+    return 'deadline-urgent' if hours_left <= 48    # Last 2 days  
+    return 'deadline-warning' if hours_left <= 72   # Last 3 days
     'deadline-normal'
   end
 
@@ -164,6 +177,30 @@ class InfractionNotification < ApplicationRecord
   
   def overdue_for_analysis?
     days_since_submission > Duration::MAX_ANALYSIS_DAYS && pending?
+  end
+  
+  # Dispute-related methods
+  def can_be_disputed?
+    dispute.nil?
+  end
+  
+  def has_dispute?
+    dispute.present?
+  end
+  
+  def dispute_deadline
+    return nil unless response_due_at
+    response_due_at
+  end
+  
+  def days_until_response_deadline
+    return 0 unless response_due_at
+    return 0 if response_due_at < Time.current
+    ((response_due_at - Time.current) / 1.day).ceil
+  end
+  
+  def overdue_for_response?
+    response_due_at.present? && response_due_at < Time.current
   end
   
   def update_status!(new_status, notes: nil)
@@ -251,6 +288,14 @@ class InfractionNotification < ApplicationRecord
     self.status ||= InfractionStatus::SUBMITTED
     self.submitted_at ||= Time.current
     self.idempotency_key ||= Jdpi::IdempotencyService.generate_key
+    self.response_due_at ||= 7.days.from_now
+    self.days_remaining_to_respond ||= 7
+  end
+  
+  def update_days_remaining
+    if response_due_at.present?
+      self.days_remaining_to_respond = days_until_response_deadline
+    end
   end
   
   def validate_pix_key_format

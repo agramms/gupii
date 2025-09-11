@@ -1,0 +1,486 @@
+<div class="min-h-screen bg-gray-50">
+  <!-- Critical Alerts Banner -->
+  <% if @critical_alerts[:auto_decline_candidates] > 0 %>
+    <div class="sticky top-0 z-50 bg-red-50 border-l-4 border-red-500 p-4">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center">
+          <div class="flex-shrink-0">
+            <svg class="animate-pulse h-5 w-5 text-red-400" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"/>
+            </svg>
+          </div>
+          <div class="ml-3">
+            <h3 class="text-sm font-medium text-red-800">
+              🔥 <%= pluralize(@critical_alerts[:auto_decline_candidates], 'disputa vencida', 'disputas vencidas') %>
+            </h3>
+            <div class="mt-1 text-sm text-red-700">
+              Estas disputas estão vencidas e podem ser automaticamente rejeitadas.
+            </div>
+          </div>
+        </div>
+        <div class="flex-shrink-0">
+          <button class="bg-red-100 rounded-md p-2 text-red-400 hover:text-red-500 transition-colors duration-200">
+            <span class="text-xs font-semibold">Ver Todas</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  <% end %>
+
+  <!-- Main Header -->
+  <div class="bg-white shadow">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between items-center py-6">
+        <div class="flex items-center">
+          <h1 class="text-3xl font-bold text-gray-900">Gestão de Disputas</h1>
+          <span class="ml-3 text-sm text-gray-500">Acompanhamento de disputas internas</span>
+        </div>
+        <div class="flex items-center space-x-4">
+          <span class="text-sm text-gray-600">
+            Disputas são criadas apenas através das notificações de infração
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tabs Navigation -->
+  <div class="bg-white border-b border-gray-200">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <nav class="-mb-px flex space-x-1" aria-label="Tabs">
+        <%= link_to disputes_path(permitted_params_except(:tab).merge(tab: 'opened')), 
+            class: "py-3 px-6 border-b-2 font-medium text-sm rounded-t-lg transition-all duration-200 #{'border-indigo-500 text-indigo-600 bg-indigo-50' if @tab == 'opened'} #{'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 hover:bg-gray-50' if @tab != 'opened'}" do %>
+          <span class="flex items-center">
+            <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            Abertas (<%= @opened_count %>)
+          </span>
+        <% end %>
+        
+        <%= link_to disputes_path(permitted_params_except(:tab).merge(tab: 'pending')), 
+            class: "py-3 px-6 border-b-2 font-medium text-sm rounded-t-lg transition-all duration-200 #{'border-indigo-500 text-indigo-600 bg-indigo-50' if @tab == 'pending'} #{'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 hover:bg-gray-50' if @tab != 'pending'}" do %>
+          <span class="flex items-center">
+            <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            Pendentes (<%= @pending_count %>)
+          </span>
+        <% end %>
+
+        <%= link_to disputes_path(permitted_params_except(:tab).merge(tab: 'review')), 
+            class: "py-3 px-6 border-b-2 font-medium text-sm rounded-t-lg transition-all duration-200 #{'border-indigo-500 text-indigo-600 bg-indigo-50' if @tab == 'review'} #{'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 hover:bg-gray-50' if @tab != 'review'}" do %>
+          <span class="flex items-center">
+            <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            Em Análise (<%= @under_review_count %>)
+          </span>
+        <% end %>
+
+        <%= link_to disputes_path(permitted_params_except(:tab).merge(tab: 'overdue')), 
+            class: "py-3 px-6 border-b-2 font-medium text-sm rounded-t-lg transition-all duration-200 #{'border-indigo-500 text-indigo-600 bg-indigo-50' if @tab == 'overdue'} #{'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 hover:bg-gray-50' if @tab != 'overdue'}" do %>
+          <span class="flex items-center">
+            <svg class="mr-2 h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"/>
+            </svg>
+            Vencidas (<%= @overdue_count %>)
+          </span>
+        <% end %>
+        
+        <%= link_to disputes_path(permitted_params_except(:tab).merge(tab: 'all')), 
+            class: "py-3 px-6 border-b-2 font-medium text-sm rounded-t-lg transition-all duration-200 #{'border-indigo-500 text-indigo-600 bg-indigo-50' if @tab == 'all'} #{'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 hover:bg-gray-50' if @tab != 'all'}" do %>
+          <span class="flex items-center">
+            <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v6a2 2 0 002 2h6a2 2 0 002-2V7a2 2 0 00-2-2H9z"/>
+            </svg>
+            Todas (<%= Dispute.count %>)
+          </span>
+        <% end %>
+      </nav>
+    </div>
+  </div>
+
+  <!-- Enhanced Quick Stats Bar with Clickable Filters -->
+  <div class="bg-white border-b border-gray-200 px-6 py-4">
+    <div class="max-w-7xl mx-auto">
+      <!-- Professional Filter Cards -->
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        <!-- Pending Customer Response Card -->
+        <%= link_to disputes_path(permitted_params_except(:quick_filter).merge(tab: @tab, quick_filter: 'pending')), 
+            class: "group relative flex items-center justify-between p-4 rounded-full border-2 border-yellow-200 bg-white hover:bg-yellow-50 hover:border-yellow-300 transition-all duration-300 shadow-sm hover:shadow-md #{params[:quick_filter] == 'pending' ? 'bg-yellow-50 border-yellow-400 ring-2 ring-yellow-200' : ''}" do %>
+          <div class="flex items-center space-x-3">
+            <div class="flex-shrink-0">
+              <div class="flex items-center justify-center w-10 h-10 bg-yellow-100 rounded-full shadow-sm group-hover:bg-yellow-200 group-hover:scale-105 transition-all duration-200">
+                <svg class="w-5 h-5 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+              </div>
+            </div>
+            <div class="min-w-0 flex-1">
+              <p class="text-sm font-medium text-gray-700 group-hover:text-yellow-700 transition-colors">
+                Aguardando Cliente
+              </p>
+              <p class="text-lg font-bold text-gray-900 group-hover:text-yellow-800 transition-colors">
+                <%= @dashboard_stats[:pending_customer_response] %>
+              </p>
+            </div>
+          </div>
+        <% end %>
+
+        <!-- Under Review Card -->
+        <%= link_to disputes_path(permitted_params_except(:quick_filter).merge(tab: @tab, quick_filter: 'review')), 
+            class: "group relative flex items-center justify-between p-4 rounded-full border-2 border-blue-200 bg-white hover:bg-blue-50 hover:border-blue-300 transition-all duration-300 shadow-sm hover:shadow-md #{params[:quick_filter] == 'review' ? 'bg-blue-50 border-blue-400 ring-2 ring-blue-200' : ''}" do %>
+          <div class="flex items-center space-x-3">
+            <div class="flex-shrink-0">
+              <div class="flex items-center justify-center w-10 h-10 bg-blue-100 rounded-full shadow-sm group-hover:bg-blue-200 group-hover:scale-105 transition-all duration-200">
+                <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+              </div>
+            </div>
+            <div class="min-w-0 flex-1">
+              <p class="text-sm font-medium text-gray-700 group-hover:text-blue-700 transition-colors">
+                Em Análise
+              </p>
+              <p class="text-lg font-bold text-gray-900 group-hover:text-blue-800 transition-colors">
+                <%= @dashboard_stats[:under_review] %>
+              </p>
+            </div>
+          </div>
+        <% end %>
+
+        <!-- Overdue Card -->
+        <%= link_to disputes_path(permitted_params_except(:quick_filter).merge(tab: @tab, quick_filter: 'overdue')), 
+            class: "group relative flex items-center justify-between p-4 rounded-full border-2 border-red-200 bg-white hover:bg-red-50 hover:border-red-300 transition-all duration-300 shadow-sm hover:shadow-md #{params[:quick_filter] == 'overdue' ? 'bg-red-50 border-red-400 ring-2 ring-red-200' : ''}" do %>
+          <div class="flex items-center space-x-3">
+            <div class="flex-shrink-0">
+              <div class="flex items-center justify-center w-10 h-10 bg-red-100 rounded-full shadow-sm group-hover:bg-red-200 group-hover:scale-105 transition-all duration-200">
+                <svg class="w-5 h-5 text-red-600" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"/>
+                </svg>
+              </div>
+            </div>
+            <div class="min-w-0 flex-1">
+              <p class="text-sm font-medium text-gray-700 group-hover:text-red-700 transition-colors">
+                Vencidas
+              </p>
+              <p class="text-lg font-bold text-gray-900 group-hover:text-red-800 transition-colors">
+                <%= @dashboard_stats[:overdue_customer_response] %>
+              </p>
+            </div>
+          </div>
+        <% end %>
+
+        <!-- Approaching Deadline Card -->
+        <%= link_to disputes_path(permitted_params_except(:quick_filter).merge(tab: @tab, quick_filter: 'approaching')), 
+            class: "group relative flex items-center justify-between p-4 rounded-full border-2 border-orange-200 bg-white hover:bg-orange-50 hover:border-orange-300 transition-all duration-300 shadow-sm hover:shadow-md #{params[:quick_filter] == 'approaching' ? 'bg-orange-50 border-orange-400 ring-2 ring-orange-200' : ''}" do %>
+          <div class="flex items-center space-x-3">
+            <div class="flex-shrink-0">
+              <div class="flex items-center justify-center w-10 h-10 bg-orange-100 rounded-full shadow-sm group-hover:bg-orange-200 group-hover:scale-105 transition-all duration-200">
+                <svg class="w-5 h-5 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+              </div>
+            </div>
+            <div class="min-w-0 flex-1">
+              <p class="text-sm font-medium text-gray-700 group-hover:text-orange-700 transition-colors">
+                Próximo Venc.
+              </p>
+              <p class="text-lg font-bold text-gray-900 group-hover:text-orange-800 transition-colors">
+                <%= @dashboard_stats[:approaching_deadlines] %>
+              </p>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  </div>
+
+  <div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+    <!-- Enhanced Search and Filters -->
+    <div class="bg-white shadow rounded-lg mb-6">
+      <div class="p-6">
+        <%= form_with url: disputes_path, method: :get, local: true, class: "space-y-6" do |form| %>
+          <%= hidden_field_tag :tab, @tab %>
+          <%= hidden_field_tag :quick_filter, params[:quick_filter] if params[:quick_filter].present? %>
+          
+          <!-- Filters in Two Rows -->
+          <div class="space-y-4">
+            <!-- First Row: Search Field (Full Width) -->
+            <div class="flex">
+              <div class="flex-1">
+                <%= form.label :search, "Buscar", class: "block text-sm font-medium text-gray-700" %>
+                <%= form.text_field :search, value: params[:search], 
+                                    placeholder: "Buscar por chave PIX, justificativa ou ID...", 
+                                    class: "mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm py-2.5 px-3" %>
+              </div>
+            </div>
+            
+            <!-- Second Row: Dropdowns and Button -->
+            <div class="flex flex-wrap items-end gap-4">
+              <!-- Status Dropdown -->
+              <div class="flex-1 min-w-32">
+                <%= form.label :status, "Status", class: "block text-sm font-medium text-gray-700" %>
+                <%= form.select :status, 
+                                options_for_select([['Todos os status', '']] + 
+                                  Dispute.statuses.map { |key, _| [key.humanize, key] }, 
+                                  params[:status]), 
+                                {}, 
+                                { class: "mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm py-2.5 px-3" } %>
+              </div>
+
+              <!-- Type Dropdown -->
+              <div class="flex-1 min-w-32">
+                <%= form.label :dispute_type, "Tipo", class: "block text-sm font-medium text-gray-700" %>
+                <%= form.select :dispute_type, 
+                                options_for_select([['Todos os tipos', '']] + 
+                                  Dispute.dispute_types.map { |key, _| [key.humanize, key] }, 
+                                  params[:dispute_type]), 
+                                {}, 
+                                { class: "mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm py-2.5 px-3" } %>
+              </div>
+
+              <!-- Created By Filter -->
+              <div class="flex-1 min-w-32">
+                <%= form.label :created_by, "Criado por", class: "block text-sm font-medium text-gray-700" %>
+                <%= form.text_field :created_by, value: params[:created_by], 
+                                    placeholder: "Email do criador...", 
+                                    class: "mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm py-2.5 px-3" %>
+              </div>
+
+              <!-- Assigned To Filter -->
+              <div class="flex-1 min-w-32">
+                <%= form.label :assigned_to, "Atribuído para", class: "block text-sm font-medium text-gray-700" %>
+                <%= form.text_field :assigned_to, value: params[:assigned_to], 
+                                    placeholder: "Email do responsável...", 
+                                    class: "mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm py-2.5 px-3" %>
+              </div>
+              
+              <!-- Filter Button - Aligned with dropdowns -->
+              <div class="flex-shrink-0">
+                <button type="submit" class="bg-indigo-600 text-white px-4 py-2.5 rounded-md hover:bg-indigo-700 transition-colors duration-200 shadow-sm flex items-center space-x-2">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                  </svg>
+                  <span class="text-sm font-medium">Filtrar</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    </div>
+
+    <!-- Disputes Table -->
+    <div class="bg-white shadow-lg rounded-lg overflow-hidden">
+      <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+        <h3 class="text-lg font-medium text-gray-900">
+          Lista de Disputas
+          <span class="ml-2 text-sm text-gray-500">(<%= @disputes.count %> encontradas)</span>
+        </h3>
+      </div>
+      
+      <% if @disputes.any? %>
+        <div class="overflow-x-auto">
+          <table class="min-w-full divide-y divide-gray-200 table-fixed">
+            <thead class="bg-gray-50">
+              <tr>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/3">
+                  Disputa
+                </th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/3">
+                  Infração Relacionada
+                </th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-24">
+                  <%= t('disputes.index.table_headers.status') %>
+                </th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-32">
+                  <%= t('disputes.index.table_headers.type') %>
+                </th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-20">
+                  <%= t('disputes.index.table_headers.deadline') %>
+                </th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-40">
+                  <%= t('disputes.index.table_headers.actions') %>
+                </th>
+              </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+              <% @disputes.each do |dispute| %>
+                <tr class="hover:bg-gray-50 transition-colors duration-150">
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="flex items-center">
+                      <div>
+                        <div class="text-sm font-medium text-gray-900">
+                          <%= link_to dispute_path(dispute), class: "text-indigo-600 hover:text-indigo-900" do %>
+                            Disputa #<%= dispute.id.first(8) %>
+                          <% end %>
+                        </div>
+                        <div class="text-sm text-gray-500">
+                          Criado <%= time_ago_in_words(dispute.created_at) %> atrás
+                        </div>
+                      </div>
+                    </div>
+                  </td>
+
+                  <td class="px-6 py-4 w-full">
+                    <div class="text-sm text-gray-900">
+                      <%= link_to infraction_notification_path(dispute.infraction_notification), 
+                                  class: "text-blue-600 hover:text-blue-900" do %>
+                        <%= dispute.infraction_notification.masked_pix_key %>
+                      <% end %>
+                    </div>
+                    <div class="text-sm text-gray-500">
+                      <%= dispute.infraction_notification.infraction_type_description %>
+                    </div>
+                  </td>
+
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <span class="inline-flex px-2 text-xs leading-5 font-semibold rounded-full
+                                 <%= case dispute.status
+                                     when 'pending_customer_response' then 'bg-yellow-100 text-yellow-800'
+                                     when 'under_internal_review' then 'bg-blue-100 text-blue-800'
+                                     when 'approved' then 'bg-green-100 text-green-800'
+                                     when 'rejected' then 'bg-red-100 text-red-800'
+                                     when 'auto_declined' then 'bg-gray-100 text-gray-800'
+                                     when 'escalated' then 'bg-purple-100 text-purple-800'
+                                     else 'bg-gray-100 text-gray-800'
+                                     end %>">
+                      <%= t("disputes.status_options.#{dispute.status}", default: dispute.status.humanize) %>
+                    </span>
+                  </td>
+
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    <%= t("disputes.types.#{dispute.dispute_type}", default: dispute.dispute_type.humanize) %>
+                  </td>
+
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <% if dispute.days_until_deadline > 0 %>
+                      <span class="text-sm <%= dispute.approaching_deadline? ? 'text-orange-600 font-semibold' : 'text-gray-900' %>">
+                        <%= pluralize(dispute.days_until_deadline, 'dia', 'dias') %>
+                      </span>
+                    <% elsif dispute.overdue_for_customer_response? %>
+                      <span class="text-sm text-red-600 font-semibold">
+                        Vencido há <%= pluralize(dispute.days_until_deadline.abs, 'dia', 'dias') %>
+                      </span>
+                    <% else %>
+                      <span class="text-sm text-gray-500">
+                        <%= dispute.resolved? ? 'Resolvido' : 'N/A' %>
+                      </span>
+                    <% end %>
+                  </td>
+
+                  <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                    <div class="flex space-x-4 bg-gray-50 rounded-lg px-4 py-2 border border-gray-200">
+                      <%= link_to t('disputes.index.buttons.view'), dispute_path(dispute), 
+                                  class: "text-indigo-600 hover:text-indigo-900 text-sm font-medium transition-colors duration-200" %>
+                      <% if dispute.can_be_cancelled? %>
+                        <span class="text-gray-300">|</span>
+                        <%= link_to t('disputes.index.buttons.cancel'), cancel_dispute_path(dispute), 
+                                    method: :patch,
+                                    data: { confirm: t('disputes.index.buttons.confirm_cancel') },
+                                    class: "text-red-600 hover:text-red-900 text-sm font-medium transition-colors duration-200" %>
+                      <% end %>
+                    </div>
+                  </td>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+        </div>
+      <% else %>
+        <div class="text-center py-12">
+          <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+          </svg>
+          <h3 class="mt-2 text-sm font-medium text-gray-900">Nenhuma disputa encontrada</h3>
+          <p class="mt-1 text-sm text-gray-500">
+            <% if @tab == 'opened' %>
+              Não há disputas abertas no momento.
+            <% elsif @tab == 'all' %>
+              Não há disputas no sistema no momento.
+            <% else %>
+              Não há disputas que correspondam aos filtros aplicados.
+            <% end %>
+          </p>
+          <div class="mt-6">
+            <%= link_to "Ver todas as disputas", disputes_path(tab: 'all'), 
+                        class: "inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" %>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>
+
+<!-- Enhanced CSS -->
+<style>
+  /* Form input styling to match infraction reports */
+  .form-select,
+  .form-input,
+  input[type="text"],
+  input[type="date"],
+  select {
+    padding-top: 0.625rem !important;
+    padding-bottom: 0.625rem !important;
+    line-height: 1.25 !important;
+  }
+
+  /* Professional transitions */
+  .transition-all {
+    transition: all 0.2s ease-in-out;
+  }
+  
+  /* Enhanced hover states */
+  .hover\:scale-105:hover {
+    transform: scale(1.05);
+  }
+
+  /* Smooth color transitions */
+  .transition-colors {
+    transition-property: color, background-color, border-color;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    transition-duration: 150ms;
+  }
+
+  /* Enhanced card shadows */
+  .shadow-lg {
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  }
+
+  /* Force table column widths */
+  .table-fixed {
+    table-layout: fixed;
+  }
+
+  .table-fixed th:nth-child(1),
+  .table-fixed td:nth-child(1) {
+    width: 30%;
+  }
+
+  .table-fixed th:nth-child(2),
+  .table-fixed td:nth-child(2) {
+    width: 30%;
+  }
+
+  .table-fixed th:nth-child(3),
+  .table-fixed td:nth-child(3) {
+    width: 12%;
+  }
+
+  .table-fixed th:nth-child(4),
+  .table-fixed td:nth-child(4) {
+    width: 15%;
+  }
+
+  .table-fixed th:nth-child(5),
+  .table-fixed td:nth-child(5) {
+    width: 8%;
+  }
+
+  .table-fixed th:nth-child(6),
+  .table-fixed td:nth-child(6) {
+    width: 15%;
+  }
+</style>

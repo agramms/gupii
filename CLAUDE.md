@@ -209,6 +209,40 @@ RAILS_ENV=development
 - Metrics: http://localhost:9090
 - Tracing: http://localhost:16686
 
+## Disputes System Architecture
+
+The **Disputes Management System** handles internal dispute processes for infraction notifications with comprehensive workflow management.
+
+### Key Features
+- **Complete CRUD Operations**: Create disputes from infraction notifications with nested routing
+- **Status Management**: 7-state dispute lifecycle with proper transitions
+- **Timeline Tracking**: Customer response deadlines with automatic decline capability
+- **Action Management**: Approve, reject, escalate, assign, and cancel operations
+- **Dashboard Analytics**: Real-time metrics and critical alerts
+- **Internationalization**: Full i18n support in Portuguese
+
+### Technical Implementation
+- **Model**: `app/models/dispute.rb` with ShortId concern for display IDs
+- **Controller**: `app/controllers/disputes_controller.rb` with comprehensive action handling
+- **Views**: Responsive Tailwind CSS with professional UX matching infraction notifications
+- **Routes**: Nested under infraction notifications + standalone dispute management
+- **Database**: 6-day customer response deadline with auto-decline functionality
+
+### Dispute Lifecycle
+1. **pending_customer_response** → Customer has 6 days to respond
+2. **under_internal_review** → Internal team analysis
+3. **pending_resolution** → Awaiting final decision
+4. **approved/rejected** → Final resolution states
+5. **auto_declined** → Automatic decline after deadline
+6. **escalated** → Escalated for superior review
+
+### Business Rules
+- **One dispute per infraction notification**
+- **6-day customer response deadline** (7 - 1 day buffer)
+- **Automatic decline** for overdue responses
+- **Status transition validation** with proper workflow
+- **Timeline constraints** between 1-14 days
+
 ## Important Notes
 
 - **PIX Focus**: Brazilian Central Bank PIX integration with MED (Mecanismo Especial de Devolução)
@@ -217,6 +251,7 @@ RAILS_ENV=development
 - **Authentication**: iugu Identity Provider with JWT tokens
 - **API Strategy**: Polling-based client communication pattern
 - **Service Architecture**: Clean JDPI integration in `app/services/jdpi/`
+- **Disputes System**: Complete lifecycle management with 6-day customer response SLA
 - **Reference Templates**: Use `tmp/platform2-app-boleto` for Tailwind patterns only
 - **JDPI Documentation**: API specification in `tmp/jdpi-api-doc.5.2.1.pdf`
 - **Mascot**: Gupii 🐹 represents friendly, accessible PIX payments

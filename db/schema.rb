@@ -10,9 +10,41 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_09_09_000001) do
+ActiveRecord::Schema[8.0].define(version: 2025_09_09_000002) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
+
+  create_table "disputes", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "infraction_notification_id", null: false
+    t.integer "dispute_type", default: 0, null: false
+    t.integer "status", default: 0, null: false
+    t.text "justification", null: false
+    t.text "evidence_notes"
+    t.jsonb "additional_data", default: {}
+    t.string "created_by", null: false
+    t.string "assigned_to"
+    t.string "reviewed_by"
+    t.datetime "submitted_at", precision: nil
+    t.datetime "reviewed_at", precision: nil
+    t.datetime "resolved_at", precision: nil
+    t.datetime "customer_response_due_at", precision: nil, null: false
+    t.text "resolution_notes"
+    t.text "next_actions"
+    t.string "final_decision"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.datetime "deleted_at", precision: nil
+    t.string "deleted_by"
+    t.text "deletion_reason"
+    t.index ["created_at"], name: "index_disputes_on_created_at"
+    t.index ["customer_response_due_at"], name: "index_disputes_on_customer_response_due_at"
+    t.index ["deleted_at"], name: "index_disputes_on_deleted_at"
+    t.index ["dispute_type"], name: "index_disputes_on_dispute_type"
+    t.index ["infraction_notification_id"], name: "index_disputes_on_infraction_notification", unique: true
+    t.index ["infraction_notification_id"], name: "index_disputes_on_infraction_notification_id"
+    t.index ["status", "customer_response_due_at"], name: "index_disputes_on_status_and_due_date"
+    t.index ["status"], name: "index_disputes_on_status"
+  end
 
   create_table "infraction_logs", id: :uuid, default: -> { "gen_random_uuid()" }, comment: "Audit trail for infraction notification changes", force: :cascade do |t|
     t.uuid "infraction_notification_id", null: false
@@ -43,7 +75,11 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_09_000001) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "created_by", default: "DICT_AUTOMATIC", null: false, comment: "Source that created the infraction (CUSTOMER_SERVICE, CUSTOMER_EXPERIENCE, DICT_AUTOMATIC)"
+    t.integer "dispute_status", default: 0
+    t.datetime "response_due_at", precision: nil
+    t.integer "days_remaining_to_respond"
     t.index ["created_by"], name: "index_infraction_notifications_on_created_by"
+    t.index ["dispute_status"], name: "index_infraction_notifications_on_dispute_status"
     t.index ["idempotency_key"], name: "index_infraction_notifications_on_idempotency_key", unique: true
     t.index ["infraction_type", "created_at"], name: "idx_on_infraction_type_created_at_4339c8d09a"
     t.index ["infraction_type"], name: "index_infraction_notifications_on_infraction_type"
@@ -51,7 +87,9 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_09_000001) do
     t.index ["last_status_change_at"], name: "index_infraction_notifications_on_last_status_change_at"
     t.index ["pix_key", "status"], name: "index_infraction_notifications_on_pix_key_and_status"
     t.index ["pix_key"], name: "index_infraction_notifications_on_pix_key"
+    t.index ["response_due_at"], name: "index_infraction_notifications_on_response_due_at"
     t.index ["status", "created_at"], name: "index_infraction_notifications_on_status_and_created_at"
+    t.index ["status", "response_due_at"], name: "index_infractions_on_status_and_due_date"
     t.index ["status"], name: "index_infraction_notifications_on_status"
     t.index ["submitted_at"], name: "index_infraction_notifications_on_submitted_at"
   end
@@ -108,5 +146,6 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_09_000001) do
     t.index ["status"], name: "index_payment_service_providers_on_status"
   end
 
+  add_foreign_key "disputes", "infraction_notifications"
   add_foreign_key "infraction_logs", "infraction_notifications", on_delete: :cascade
 end

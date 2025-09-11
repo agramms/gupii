@@ -1,0 +1,323 @@
+<% content_for :title, "Disputa ##{@dispute.short_id}" %>
+
+<!-- Page Header -->
+<div class="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-6">
+  <div class="min-w-0 flex-1">
+    <nav class="flex mb-3" aria-label="Breadcrumb">
+      <ol role="list" class="flex items-center space-x-4">
+        <li>
+          <%= link_to disputes_path, class: "text-gray-400 hover:text-gray-500 text-sm font-medium" do %>
+            <svg class="h-4 w-4 mr-1 inline" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M3 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM9 15a1 1 0 011-1h6a1 1 0 110 2h-6a1 1 0 01-1-1z" clip-rule="evenodd"></path>
+            </svg>
+            Disputas
+          <% end %>
+        </li>
+        <li>
+          <div class="flex items-center">
+            <svg class="h-5 w-5 text-gray-300" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 111.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
+            </svg>
+            <span class="ml-4 text-sm font-medium text-gray-500">Disputa #<%= @dispute.short_id %></span>
+          </div>
+        </li>
+      </ol>
+    </nav>
+    <h1 class="text-2xl font-bold leading-7 text-gray-900 sm:text-3xl sm:truncate">
+      Disputa #<%= @dispute.short_id %>
+    </h1>
+    <div class="mt-2 flex flex-col sm:flex-row sm:flex-wrap sm:space-x-6">
+      <div class="mt-2 flex items-center text-sm text-gray-500">
+        <svg class="mr-1.5 h-5 w-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd"></path>
+        </svg>
+        Criada em <%= l(@dispute.created_at, format: :long) %>
+      </div>
+      <div class="mt-2 flex items-center text-sm text-gray-500">
+        <svg class="mr-1.5 h-5 w-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"></path>
+        </svg>
+        <% if @dispute.customer_response_due_at %>
+          <%= time_ago_in_words(@dispute.customer_response_due_at) %> para expirar
+        <% else %>
+          Prazo indefinido
+        <% end %>
+      </div>
+    </div>
+  </div>
+
+  <!-- Action Buttons -->
+  <div class="mt-5 flex lg:mt-0 lg:ml-4 space-x-3">
+    <%= link_to @dispute.infraction_notification, 
+                class: "inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-all duration-200" do %>
+      <svg class="-ml-1 mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+      </svg>
+      Ver Infração Original
+    <% end %>
+    
+    <% if !@dispute.resolved? %>
+      <div class="flex space-x-2">
+        <%= link_to "Aprovar", approve_dispute_path(@dispute),
+                    method: :patch,
+                    data: { confirm: 'Tem certeza que deseja aprovar esta disputa?' },
+                    class: "bg-green-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-green-700 transition-all duration-200" %>
+        <%= link_to "Rejeitar", reject_dispute_path(@dispute),
+                    method: :patch,
+                    data: { confirm: 'Tem certeza que deseja rejeitar esta disputa?' },
+                    class: "bg-red-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-red-700 transition-all duration-200" %>
+        <%= link_to "Escalar", escalate_dispute_path(@dispute),
+                    method: :patch,
+                    data: { confirm: 'Tem certeza que deseja escalar esta disputa?' },
+                    class: "bg-purple-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-purple-700 transition-all duration-200" %>
+      </div>
+    <% end %>
+  </div>
+</div>
+
+<!-- Main Content Grid -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+  <!-- Main Content -->
+  <div class="lg:col-span-2 space-y-6">
+    
+    <!-- Dispute Status Card -->
+    <div class="bg-white shadow-lg rounded-lg overflow-hidden">
+      <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+        <h3 class="text-lg font-semibold text-gray-900 flex items-center">
+          <svg class="mr-2 h-5 w-5 text-gray-500" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M10 2L3 7v11a1 1 0 001 1h12a1 1 0 001-1V7l-7-5zM8 15V9h4v6H8z" clip-rule="evenodd"></path>
+          </svg>
+          Status da Disputa
+        </h3>
+      </div>
+      <div class="p-6">
+        <div class="flex items-center justify-between mb-4">
+          <div class="flex items-center">
+            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium
+                         <%= case @dispute.status
+                             when 'pending_customer_response' then 'bg-yellow-100 text-yellow-800'
+                             when 'under_internal_review' then 'bg-blue-100 text-blue-800'
+                             when 'approved' then 'bg-green-100 text-green-800'
+                             when 'rejected' then 'bg-red-100 text-red-800'
+                             when 'auto_declined' then 'bg-gray-100 text-gray-800'
+                             when 'escalated' then 'bg-purple-100 text-purple-800'
+                             else 'bg-gray-100 text-gray-800'
+                             end %>">
+              <%= @dispute.status.humanize %>
+            </span>
+          </div>
+          <div class="text-right">
+            <p class="text-sm text-gray-600">Última atualização</p>
+            <p class="text-sm font-medium text-gray-900"><%= l(@dispute.updated_at, format: :short) %></p>
+          </div>
+        </div>
+        
+        <!-- Progress Timeline -->
+        <div class="mt-6">
+          <div class="flex justify-between text-xs text-gray-500 mb-2">
+            <span>Criada</span>
+            <span>Em análise</span>
+            <span>Finalizada</span>
+          </div>
+          <div class="w-full bg-gray-200 rounded-full h-2">
+            <% progress = case @dispute.status
+                         when 'pending' then '33%'
+                         when 'under_review', 'customer_response_required' then '66%'
+                         when 'resolved', 'rejected' then '100%'
+                         else '0%'
+                         end %>
+            <div class="bg-blue-600 h-2 rounded-full transition-all duration-300" style="width: <%= progress %>"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Dispute Details Card -->
+    <div class="bg-white shadow-lg rounded-lg overflow-hidden">
+      <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+        <h3 class="text-lg font-semibold text-gray-900">Detalhes da Disputa</h3>
+      </div>
+      <div class="p-6 space-y-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Tipo de Disputa</label>
+            <p class="text-sm text-gray-900"><%= t("disputes.types.#{@dispute.dispute_type}") %></p>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Chave PIX</label>
+            <p class="text-sm text-gray-900 font-mono break-all"><%= @dispute.infraction_notification.pix_key %></p>
+          </div>
+        </div>
+        
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Razão da Disputa</label>
+          <div class="bg-gray-50 p-4 rounded-md">
+            <p class="text-sm text-gray-900 whitespace-pre-wrap"><%= @dispute.justification || 'Não especificada' %></p>
+          </div>
+        </div>
+        
+        <% if @dispute.evidence_notes.present? %>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Evidências</label>
+            <div class="bg-blue-50 border border-blue-200 p-4 rounded-md">
+              <p class="text-sm text-gray-800 whitespace-pre-wrap"><%= @dispute.evidence_notes %></p>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    </div>
+
+    <!-- Response Section (if customer response required) -->
+    <% if @dispute.status == 'pending_customer_response' %>
+      <div class="bg-amber-50 border border-amber-200 rounded-lg p-6">
+        <div class="flex items-center mb-4">
+          <svg class="h-6 w-6 text-amber-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+          </svg>
+          <h3 class="text-lg font-medium text-amber-900">Resposta do Cliente Necessária</h3>
+        </div>
+        <p class="text-amber-800 mb-4">Esta disputa requer uma resposta adicional do cliente.</p>
+        
+        <div class="flex items-center justify-between">
+          <p class="text-amber-800">Aguardando resposta do cliente...</p>
+          <% if @dispute.customer_response_due_at && @dispute.customer_response_due_at < Time.current %>
+            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
+              Expirada
+            </span>
+          <% end %>
+        </div>
+      </div>
+    <% end %>
+
+  </div>
+
+  <!-- Sidebar -->
+  <div class="lg:col-span-1 space-y-6">
+    
+    <!-- Quick Info Card -->
+    <div class="bg-white shadow-lg rounded-lg overflow-hidden">
+      <div class="px-4 py-3 bg-gray-50 border-b border-gray-200">
+        <h3 class="text-base font-semibold text-gray-900">Informações Rápidas</h3>
+      </div>
+      <div class="p-4 space-y-3">
+        <div class="flex justify-between">
+          <span class="text-sm text-gray-600">ID da Disputa:</span>
+          <span class="text-sm font-medium text-gray-900">#<%= @dispute.short_id %></span>
+        </div>
+        
+        <div class="flex justify-between">
+          <span class="text-sm text-gray-600">Infração:</span>
+          <%= link_to @dispute.infraction_notification, class: "text-sm font-medium text-blue-600 hover:text-blue-800" do %>
+            #<%= @dispute.infraction_notification.short_id %>
+          <% end %>
+        </div>
+        
+        <div class="flex justify-between">
+          <span class="text-sm text-gray-600">Criado por:</span>
+          <span class="text-sm font-medium text-gray-900"><%= @dispute.created_by || 'Sistema' %></span>
+        </div>
+        
+        <% if @dispute.customer_response_due_at %>
+          <div class="flex justify-between">
+            <span class="text-sm text-gray-600">Expira em:</span>
+            <span class="text-sm font-medium <%= @dispute.customer_response_due_at < Time.current ? 'text-red-600' : 'text-gray-900' %>">
+              <%= l(@dispute.customer_response_due_at, format: :short) %>
+            </span>
+          </div>
+        <% end %>
+        
+        <div class="flex justify-between">
+          <span class="text-sm text-gray-600">Última alteração:</span>
+          <span class="text-sm font-medium text-gray-900"><%= time_ago_in_words(@dispute.updated_at) %> atrás</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Timeline Card -->
+    <div class="bg-white shadow-lg rounded-lg overflow-hidden">
+      <div class="px-4 py-3 bg-gray-50 border-b border-gray-200">
+        <h3 class="text-base font-semibold text-gray-900">Histórico</h3>
+      </div>
+      <div class="p-4">
+        <div class="flow-root">
+          <ul role="list" class="-mb-8">
+            <li>
+              <div class="relative pb-8">
+                <span class="absolute top-4 left-4 -ml-px h-full w-0.5 bg-gray-200" aria-hidden="true"></span>
+                <div class="relative flex space-x-3">
+                  <div class="h-8 w-8 bg-green-500 rounded-full flex items-center justify-center">
+                    <svg class="h-4 w-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                      <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                    </svg>
+                  </div>
+                  <div class="min-w-0 flex-1">
+                    <p class="text-sm text-gray-900 font-medium">Disputa criada</p>
+                    <p class="text-xs text-gray-500"><%= l(@dispute.created_at, format: :short) %></p>
+                  </div>
+                </div>
+              </div>
+            </li>
+            
+            <% if @dispute.submitted_at %>
+              <li>
+                <div class="relative pb-8">
+                  <span class="absolute top-4 left-4 -ml-px h-full w-0.5 bg-gray-200" aria-hidden="true"></span>
+                  <div class="relative flex space-x-3">
+                    <div class="h-8 w-8 bg-blue-500 rounded-full flex items-center justify-center">
+                      <svg class="h-4 w-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z"></path>
+                      </svg>
+                    </div>
+                    <div class="min-w-0 flex-1">
+                      <p class="text-sm text-gray-900 font-medium">Enviada para análise</p>
+                      <p class="text-xs text-gray-500"><%= l(@dispute.submitted_at, format: :short) %></p>
+                    </div>
+                  </div>
+                </div>
+              </li>
+            <% end %>
+
+            <% if false # customer_responded_at attribute doesn't exist %>
+              <li>
+                <div class="relative pb-8">
+                  <span class="absolute top-4 left-4 -ml-px h-full w-0.5 bg-gray-200" aria-hidden="true"></span>
+                  <div class="relative flex space-x-3">
+                    <div class="h-8 w-8 bg-yellow-500 rounded-full flex items-center justify-center">
+                      <svg class="h-4 w-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M18 10c0 3.866-3.582 7-8 7a8.841 8.841 0 01-4.083-.98L2 17l1.338-3.123C2.493 12.767 2 11.434 2 10c0-3.866 3.582-7 8-7s8 3.134 8 7zM7 9H5v2h2V9zm8 0h-2v2h2V9zM9 9h2v2H9V9z" clip-rule="evenodd"></path>
+                      </svg>
+                    </div>
+                    <div class="min-w-0 flex-1">
+                      <p class="text-sm text-gray-900 font-medium">Cliente respondeu</p>
+                      <p class="text-xs text-gray-500"><%= l(@dispute.customer_responded_at, format: :short) %></p>
+                    </div>
+                  </div>
+                </div>
+              </li>
+            <% end %>
+
+            <% if @dispute.resolved_at %>
+              <li>
+                <div class="relative">
+                  <div class="relative flex space-x-3">
+                    <div class="h-8 w-8 bg-green-500 rounded-full flex items-center justify-center">
+                      <svg class="h-4 w-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                      </svg>
+                    </div>
+                    <div class="min-w-0 flex-1">
+                      <p class="text-sm text-gray-900 font-medium">
+                        <%= @dispute.resolved? ? 'Disputa resolvida' : 'Disputa rejeitada' %>
+                      </p>
+                      <p class="text-xs text-gray-500"><%= l(@dispute.resolved_at, format: :short) %></p>
+                    </div>
+                  </div>
+                </div>
+              </li>
+            <% end %>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

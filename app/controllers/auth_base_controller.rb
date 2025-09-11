@@ -1,15 +1,34 @@
 require 'oauth2'
+require 'ostruct'
 
 class AuthBaseController < ApplicationController
   before_action :authenticated
   before_action :refresh_auth_vars
   rescue_from OAuth2::Error, with: :handle_oauth2_errors
+  
+  helper_method :current_user
 
   private
 
   CONSOLE_WORKSPACES_URL = 'https://api.console.iugu.com/workspaces'.freeze
 
   def read_access_token = JwtCache.read_access_token(session[:user_id])
+
+  def current_user
+    return @current_user_object if defined?(@current_user_object)
+    
+    user_id = session[:user_id]
+    return nil unless user_id
+    
+    access_token = read_access_token
+    return nil unless access_token
+    
+    # Create a simple user object with essential info
+    @current_user_object = OpenStruct.new(
+      id: user_id,
+      email: user_id # In this system, user_id appears to be the email
+    )
+  end
 
   def refresh_auth_vars
     @current_user = session[:user_id]

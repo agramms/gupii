@@ -24,6 +24,138 @@ pt-BR:
     toggle_menu: "Alternar menu"
     more: "Mais"
     gupii_logo_alt: "Logo do Sistema de Integração PIX Gupii"
+    disputes: "Disputas"
+
+  # Disputas - Comprehensive translations
+  disputes:
+    title: "Disputas"
+    subtitle: "Gerenciamento de disputas de infrações PIX"
+    new:
+      title: "Nova Disputa"
+      subtitle: "Criar nova disputa para notificação de infração"
+      breadcrumb: "Nova Disputa"
+      page_title: "Criar Nova Disputa"
+      page_description: "Abra uma disputa para a notificação de infração"
+      help_title: "Dicas para Abrir uma Disputa"
+      help_items:
+        - "Seja específico sobre os motivos da disputa"
+        - "Inclua todas as evidências relevantes"  
+        - "Verifique se o tipo de disputa está correto"
+        - "A disputa será analisada em até 6 dias úteis"
+
+    # Dispute Types
+    types:
+      validity_challenge: "Contestação de Validade"
+      insufficient_evidence: "Evidência Insuficiente"
+      procedural_error: "Erro Processual"
+      escalation_required: "Escalação Necessária"
+      technical_issue: "Problema Técnico"
+
+    # Dispute Type Descriptions
+    type_descriptions:
+      validity_challenge: "Questiona a validade da infração ou suas bases legais"
+      insufficient_evidence: "Alega que as evidências apresentadas são insuficientes"
+      procedural_error: "Identifica erros no processo de notificação ou análise"
+      escalation_required: "Requer revisão por instância superior ou especializada"
+      technical_issue: "Reporta problemas técnicos que afetaram o processo"
+
+    # Index page
+    index:
+      table_headers:
+        status: "Status"
+        type: "Tipo"
+        deadline: "Prazo"
+        actions: "Ações"
+      buttons:
+        view: "Ver"
+        cancel: "Cancelar"
+        confirm_cancel: "Tem certeza que deseja cancelar esta disputa?"
+
+    # Status Options
+    status_options:
+      pending_customer_response: "Aguardando Cliente"
+      under_internal_review: "Em Análise Interna"
+      approved: "Aprovada"
+      rejected: "Rejeitada"
+      auto_declined: "Auto Rejeitada"
+      escalated: "Escalada"
+
+    # Form Fields
+    fields:
+      dispute_type:
+        label: "Tipo de Disputa"
+        help: "Selecione o tipo de disputa mais apropriado para esta situação"
+        placeholder: "Selecione o tipo de disputa"
+        required_error: "Tipo de disputa é obrigatório"
+
+      justification:
+        label: "Justificativa da Disputa"
+        help: "Descreva detalhadamente os motivos para a abertura desta disputa"
+        placeholder: "Descreva os motivos da disputa, incluindo qualquer informação relevante que justifique a contestação da infração..."
+        help_detail: "Seja específico sobre os motivos da disputa. Essa informação será usada para análise e pode ser compartilhada com as partes envolvidas."
+
+      evidence_notes:
+        label: "Evidências e Documentação"
+        help: "Forneça evidências adicionais que suportem a disputa (opcional)"
+        placeholder: "Descreva evidências adicionais, documentos de suporte, detalhes de transação ou qualquer informação relevante que ajude na análise da disputa..."
+        help_detail: "Inclua qualquer evidência adicional, detalhes de transação, ou documentos de suporte que ajudem na análise da disputa."
+
+    # Card Sections
+    sections:
+      dispute_type:
+        title: "Tipo de Disputa"
+        description: "Selecione o tipo de disputa mais apropriado para esta situação"
+      
+      reason:
+        title: "Razão da Disputa"
+        description: "Descreva detalhadamente os motivos para a abertura desta disputa"
+      
+      evidence:
+        title: "Evidências e Documentação"
+        description: "Forneça evidências adicionais que suportem a disputa (opcional)"
+
+    # Sidebar Info
+    infraction_summary:
+      title: "Infração Original"
+      fields:
+        infraction_id: "ID da Infração"
+        pix_key: "Chave PIX"
+        infraction_type: "Tipo da Infração"
+        status: "Status"
+        created_at: "Criada em"
+
+    # Timeline
+    timeline:
+      title: "Cronograma da Disputa"
+      steps:
+        creation:
+          title: "Criação"
+          description: "Disputa será criada imediatamente"
+        analysis:
+          title: "Análise"
+          description: "Revisão técnica em até 2 dias úteis"
+        resolution:
+          title: "Resolução"
+          description: "Decisão final em até 6 dias úteis"
+
+    # Actions
+    actions:
+      create: "Criar Disputa"
+      cancel: "Cancelar"
+      submit: "Enviar Disputa"
+
+    # Error Messages
+    errors:
+      validation_failed: "Há problemas com os dados informados"
+      dispute_type_required: "Tipo de disputa é obrigatório"
+      reason_required: "Razão da disputa é obrigatória"
+      reason_too_short: "Razão da disputa deve ter pelo menos 10 caracteres"
+      evidence_invalid_json: "Dados de evidência devem estar em formato JSON válido"
+
+    # Success Messages
+    success:
+      created: "Disputa criada com sucesso"
+      updated: "Disputa atualizada com sucesso"
     
   header:
     workspace: "Workspace"
@@ -247,6 +379,43 @@ pt-BR:
       fraud: "Cliente reportou transação PIX não reconhecida de R$ 500,00 realizada em [data/hora]. Chave PIX utilizada não pertence ao cliente. Evidências: print do extrato e declaração do cliente."
       invalid_key: "Chave PIX cadastrada com formato de email inválido, causando falhas em transações. Email: [exemplo@dominio]. Sistema retorna erro de validação consistentemente."
       unauthorized: "Chave PIX cadastrada sem autorização do titular da conta. Cliente nega ter solicitado o cadastro. Data do cadastro: [data]. Solicitação de cancelamento protocolada."
+    
+    show:
+      title: "Investigação de Infração"
+      critical_deadline: "Prazo Crítico"
+      hour_remaining: "hora restante"
+      hours_remaining: "horas restantes"
+      critical_deadline_message: "Esta notificação deve ser processada urgentemente para cumprir os prazos do BACEN."
+      investigation_overview: "Visão Geral da Investigação"
+      created_time_ago: "Criado há %{time}"
+      investigated_pix_key: "Chave PIX Investigada"
+      type_label: "Tipo"
+      unknown: "Desconhecido"
+      risk_level: "Nível de Risco"
+      high_risk: "Alto Risco"
+      medium_risk: "Risco Médio"
+      low_risk: "Baixo Risco"
+      infraction_type: "Tipo de Infração"
+      report_source: "Fonte da Denúncia"
+      evidence_details: "Evidências e Detalhes"
+      infraction_description: "Descrição da Infração"
+      evidence_data: "Dados de Evidência"
+      jdpi_integration: "Integração JDPI"
+      synchronized: "Sincronizado"
+      jdpi_response: "Resposta JDPI"
+      bacen_deadline: "Prazo BACEN"
+      remaining_for_analysis: "restantes para análise"
+      dispute_status: "Status da Disputa"
+      timeline: "Linha do Tempo"
+      creation: "Criação"
+      last_update: "Última Atualização"
+      cancellation: "Cancelamento"
+      investigation_log: "Log de Investigação"
+    
+    actions:
+      open_dispute: "Abrir Disputa"
+      cancel_investigation: "Cancelar Investigação"
+      confirm_cancel: "Tem certeza que deseja cancelar esta investigação?"
 
     # Dashboard Anti-Fraude
     fraud_dashboard:

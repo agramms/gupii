@@ -35,7 +35,7 @@ class InfractionNotificationsController < AuthBaseController
   end
 
   def create
-    @infraction_notification = InfractionNotification.new(infraction_notification_params)
+    @infraction_notification = InfractionNotification.new(infraction_notification_params.merge(idempotency_key: SecureRandom.uuid))
     
     if @infraction_notification.save
       # Submit to JDPI if not created automatically by DICT

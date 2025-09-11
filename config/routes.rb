@@ -29,6 +29,22 @@ Rails.application.routes.draw do
     member do
       patch :cancel
     end
+    # Nested dispute creation from infraction notifications
+    resources :disputes, only: [:new, :create]
+  end
+  
+  # Disputes Management (standalone routes)
+  resources :disputes, except: [:destroy, :edit, :update, :new, :create] do
+    member do
+      patch :approve
+      patch :reject  
+      patch :escalate
+      patch :assign
+      patch :cancel
+    end
+    collection do
+      post :auto_decline_overdue
+    end
   end
   
   # Payment Service Providers Management (Read-only)
@@ -54,6 +70,22 @@ Rails.application.routes.draw do
       resources :infraction_notifications, except: [:destroy, :edit, :update] do
         member do
           patch :cancel
+        end
+      end
+      
+      # Disputes API
+      resources :disputes, except: [:destroy, :edit, :update] do
+        member do
+          patch :approve
+          patch :reject  
+          patch :escalate
+          patch :assign
+        end
+        collection do
+          post :auto_decline_overdue
+          get :overdue
+          get :approaching_deadline
+          get :stats
         end
       end
       
