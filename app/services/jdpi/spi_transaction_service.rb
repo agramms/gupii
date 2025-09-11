@@ -23,19 +23,12 @@ module Jdpi
       def lookup(end_to_end_id)
         validate_end_to_end_id!(end_to_end_id)
         
-        begin
-          response = make_request(end_to_end_id)
-          normalize_response(response)
-        rescue Net::HTTPError => e
-          handle_http_error(e, end_to_end_id)
-        rescue StandardError => e
-          Rails.logger.error "[SPI Transaction Service] Unexpected error for E2E ID #{end_to_end_id}: #{e.message}"
-          raise SpiApiError, "Erro interno na consulta SPI"
-        end
+        service = new(scopes: ['spi_api'])
+        service.perform_lookup(end_to_end_id)
       end
-
+      
       private
-
+      
       # Validate End-to-End ID format
       # Format: E + 8 digits (ISPB) + 12 digits (yyyyMMddHHmm) + 11 alphanumeric characters
       def validate_end_to_end_id!(end_to_end_id)
@@ -44,49 +37,22 @@ module Jdpi
         raise InvalidEndToEndIdError, "Formato de End-to-End ID inválido. Deve ter 32 caracteres no formato: E + 8 dígitos (ISPB) + 12 dígitos (data/hora UTC yyyyMMddHHmm) + 11 caracteres alfanuméricos"
       end
 
-      # Make HTTP request to SPI API
-      def make_request(end_to_end_id)
-        url = build_api_url(end_to_end_id)
-        headers = build_headers
+      # Handle BaseService errors and convert to specific exceptions
+      def handle_service_errors(errors, end_to_end_id)
+        error_message = errors.first || "Unknown error"
         
-        Rails.logger.info "[SPI Transaction Service] Consulting E2E ID: #{end_to_end_id}"
-        
-        response = http_client.get(url, headers)
-        
-        Rails.logger.info "[SPI Transaction Service] API Response Status: #{response.code}"
-        
-        case response.code
-        when 200
-          JSON.parse(response.body)
-        when 404
-          raise TransactionNotFoundError, "Transação não encontrada para o End-to-End ID: #{end_to_end_id}"
-        when 400
+        case error_message
+        when /Bad request/
           raise InvalidEndToEndIdError, "End-to-End ID inválido ou malformado"
-        when 401, 403
+        when /not found/i, /404/
+          raise TransactionNotFoundError, "Transação não encontrada para o End-to-End ID: #{end_to_end_id}"
+        when /Unauthorized/i, /Forbidden/i, /401/, /403/
           raise SpiApiError, "Erro de autenticação na API SPI"
-        when 500, 502, 503, 504
+        when /Server error/i, /timeout/i, /500/, /502/, /503/, /504/
           raise SpiApiError, "Erro interno da API SPI. Tente novamente"
         else
-          raise SpiApiError, "Erro inesperado da API SPI (#{response.code})"
+          raise SpiApiError, "Erro na consulta SPI: #{error_message}"
         end
-      end
-
-      # Build complete API URL
-      def build_api_url(end_to_end_id)
-        base_url = Rails.application.credentials.dig(:jdpi, :base_url) || 'https://api.jdpi.bcb.gov.br'
-        "#{base_url}/jdpi/#{ENDPOINT_PATH}/#{API_VERSION}/lancamento/#{end_to_end_id}"
-      end
-
-      # Build request headers
-      def build_headers
-        token = Rails.application.credentials.dig(:jdpi, :access_token)
-        
-        {
-          'Authorization' => "Bearer #{token}",
-          'Content-Type' => 'application/json',
-          'Accept' => 'application/json',
-          'User-Agent' => "Gupii-SPI-Client/#{Rails.application.class.module_parent_name.downcase}"
-        }
       end
 
       # Normalize API response to consistent format
@@ -203,28 +169,39 @@ module Jdpi
         else 'Tipo de Agente Desconhecido'
         end
       end
-
-      # Handle HTTP errors with proper logging and user-friendly messages
-      def handle_http_error(error, end_to_end_id)
-        Rails.logger.error "[SPI Transaction Service] HTTP Error for E2E ID #{end_to_end_id}: #{error.class} - #{error.message}"
-        
-        case error
-        when Net::TimeoutError
-          raise SpiApiError, "Timeout na consulta SPI. Tente novamente"
-        when Net::HTTPUnauthorized
-          raise SpiApiError, "Erro de autenticação na API SPI"
-        when Net::HTTPNotFound
-          raise TransactionNotFoundError, "Transação não encontrada para o End-to-End ID: #{end_to_end_id}"
-        when Net::HTTPServerError
-          raise SpiApiError, "Erro interno da API SPI. Tente novamente"
-        else
-          raise SpiApiError, "Erro de comunicação com a API SPI"
-        end
+    end
+    
+    # Instance method to perform the actual lookup
+    def perform_lookup(end_to_end_id)
+      path = "/jdpi/#{ENDPOINT_PATH}/#{API_VERSION}/lancamento/#{end_to_end_id}"
+      
+      response_body = execute_request(:get, path)
+      
+      if success?
+        self.class.normalize_response(response_body)
+      else
+        # Convert BaseService errors to our specific exceptions
+        handle_service_errors_instance(errors, end_to_end_id)
       end
-
-      # HTTP client with appropriate timeout settings
-      def http_client
-        @http_client ||= Net::HTTP
+    end
+    
+    private
+    
+    # Instance version of error handling
+    def handle_service_errors_instance(errors, end_to_end_id)
+      error_message = errors.first || "Unknown error"
+      
+      case error_message
+      when /Bad request/
+        raise Jdpi::SpiTransactionService::InvalidEndToEndIdError, "End-to-End ID inválido ou malformado"
+      when /not found/i, /404/
+        raise Jdpi::SpiTransactionService::TransactionNotFoundError, "Transação não encontrada para o End-to-End ID: #{end_to_end_id}"
+      when /Unauthorized/i, /Forbidden/i, /401/, /403/
+        raise Jdpi::SpiTransactionService::SpiApiError, "Erro de autenticação na API SPI"
+      when /Server error/i, /timeout/i, /500/, /502/, /503/, /504/
+        raise Jdpi::SpiTransactionService::SpiApiError, "Erro interno da API SPI. Tente novamente"
+      else
+        raise Jdpi::SpiTransactionService::SpiApiError, "Erro na consulta SPI: #{error_message}"
       end
     end
   end
