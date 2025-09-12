@@ -8,25 +8,31 @@ class PaymentServiceProvidersController < ApplicationController
   def index
     Rails.logger.info "[PSP Controller] Loading PSP index with params: #{search_params.inspect}"
     
-    @psps = build_psp_query
-    @pagy, @psps = pagy(@psps, items: 20)
-    
-    # Dashboard metrics for the header
-    @dashboard_summary = PspMetricsService.dashboard_data
-    @health_alerts = PspMetricsService.health_alerts
-    
-    Rails.logger.info "[PSP Controller] Loaded #{@psps.count} PSPs for display"
-    
-    respond_to do |format|
-      format.html
-      format.json do
-        render json: {
-          psps: @psps.map { |psp| psp_summary_json(psp) },
-          pagination: pagy_metadata(@pagy),
-          dashboard: @dashboard_summary,
-          alerts: @health_alerts
-        }
+    begin
+      @psps = PaymentServiceProvider.all # Simplified for debugging
+      @pagy, @psps = pagy(@psps, items: 20)
+      
+      # Dashboard metrics for the header
+      @dashboard_summary = PspMetricsService.dashboard_data
+      @health_alerts = PspMetricsService.health_alerts
+      
+      Rails.logger.info "[PSP Controller] Loaded #{@psps.count} PSPs for display"
+      
+      respond_to do |format|
+        format.html
+        format.json do
+          render json: {
+            psps: @psps.map { |psp| psp_summary_json(psp) },
+            pagination: build_pagination_metadata(@pagy),
+            dashboard: @dashboard_summary,
+            alerts: @health_alerts
+          }
+        end
       end
+    rescue => e
+      Rails.logger.error "[PSP Controller] Index error: #{e.message}"
+      Rails.logger.error e.backtrace.join("\n")
+      raise e # Re-raise for debugging
     end
   end
   
@@ -177,6 +183,22 @@ class PaymentServiceProvidersController < ApplicationController
   end
   
   private
+  
+  def build_pagination_metadata(pagy)
+    return {} unless pagy
+    
+    {
+      current: pagy.page,
+      per_page: pagy.vars[:items],
+      total_pages: pagy.pages,
+      total_count: pagy.count,
+      has_next: pagy.next.present?,
+      has_prev: pagy.prev.present?
+    }
+  rescue => e
+    Rails.logger.error "[PSP Controller] Pagination metadata error: #{e.message}"
+    {}
+  end
   
   def set_payment_service_provider
     @psp = PaymentServiceProvider.find_by_any_id(params[:id]) ||

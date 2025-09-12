@@ -311,6 +311,9 @@ module Jdpi
       INFRACTION_CREATED = 'Infraction notification created successfully: %{id}'
       INFRACTION_CANCELLED = 'Infraction notification cancelled successfully'
       INFRACTION_ANALYZED = 'Infraction notification analyzed: %{result}'
+      FRAUD_MARKING_CREATED = 'Fraud marking created successfully: %{id}'
+      FRAUD_MARKING_CANCELLED = 'Fraud marking cancelled successfully'
+      FRAUD_MARKING_QUERIED = 'Fraud marking queried successfully: %{id}'
       AUTHENTICATION_SUCCESS = 'Successfully authenticated with JDPI API'
       TOKEN_REFRESHED = 'Access token refreshed successfully'
     end

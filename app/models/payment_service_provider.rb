@@ -81,6 +81,18 @@ class PaymentServiceProvider < ApplicationRecord
          .limit(limit)
   end
   
+  def self.find_by_any_id(identifier)
+    # Try to find by UUID first, then by ISPB, then use ShortId concern logic
+    find_by(id: identifier) || 
+    find_by(ispb: identifier) ||
+    super(identifier)
+  end
+  
+  def self.search_by_short_id(short_id)
+    # Use ShortId concern implementation 
+    super(short_id)
+  end
+  
   # Instance methods
   def pix_services
     services_offered.select { |service| service.to_s.downcase.include?('pix') }

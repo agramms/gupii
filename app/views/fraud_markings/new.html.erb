@@ -1,0 +1,450 @@
+<div class="min-h-screen bg-gray-50">
+  <!-- Header -->
+  <div class="bg-white shadow">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between items-center py-6">
+        <div class="flex items-center">
+          <%= link_to fraud_markings_path, class: "text-gray-400 hover:text-gray-600 mr-4" do %>
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+            </svg>
+          <% end %>
+          <h1 class="text-3xl font-bold text-gray-900"><%= t('fraud_markings.new.title') %></h1>
+          <span class="ml-3 text-sm text-gray-500"><%= t('fraud_markings.new.subtitle') %></span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Form Container -->
+    <div class="bg-white shadow rounded-lg">
+      <%= form_with model: @fraud_marking, local: true, multipart: true, class: "space-y-6" do |form| %>
+        <!-- Error Messages -->
+        <% if @fraud_marking.errors.any? %>
+          <div class="rounded-md bg-red-50 p-4">
+            <div class="flex">
+              <div class="flex-shrink-0">
+                <svg class="h-5 w-5 text-red-400" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+                </svg>
+              </div>
+              <div class="ml-3">
+                <h3 class="text-sm font-medium text-red-800"><%= t('errors.validation_failed') %></h3>
+                <div class="mt-2 text-sm text-red-700">
+                  <ul role="list" class="list-disc pl-5 space-y-1">
+                    <% @fraud_marking.errors.full_messages.each do |message| %>
+                      <li><%= message %></li>
+                    <% end %>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        <% end %>
+
+        <div class="px-6 py-6 space-y-8">
+          <!-- PIX Key Information -->
+          <div>
+            <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4 flex items-center">
+              <svg class="w-5 h-5 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m0 0a2 2 0 012 2m-2-2a2 2 0 00-2 2m2-2a2 2 0 01-2-2m0 0V5.828c0-.537.211-1.053.586-1.414l2.828-2.828A2 2 0 0120.828 2H19a2 2 0 00-2 2v4m2-2a2 2 0 012 2m0 0v11a2 2 0 01-2 2H7a2 2 0 01-2-2V9a2 2 0 012-2h5.586c0-.537.211-1.053.586-1.414L15 4.586z"/>
+              </svg>
+              <%= t('fraud_markings.new.pix_key_section') %>
+            </h3>
+            <div class="grid grid-cols-1 gap-6">
+              <div>
+                <%= form.label :pix_key, t('fraud_markings.fields.pix_key'), class: "block text-sm font-medium text-gray-700" %>
+                <%= form.text_field :pix_key, required: true, 
+                                    class: "mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm",
+                                    placeholder: t('fraud_markings.placeholders.pix_key') %>
+                <p class="mt-2 text-sm text-gray-500"><%= t('fraud_markings.help.pix_key') %></p>
+              </div>
+            </div>
+          </div>
+
+          <hr class="border-gray-200">
+
+          <!-- Fraud Classification -->
+          <div>
+            <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4 flex items-center">
+              <svg class="w-5 h-5 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"/>
+              </svg>
+              <%= t('fraud_markings.new.fraud_classification_section') %>
+            </h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <!-- Fraud Type -->
+              <div>
+                <%= form.label :fraud_type, t('fraud_markings.fields.fraud_type'), class: "block text-sm font-medium text-gray-700" %>
+                <%= form.select :fraud_type, 
+                               options_for_select([
+                                 [t('fraud_markings.placeholders.select_fraud_type'), '']
+                               ] + FraudMarking::FraudTypes::ALL.map { |type| [t("fraud_markings.fraud_types.#{type.downcase}"), type] }, @fraud_marking.fraud_type),
+                               { required: true },
+                               { class: "mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" } %>
+              </div>
+
+              <!-- Classification -->
+              <div>
+                <%= form.label :classification, t('fraud_markings.fields.classification'), class: "block text-sm font-medium text-gray-700" %>
+                <%= form.select :classification, 
+                               options_for_select(FraudMarking::Classification::ALL.map { |classification| [t("fraud_markings.classifications.#{classification.downcase}"), classification] }, @fraud_marking.classification),
+                               { required: true },
+                               { class: "mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" } %>
+              </div>
+
+              <!-- Sub Fraud Type (Optional) -->
+              <div>
+                <%= form.label :sub_fraud_type, t('fraud_markings.fields.sub_fraud_type'), class: "block text-sm font-medium text-gray-700" %>
+                <%= form.text_field :sub_fraud_type, 
+                                    class: "mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm",
+                                    placeholder: t('fraud_markings.placeholders.sub_fraud_type') %>
+                <p class="mt-1 text-sm text-gray-500"><%= t('fraud_markings.help.sub_fraud_type') %></p>
+              </div>
+
+              <!-- Risk Assessment -->
+              <div>
+                <%= form.label :risk_level, t('fraud_markings.fields.risk_level'), class: "block text-sm font-medium text-gray-700" %>
+                <%= form.select :risk_level, 
+                               options_for_select([
+                                 [t('fraud_markings.placeholders.select_risk_level'), '']
+                               ] + FraudMarking::RiskLevel::ALL.map { |level| [t("fraud_markings.risk_levels.#{level.downcase}"), level] }, @fraud_marking.risk_level),
+                               {},
+                               { class: "mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" } %>
+              </div>
+            </div>
+          </div>
+
+          <hr class="border-gray-200">
+
+          <!-- Financial Information -->
+          <div>
+            <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4 flex items-center">
+              <svg class="w-5 h-5 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"/>
+              </svg>
+              <%= t('fraud_markings.new.financial_section') %>
+            </h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <%= form.label :transaction_amount, t('fraud_markings.fields.transaction_amount'), class: "block text-sm font-medium text-gray-700" %>
+                <%= form.number_field :transaction_amount, step: 0.01, min: 0,
+                                      class: "mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm",
+                                      placeholder: "0.00" %>
+                <p class="mt-1 text-sm text-gray-500"><%= t('fraud_markings.help.transaction_amount') %></p>
+              </div>
+              <div>
+                <%= form.label :transaction_currency, t('fraud_markings.fields.transaction_currency'), class: "block text-sm font-medium text-gray-700" %>
+                <%= form.select :transaction_currency, 
+                               options_for_select([
+                                 ['BRL (Real)', 'BRL'],
+                                 ['USD (Dollar)', 'USD'],
+                                 ['EUR (Euro)', 'EUR']
+                               ], @fraud_marking.transaction_currency || 'BRL'),
+                               {},
+                               { class: "mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" } %>
+              </div>
+            </div>
+          </div>
+
+          <hr class="border-gray-200">
+
+          <!-- Descriptions -->
+          <div>
+            <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4 flex items-center">
+              <svg class="w-5 h-5 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+              </svg>
+              <%= t('fraud_markings.new.description_section') %>
+            </h3>
+            <div class="space-y-6">
+              <!-- Description (Required) -->
+              <div>
+                <%= form.label :description, t('fraud_markings.fields.description'), class: "block text-sm font-medium text-gray-700" %>
+                <%= form.text_area :description, required: true, rows: 4,
+                                   class: "mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm",
+                                   placeholder: t('fraud_markings.placeholders.description') %>
+                <div class="mt-2 flex justify-between items-center">
+                  <p class="text-sm text-gray-500"><%= t('fraud_markings.help.description') %></p>
+                  <span class="text-sm text-gray-400" id="description-counter">0/<%= Jdpi::StatusCodes::BusinessRules::MAX_DESCRIPTION_LENGTH %></span>
+                </div>
+              </div>
+
+              <!-- Detailed Description (Optional) -->
+              <div>
+                <%= form.label :detailed_description, t('fraud_markings.fields.detailed_description'), class: "block text-sm font-medium text-gray-700" %>
+                <%= form.text_area :detailed_description, rows: 6,
+                                   class: "mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm",
+                                   placeholder: t('fraud_markings.placeholders.detailed_description') %>
+                <p class="mt-1 text-sm text-gray-500"><%= t('fraud_markings.help.detailed_description') %></p>
+              </div>
+
+              <!-- Supporting Details (Optional) -->
+              <div>
+                <%= form.label :supporting_details, t('fraud_markings.fields.supporting_details'), class: "block text-sm font-medium text-gray-700" %>
+                <%= form.text_area :supporting_details, rows: 4,
+                                   class: "mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm",
+                                   placeholder: t('fraud_markings.placeholders.supporting_details') %>
+                <p class="mt-1 text-sm text-gray-500"><%= t('fraud_markings.help.supporting_details') %></p>
+              </div>
+            </div>
+          </div>
+
+          <hr class="border-gray-200">
+
+          <!-- Evidence Files -->
+          <div>
+            <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4 flex items-center">
+              <svg class="w-5 h-5 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.586-6.586a2 2 0 002.828-2.828l-2.828-2.828a2 2 0 00-2.828 0L7.757 9.172a3 3 0 000 4.243L12 17.414l4.243-4.243a3 3 0 000-4.243z"/>
+              </svg>
+              <%= t('fraud_markings.new.evidence_section') %>
+            </h3>
+            <div>
+              <%= form.label :evidence_files, t('fraud_markings.fields.evidence_files'), class: "block text-sm font-medium text-gray-700 mb-2" %>
+              <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md hover:border-gray-400 transition-colors">
+                <div class="space-y-1 text-center">
+                  <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
+                    <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                  <div class="flex text-sm text-gray-600">
+                    <label for="fraud_marking_evidence_files" class="relative cursor-pointer bg-white rounded-md font-medium text-indigo-600 hover:text-indigo-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-indigo-500">
+                      <span><%= t('fraud_markings.upload.choose_files') %></span>
+                      <%= form.file_field :evidence_files, multiple: true, accept: "image/*,.pdf,.doc,.docx,.txt", 
+                                         class: "sr-only", id: "fraud_marking_evidence_files" %>
+                    </label>
+                    <p class="pl-1"><%= t('fraud_markings.upload.or_drag_drop') %></p>
+                  </div>
+                  <p class="text-xs text-gray-500">
+                    <%= t('fraud_markings.upload.file_types', 
+                         max_files: Jdpi::StatusCodes::BusinessRules::MAX_EVIDENCE_FILES,
+                         max_size: "#{Jdpi::StatusCodes::BusinessRules::MAX_EVIDENCE_FILE_SIZE_MB}MB") %>
+                  </p>
+                </div>
+              </div>
+              <div id="file-preview" class="mt-4 hidden">
+                <h4 class="text-sm font-medium text-gray-900 mb-2"><%= t('fraud_markings.upload.selected_files') %></h4>
+                <div id="file-list" class="space-y-2"></div>
+              </div>
+            </div>
+          </div>
+
+          <hr class="border-gray-200">
+
+          <!-- Case Management -->
+          <div>
+            <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4 flex items-center">
+              <svg class="w-5 h-5 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+              </svg>
+              <%= t('fraud_markings.new.case_management_section') %>
+            </h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <!-- Created By Source -->
+              <div>
+                <%= form.label :created_by_source, t('fraud_markings.fields.created_by_source'), class: "block text-sm font-medium text-gray-700" %>
+                <%= form.select :created_by_source, 
+                               options_for_select(FraudMarking::Sources::ALL.map { |source| [t("fraud_markings.sources.#{source.downcase}"), source] }, @fraud_marking.created_by_source),
+                               { required: true },
+                               { class: "mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" } %>
+              </div>
+
+              <!-- Reference Case ID -->
+              <div>
+                <%= form.label :reference_case_id, t('fraud_markings.fields.reference_case_id'), class: "block text-sm font-medium text-gray-700" %>
+                <%= form.text_field :reference_case_id, 
+                                    class: "mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm",
+                                    placeholder: t('fraud_markings.placeholders.reference_case_id') %>
+                <p class="mt-1 text-sm text-gray-500"><%= t('fraud_markings.help.reference_case_id') %></p>
+              </div>
+            </div>
+
+            <!-- Special Flags -->
+            <div class="mt-6 space-y-4">
+              <div class="flex items-start">
+                <div class="flex items-center h-5">
+                  <%= form.check_box :sensitive_case, class: "focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded" %>
+                </div>
+                <div class="ml-3 text-sm">
+                  <%= form.label :sensitive_case, t('fraud_markings.fields.sensitive_case'), class: "font-medium text-gray-700" %>
+                  <p class="text-gray-500"><%= t('fraud_markings.help.sensitive_case') %></p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Internal Notes -->
+            <div class="mt-6">
+              <%= form.label :internal_notes, t('fraud_markings.fields.internal_notes'), class: "block text-sm font-medium text-gray-700" %>
+              <%= form.text_area :internal_notes, rows: 3,
+                                 class: "mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm",
+                                 placeholder: t('fraud_markings.placeholders.internal_notes') %>
+              <p class="mt-1 text-sm text-gray-500"><%= t('fraud_markings.help.internal_notes') %></p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Footer Actions -->
+        <div class="px-6 py-4 bg-gray-50 rounded-b-lg flex justify-between items-center">
+          <div class="text-sm text-gray-600">
+            <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            <%= t('fraud_markings.new.approval_notice') %>
+          </div>
+          <div class="flex items-center space-x-3">
+            <%= link_to t('actions.cancel'), fraud_markings_path, 
+                        class: "px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" %>
+            <%= form.submit t('fraud_markings.actions.create_for_approval'), 
+                            class: "px-6 py-2 bg-indigo-600 text-white rounded-md text-sm font-medium hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 flex items-center" do %>
+              <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+              </svg>
+              <%= t('fraud_markings.actions.create_for_approval') %>
+            <% end %>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>
+
+<script>
+// Character counter for description
+document.addEventListener('DOMContentLoaded', function() {
+  const descriptionField = document.getElementById('fraud_marking_description');
+  const counter = document.getElementById('description-counter');
+  const maxLength = <%= Jdpi::StatusCodes::BusinessRules::MAX_DESCRIPTION_LENGTH %>;
+  
+  if (descriptionField && counter) {
+    function updateCounter() {
+      const currentLength = descriptionField.value.length;
+      counter.textContent = `${currentLength}/${maxLength}`;
+      
+      if (currentLength > maxLength * 0.9) {
+        counter.classList.add('text-red-500');
+        counter.classList.remove('text-gray-400');
+      } else {
+        counter.classList.add('text-gray-400');
+        counter.classList.remove('text-red-500');
+      }
+    }
+    
+    descriptionField.addEventListener('input', updateCounter);
+    updateCounter(); // Initial call
+  }
+});
+
+// File upload handling
+document.addEventListener('DOMContentLoaded', function() {
+  const fileInput = document.getElementById('fraud_marking_evidence_files');
+  const filePreview = document.getElementById('file-preview');
+  const fileList = document.getElementById('file-list');
+  const maxFiles = <%= Jdpi::StatusCodes::BusinessRules::MAX_EVIDENCE_FILES %>;
+  const maxSize = <%= Jdpi::StatusCodes::BusinessRules::MAX_EVIDENCE_FILE_SIZE_MB %> * 1024 * 1024; // Convert to bytes
+  
+  if (fileInput) {
+    fileInput.addEventListener('change', function(e) {
+      const files = Array.from(e.target.files);
+      
+      if (files.length === 0) {
+        filePreview.classList.add('hidden');
+        return;
+      }
+      
+      // Validation
+      if (files.length > maxFiles) {
+        alert(`<%= t('fraud_markings.errors.too_many_files', max: Jdpi::StatusCodes::BusinessRules::MAX_EVIDENCE_FILES) %>`);
+        e.target.value = '';
+        return;
+      }
+      
+      const oversizedFiles = files.filter(file => file.size > maxSize);
+      if (oversizedFiles.length > 0) {
+        alert(`<%= t('fraud_markings.errors.file_too_large', max: "#{Jdpi::StatusCodes::BusinessRules::MAX_EVIDENCE_FILE_SIZE_MB}MB") %>`);
+        e.target.value = '';
+        return;
+      }
+      
+      // Display selected files
+      filePreview.classList.remove('hidden');
+      fileList.innerHTML = '';
+      
+      files.forEach((file, index) => {
+        const fileItem = document.createElement('div');
+        fileItem.className = 'flex items-center justify-between p-2 bg-gray-50 rounded border';
+        fileItem.innerHTML = `
+          <div class="flex items-center">
+            <svg class="w-5 h-5 text-gray-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+            </svg>
+            <span class="text-sm font-medium text-gray-900">${file.name}</span>
+            <span class="ml-2 text-sm text-gray-500">(${formatFileSize(file.size)})</span>
+          </div>
+          <button type="button" onclick="removeFile(${index})" class="text-red-600 hover:text-red-800">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+          </button>
+        `;
+        fileList.appendChild(fileItem);
+      });
+    });
+  }
+});
+
+function formatFileSize(bytes) {
+  if (bytes === 0) return '0 Bytes';
+  const k = 1024;
+  const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+}
+
+function removeFile(index) {
+  const fileInput = document.getElementById('fraud_marking_evidence_files');
+  const dt = new DataTransfer();
+  const files = Array.from(fileInput.files);
+  
+  files.forEach((file, i) => {
+    if (i !== index) {
+      dt.items.add(file);
+    }
+  });
+  
+  fileInput.files = dt.files;
+  fileInput.dispatchEvent(new Event('change'));
+}
+
+// Form validation
+document.addEventListener('DOMContentLoaded', function() {
+  const form = document.querySelector('form[data-remote="false"]');
+  if (form) {
+    form.addEventListener('submit', function(e) {
+      const requiredFields = form.querySelectorAll('[required]');
+      let isValid = true;
+      
+      requiredFields.forEach(field => {
+        if (!field.value.trim()) {
+          field.classList.add('border-red-300');
+          isValid = false;
+        } else {
+          field.classList.remove('border-red-300');
+        }
+      });
+      
+      if (!isValid) {
+        e.preventDefault();
+        alert('<%= t('errors.required_fields_missing') %>');
+        // Scroll to first invalid field
+        const firstInvalid = form.querySelector('[required].border-red-300');
+        if (firstInvalid) {
+          firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          firstInvalid.focus();
+        }
+      }
+    });
+  }
+});
+</script>

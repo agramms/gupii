@@ -1,36 +1,29 @@
 require 'test_helper'
+require 'ostruct'
 
 class PaymentServiceProvidersControllerTest < ActionDispatch::IntegrationTest
   def setup
     @psp = PaymentServiceProvider.create!(
-      ispb: '12345678',
-      name: 'Test Payment Provider',
-      short_name: 'TestPSP',
-      document_number: '12345678000199',
-      document_type: 'CNPJ',
-      status: 'active',
-      psp_type: 'commercial_bank',
-      services_offered: ['pix_payment', 'pix_receiving'],
-      pix_enabled: true,
-      regulatory_status: 'authorized',
-      state: 'SP',
-      city: 'São Paulo',
-      contact_email: 'contact@testpsp.com',
-      last_sync_at: 1.hour.ago,
-      last_successful_sync_at: 1.hour.ago,
-      sync_attempts: 1
+      valid_psp_attributes.merge(
+        state: 'SP',
+        city: 'São Paulo',
+        contact_email: 'contact@testpsp.com',
+        last_sync_at: 1.hour.ago,
+        last_successful_sync_at: 1.hour.ago,
+        sync_attempts: 1
+      )
     )
     
     @inactive_psp = PaymentServiceProvider.create!(
-      ispb: '87654321',
-      name: 'Inactive PSP',
-      document_number: '87654321000188',
-      document_type: 'CNPJ',
-      status: 'inactive',
-      psp_type: 'cooperative',
-      services_offered: [],
-      pix_enabled: false,
-      regulatory_status: 'authorized'
+      valid_psp_attributes.merge(
+        ispb: '87654321',
+        name: 'Inactive PSP',
+        document_number: '87654321000188',
+        status: 'inactive',
+        psp_type: 'cooperative',
+        services_offered: ['ted_transfer'],
+        pix_enabled: false
+      )
     )
     
     # Mock dashboard data
@@ -154,7 +147,7 @@ class PaymentServiceProvidersControllerTest < ActionDispatch::IntegrationTest
     get payment_service_provider_url('nonexistent')
     
     assert_redirected_to payment_service_providers_path
-    assert_equal 'Notificação de infração não encontrada.', flash[:error]
+    assert_includes flash[:error], 'PSP not found'
   end
 
   test 'should return 404 JSON when PSP not found' do
@@ -274,17 +267,14 @@ class PaymentServiceProvidersControllerTest < ActionDispatch::IntegrationTest
     # Create many PSPs that need sync to trigger unhealthy status
     10.times do |i|
       PaymentServiceProvider.create!(
-        ispb: "1111111#{i}",
-        name: "Test PSP #{i}",
-        document_number: "1111111#{i}000199",
-        document_type: 'CNPJ',
-        status: 'active',
-        psp_type: 'commercial_bank',
-        services_offered: [],
-        pix_enabled: true,
-        regulatory_status: 'authorized',
-        last_sync_at: 25.hours.ago, # Very stale
-        sync_attempts: 5 # Failed sync
+        valid_psp_attributes.merge(
+          ispb: "1111111#{i}",
+          name: "Test PSP #{i}",
+          document_number: "1111111#{i}000199",
+          services_offered: ['ted_transfer'],
+          last_sync_at: 25.hours.ago, # Very stale
+          sync_attempts: 5 # Failed sync
+        )
       )
     end
     

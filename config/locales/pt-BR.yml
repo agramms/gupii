@@ -26,6 +26,7 @@ pt-BR:
     gupii_logo_alt: "Logo do Sistema de Integração PIX Gupii"
     disputes: "Disputas"
     spi_transactions: "Consulta SPI"
+    fraud_markings: "Marcação de Fraudes"
 
   # SPI Transactions - Comprehensive translations
   spi_transactions:
@@ -269,6 +270,24 @@ pt-BR:
   actions:
     create: "Criar"
     edit: "Editar"
+    view: "Ver"
+    show: "Exibir"
+    approve: "Aprovar"
+    reject: "Rejeitar"
+    cancel: "Cancelar"
+    submit: "Submeter"
+    save: "Salvar"
+    delete: "Excluir"
+    search: "Buscar"
+    filter: "Filtrar"
+    export: "Exportar"
+    export_csv: "Exportar CSV"
+    export_excel: "Exportar Excel"
+    all_types: "Todos os Tipos"
+    all_risks: "Todos os Riscos"
+    all_statuses: "Todos os Status"
+    clear_filters: "Limpar Filtros"
+    view_all: "Ver Todos"
     update: "Atualizar"
     delete: "Excluir"
     cancel: "Cancelar"
@@ -644,3 +663,297 @@ pt-BR:
         last_7_days: "Últimos 7 dias"
         last_30_days: "Últimos 30 dias"
         last_3_months: "Últimos 3 meses"
+
+  # Fraud Markings - Sistema de Marcação de Fraudes
+  fraud_markings:
+    # Navegação e Menu
+    menu_title: "Marcação de Fraudes"
+    menu_description: "Gestão de marcações de fraudes PIX"
+
+    # Dashboard Principal
+    dashboard:
+      title: "Painel de Marcações de Fraudes"
+      subtitle: "Sistema integrado de marcação e monitoramento de fraudes PIX"
+
+    # Estatísticas Dashboard
+    stats:
+      total_markings: "Total de Marcações"
+      pending_approval: "Aguardando Aprovação"
+      active_markings: "Marcações Ativas"
+      high_priority: "Alta Prioridade"
+      overdue: "Em Atraso"
+      today_created: "Criadas Hoje"
+      avg_approval_time: "Tempo Médio de Aprovação"
+      success_rate: "Taxa de Sucesso"
+
+    # Alertas Críticos
+    alerts:
+      overdue_markings: "Marcações em atraso requerem atenção imediata"
+      high_priority_pending: "Marcações de alta prioridade aguardando aprovação"
+      requires_approval: "Marcações aguardando aprovação de supervisor"
+      count_items:
+        one: "%{count} item requer atenção"
+        other: "%{count} itens requerem atenção"
+
+    # Abas de Navegação
+    tabs:
+      pending: "Pendentes"
+      active: "Ativas"
+      rejected: "Rejeitadas"
+      cancelled: "Canceladas"
+      all: "Todas"
+
+    # Filtros
+    filters:
+      search_placeholder: "Buscar por chave PIX, tipo de fraude..."
+      fraud_type_filter: "Filtrar por Tipo de Fraude"
+      status_filter: "Filtrar por Status"
+      risk_level_filter: "Filtrar por Nível de Risco"
+      date_range_filter: "Período"
+
+    # Tabela Principal
+    table:
+      pix_key: "Chave PIX"
+      fraud_type: "Tipo de Fraude"
+      status: "Status"
+      priority: "Prioridade"
+      created: "Criado"
+      deadline: "Prazo"
+      requested_by: "Solicitado por"
+      actions: "Ações"
+
+    # Formulário - Criação de Nova Marcação
+    new:
+      title: "Nova Marcação de Fraude"
+      subtitle: "Criação de marcação para chave PIX suspeita de atividade fraudulenta"
+      approval_notice: "Esta marcação será submetida para aprovação de supervisor"
+      
+      # Seções do Formulário
+      pix_key_section: "Informações da Chave PIX"
+      fraud_classification_section: "Classificação da Fraude"
+      financial_section: "Informações Financeiras"
+      description_section: "Descrições e Detalhes"
+      evidence_section: "Arquivos de Evidência"
+      case_management_section: "Gestão do Caso"
+
+    # Visualização Detalhada
+    show:
+      title: "Marcação de Fraude"
+      pix_key_details: "Detalhes da Chave PIX"
+      fraud_details: "Detalhes da Fraude"
+      description_details: "Descrições e Observações"
+      evidence_files: "Arquivos de Evidência"
+      activity_timeline: "Linha do Tempo de Atividades"
+      quick_actions: "Ações Rápidas"
+      status_info: "Informações de Status"
+      internal_notes: "Notas Internas"
+      view_details: "Ver detalhes"
+      no_activity: "Nenhuma atividade registrada"
+
+    # Campos de Formulário
+    fields:
+      pix_key: "Chave PIX"
+      pix_key_type: "Tipo de Chave PIX"
+      fraud_type: "Tipo de Fraude"
+      sub_fraud_type: "Subtipo de Fraude"
+      classification: "Classificação"
+      risk_level: "Nível de Risco"
+      priority_level: "Nível de Prioridade"
+      description: "Descrição"
+      detailed_description: "Descrição Detalhada"
+      supporting_details: "Detalhes de Suporte"
+      transaction_amount: "Valor da Transação"
+      transaction_currency: "Moeda"
+      created_by_source: "Fonte de Criação"
+      reference_case_id: "ID de Caso de Referência"
+      sensitive_case: "Caso Sensível"
+      internal_notes: "Notas Internas"
+      evidence_files: "Arquivos de Evidência"
+      created_at: "Data de Criação"
+      requested_by: "Solicitado por"
+      approved_by: "Aprovado por"
+      approved_at: "Data de Aprovação"
+      jdpi_id: "ID JDPI"
+      response_due_at: "Prazo de Resposta"
+      approval_notes: "Notas de Aprovação"
+      rejection_reason: "Motivo da Rejeição"
+      cancellation_reason: "Motivo do Cancelamento"
+      auto_submit_to_jdpi: "Submeter automaticamente ao JDPI após aprovação"
+
+    # Placeholders de Formulário
+    placeholders:
+      pix_key: "Ex: usuario@email.com, +5511999999999, ou UUID"
+      select_fraud_type: "Selecione o tipo de fraude"
+      select_risk_level: "Selecione o nível de risco"
+      sub_fraud_type: "Especifique o subtipo se aplicável"
+      description: "Descreva a atividade fraudulenta identificada"
+      detailed_description: "Forneça detalhes adicionais sobre a fraude"
+      supporting_details: "Adicione informações de suporte relevantes"
+      reference_case_id: "ID do caso relacionado em outros sistemas"
+      internal_notes: "Notas para uso interno da equipe"
+      approval_notes: "Comentários sobre a aprovação (opcional)"
+      rejection_reason: "Explique o motivo da rejeição"
+      cancellation_reason: "Motivo do cancelamento (opcional)"
+
+    # Textos de Ajuda
+    help:
+      pix_key: "Informe a chave PIX completa. O sistema detectará automaticamente o tipo."
+      sub_fraud_type: "Opcional: especifique uma subcategoria se aplicável"
+      transaction_amount: "Valor aproximado envolvido na fraude (opcional)"
+      detailed_description: "Forneça contexto adicional que possa ajudar na análise"
+      supporting_details: "Inclua qualquer informação adicional relevante"
+      reference_case_id: "ID de caso relacionado em outros sistemas de monitoramento"
+      sensitive_case: "Marque se este caso envolve informações sensíveis ou pessoas públicas"
+      internal_notes: "Visível apenas para a equipe interna. Não será enviado ao JDPI."
+
+    # Tipos de Fraude
+    fraud_types:
+      account_takeover: "Tomada de Conta"
+      sim_swap: "Troca de SIM (SIM Swap)"
+      phishing: "Phishing"
+      social_engineering: "Engenharia Social"
+      identity_theft: "Roubo de Identidade"
+      fake_registration: "Cadastro Falso"
+      suspicious_transaction: "Transação Suspeita"
+      money_laundering: "Lavagem de Dinheiro"
+      other_fraud: "Outra Fraude"
+
+    # Classificações
+    classifications:
+      confirmed_fraud: "Fraude Confirmada"
+      suspected_fraud: "Suspeita de Fraude"
+      investigation_required: "Investigação Necessária"
+
+    # Níveis de Risco
+    risk_levels:
+      low: "Baixo"
+      medium: "Médio"
+      high: "Alto"
+      critical: "Crítico"
+
+    # Níveis de Prioridade
+    priority_levels:
+      standard: "Padrão"
+      medium: "Médio"
+      high: "Alto"
+      critical: "Crítico"
+
+    # Fontes de Criação
+    sources:
+      customer_service: "Atendimento ao Cliente"
+      fraud_team: "Equipe de Fraude"
+      compliance_team: "Equipe de Compliance"
+      automated_system: "Sistema Automatizado"
+      external_report: "Relatório Externo"
+
+    # Status da Marcação
+    status:
+      pending: "Pendente"
+      submitted: "Submetida"
+      processing: "Processando"
+      active: "Ativa"
+      cancelled: "Cancelada"
+      rejected: "Rejeitada"
+      expired: "Expirada"
+      superseded: "Substituída"
+      error: "Erro"
+      overdue: "Em Atraso"
+      days_remaining:
+        one: "%{count} dia restante"
+        other: "%{count} dias restantes"
+
+    # Ações
+    actions:
+      create_marking: "Nova Marcação"
+      create_first: "Criar Primeira Marcação"
+      create_for_approval: "Criar para Aprovação"
+      submit_to_jdpi: "Submeter ao JDPI"
+      view_marking: "Ver Marcação"
+      edit_marking: "Editar Marcação"
+      cancel_marking: "Cancelar Marcação"
+
+    # Labels
+    labels:
+      high_priority: "Alta Prioridade"
+      sensitive: "Sensível"
+      requires_approval: "Requer Aprovação"
+
+    # Upload de Arquivos
+    upload:
+      choose_files: "Escolher arquivos"
+      or_drag_drop: "ou arraste e solte aqui"
+      file_types: "PNG, JPG, PDF, DOC, TXT até %{max_size} cada. Máximo %{max_files} arquivos."
+      selected_files: "Arquivos Selecionados"
+
+    # Estados Vazios
+    empty_state:
+      title: "Nenhuma marcação de fraude encontrada"
+      description: "Comece criando uma nova marcação ou ajuste os filtros de busca."
+
+    # Modais
+    modals:
+      approve_title: "Aprovar Marcação de Fraude"
+      reject_title: "Rejeitar Marcação de Fraude"
+      cancel_title: "Cancelar Marcação de Fraude"
+
+    # Confirmações
+    confirmations:
+      submit_to_jdpi: "Deseja submeter esta marcação ao JDPI? Esta ação não pode ser desfeita."
+      cancel_marking: "Deseja cancelar esta marcação de fraude?"
+      approve_marking: "Deseja aprovar esta marcação de fraude?"
+      reject_marking: "Deseja rejeitar esta marcação de fraude?"
+
+    # Notificações de Sucesso
+    notices:
+      created_successfully: "Marcação de fraude criada com sucesso e enviada para aprovação."
+      approved_successfully: "Marcação de fraude aprovada com sucesso."
+      rejected_successfully: "Marcação de fraude rejeitada."
+      cancelled_successfully: "Marcação de fraude cancelada."
+      submitted_to_jdpi: "Marcação submetida ao JDPI com sucesso."
+
+    # Mensagens de Erro
+    errors:
+      creation_failed: "Falha ao criar marcação de fraude. Tente novamente."
+      approval_failed: "Falha ao aprovar marcação. Verifique as permissões."
+      rejection_failed: "Falha ao rejeitar marcação."
+      cancellation_failed: "Falha ao cancelar marcação."
+      jdpi_submission_failed: "Falha ao submeter ao JDPI. Tente novamente mais tarde."
+      not_found: "Marcação de fraude não encontrada."
+      cannot_submit: "Esta marcação não pode ser submetida no estado atual."
+      supervisor_required: "Ação requer permissões de supervisor."
+      rejection_reason_required: "Motivo da rejeição é obrigatório."
+      too_many_files: "Máximo de %{max} arquivos permitidos."
+      file_too_large: "Arquivo muito grande. Tamanho máximo: %{max}."
+
+  # Logs de Atividade de Marcações de Fraude  
+  fraud_marking_logs:
+    actions:
+      created: "criada"
+      approved: "aprovada" 
+      rejected: "rejeitada"
+      cancelled: "cancelada"
+      submitted_to_jdpi: "submetida ao JDPI"
+      status_changed: "status alterado"
+      evidence_added: "evidência adicionada"
+      evidence_removed: "evidência removida"
+      notes_updated: "notas atualizadas"
+      jdpi_response_received: "resposta do JDPI recebida"
+      error_occurred: "erro ocorrido"
+      system_update: "atualização do sistema"
+
+  # Mensagens de Erro Gerais
+  errors:
+    validation_failed: "Erro de validação"
+    required_fields_missing: "Por favor, preencha todos os campos obrigatórios."
+    network_error: "Erro de conexão. Tente novamente."
+    unauthorized: "Você não tem permissão para esta ação."
+    not_found: "Recurso não encontrado."
+    server_error: "Erro interno do servidor."
+
+  # Tempo
+  time:
+    ago: "atrás"
+    formats:
+      default: "%d/%m/%Y %H:%M"
+      short: "%d/%m/%Y"
+      long: "%d de %B de %Y, %H:%M"

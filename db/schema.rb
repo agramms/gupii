@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_09_09_000002) do
+ActiveRecord::Schema[8.0].define(version: 2025_09_12_020731) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -44,6 +44,78 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_09_000002) do
     t.index ["infraction_notification_id"], name: "index_disputes_on_infraction_notification_id"
     t.index ["status", "customer_response_due_at"], name: "index_disputes_on_status_and_due_date"
     t.index ["status"], name: "index_disputes_on_status"
+  end
+
+  create_table "fraud_marking_logs", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "fraud_marking_id", null: false
+    t.string "level", limit: 10, null: false
+    t.string "action", limit: 50, null: false
+    t.string "user", limit: 255
+    t.text "message", null: false
+    t.jsonb "metadata"
+    t.text "request_details"
+    t.text "response_details"
+    t.string "ip_address", limit: 45
+    t.string "user_agent", limit: 500
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["action"], name: "idx_fraud_marking_logs_on_action"
+    t.index ["created_at"], name: "idx_fraud_marking_logs_on_created_at"
+    t.index ["fraud_marking_id", "created_at"], name: "idx_fraud_marking_logs_on_marking_and_created_at"
+    t.index ["fraud_marking_id"], name: "idx_fraud_marking_logs_on_fraud_marking_id"
+    t.index ["fraud_marking_id"], name: "index_fraud_marking_logs_on_fraud_marking_id"
+    t.index ["level"], name: "idx_fraud_marking_logs_on_level"
+  end
+
+  create_table "fraud_markings", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.string "pix_key", limit: 77, null: false
+    t.string "pix_key_type", limit: 20, null: false
+    t.string "masked_pix_key", limit: 77
+    t.string "fraud_type", limit: 50, null: false
+    t.string "sub_fraud_type", limit: 50
+    t.string "classification", limit: 30, null: false
+    t.string "status", limit: 20, default: "PENDING", null: false
+    t.datetime "status_changed_at", precision: nil
+    t.text "description", null: false
+    t.text "detailed_description"
+    t.jsonb "evidence_data"
+    t.text "supporting_details"
+    t.string "jdpi_marking_id", limit: 36
+    t.string "idempotency_key", limit: 36, null: false
+    t.datetime "submitted_at", precision: nil
+    t.datetime "processed_at", precision: nil
+    t.string "requested_by", limit: 255, null: false
+    t.string "approved_by", limit: 255
+    t.datetime "approved_at", precision: nil
+    t.string "rejection_reason", limit: 500
+    t.string "cancelled_by", limit: 255
+    t.datetime "cancelled_at", precision: nil
+    t.text "cancellation_reason"
+    t.string "risk_level", limit: 20
+    t.integer "risk_score"
+    t.decimal "transaction_amount", precision: 15, scale: 2
+    t.string "transaction_currency", limit: 3, default: "BRL"
+    t.string "created_by_source", limit: 50, null: false
+    t.string "institution_code", limit: 8
+    t.boolean "requires_supervisor_approval", default: true
+    t.boolean "sensitive_case", default: false
+    t.datetime "response_due_at", precision: nil
+    t.integer "days_remaining_to_respond"
+    t.jsonb "metadata"
+    t.text "internal_notes"
+    t.string "reference_case_id", limit: 36
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["created_at"], name: "index_fraud_markings_on_created_at"
+    t.index ["fraud_type"], name: "index_fraud_markings_on_fraud_type"
+    t.index ["idempotency_key"], name: "index_fraud_markings_on_idempotency_key", unique: true
+    t.index ["jdpi_marking_id"], name: "index_fraud_markings_on_jdpi_marking_id", unique: true
+    t.index ["pix_key", "fraud_type"], name: "index_fraud_markings_on_pix_key_and_fraud_type"
+    t.index ["pix_key"], name: "index_fraud_markings_on_pix_key"
+    t.index ["requested_by"], name: "index_fraud_markings_on_requested_by"
+    t.index ["status", "created_at"], name: "index_fraud_markings_on_status_and_created_at"
+    t.index ["status"], name: "index_fraud_markings_on_status"
+    t.index ["submitted_at"], name: "index_fraud_markings_on_submitted_at"
   end
 
   create_table "infraction_logs", id: :uuid, default: -> { "gen_random_uuid()" }, comment: "Audit trail for infraction notification changes", force: :cascade do |t|
@@ -147,5 +219,6 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_09_000002) do
   end
 
   add_foreign_key "disputes", "infraction_notifications"
+  add_foreign_key "fraud_marking_logs", "fraud_markings"
   add_foreign_key "infraction_logs", "infraction_notifications", on_delete: :cascade
 end

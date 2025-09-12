@@ -12,7 +12,10 @@ class PaymentServiceProviderTest < ActiveSupport::TestCase
       psp_type: 'commercial_bank',
       services_offered: ['pix_payment', 'pix_receiving'],
       pix_enabled: true,
-      regulatory_status: 'authorized'
+      regulatory_status: 'authorized',
+      last_sync_errors: ['no_errors'],
+      jdpi_metadata: { 'test' => 'data' },
+      validation_errors: ['no_errors']
     }
     
     @psp = PaymentServiceProvider.new(@valid_attributes)
@@ -26,7 +29,7 @@ class PaymentServiceProviderTest < ActiveSupport::TestCase
   test 'should require ispb' do
     @psp.ispb = nil
     assert_not @psp.valid?
-    assert_includes @psp.errors[:ispb], "can't be blank"
+    assert_includes @psp.errors[:ispb], "não pode ficar em branco"
   end
 
   test 'should validate ispb format' do
@@ -47,17 +50,17 @@ class PaymentServiceProviderTest < ActiveSupport::TestCase
     @psp.save!
     duplicate_psp = PaymentServiceProvider.new(@valid_attributes)
     assert_not duplicate_psp.valid?
-    assert_includes duplicate_psp.errors[:ispb], 'has already been taken'
+    assert_includes duplicate_psp.errors[:ispb], 'já está em uso'
   end
 
   test 'should require name' do
     @psp.name = nil
     assert_not @psp.valid?
-    assert_includes @psp.errors[:name], "can't be blank"
+    assert_includes @psp.errors[:name], "não pode ficar em branco"
     
     @psp.name = 'A' # Too short
     assert_not @psp.valid?
-    assert_includes @psp.errors[:name], 'is too short (minimum is 2 characters)'
+    assert_includes @psp.errors[:name], 'é muito curto (mínimo: 2 caracteres)'
   end
 
   test 'should validate status' do
@@ -92,18 +95,18 @@ class PaymentServiceProviderTest < ActiveSupport::TestCase
     
     @psp.document_type = 'INVALID'
     assert_not @psp.valid?
-    assert_includes @psp.errors[:document_type], 'is not included in the list'
+    assert_includes @psp.errors[:document_type], 'não está incluído na lista'
   end
 
   test 'should validate numerical fields' do
     @psp.total_transactions = -1
     assert_not @psp.valid?
-    assert_includes @psp.errors[:total_transactions], 'must be greater than or equal to 0'
+    assert_includes @psp.errors[:total_transactions], 'deve ser maior ou igual a 0'
     
     @psp.total_transactions = 0
     @psp.total_volume = -100
     assert_not @psp.valid?
-    assert_includes @psp.errors[:total_volume], 'must be greater than or equal to 0'
+    assert_includes @psp.errors[:total_volume], 'deve ser maior ou igual a 0'
     
     @psp.total_volume = 0
     @psp.availability_percentage = 101
@@ -117,11 +120,11 @@ class PaymentServiceProviderTest < ActiveSupport::TestCase
     
     @psp.state = 'sp' # lowercase
     assert_not @psp.valid?
-    assert_includes @psp.errors[:state], 'must be 2 uppercase letters'
+    assert_includes @psp.errors[:state], 'deve ter 2 letras maiúsculas'
     
     @psp.state = 'SAO' # 3 letters
     assert_not @psp.valid?
-    assert_includes @psp.errors[:state], 'is the wrong length (should be 2 characters)'
+    assert_includes @psp.errors[:state], 'não possui o tamanho esperado (2 caracteres)'
   end
 
   # Callback tests
@@ -145,12 +148,12 @@ class PaymentServiceProviderTest < ActiveSupport::TestCase
     @psp.document_type = 'CNPJ'
     @psp.document_number = '1234567800019' # 13 digits
     assert_not @psp.valid?
-    assert_includes @psp.errors[:document_number], 'must be 14 digits for CNPJ'
+    assert_includes @psp.errors[:document_number], 'deve ter 14 dígitos para CNPJ'
     
     @psp.document_type = 'CPF'
     @psp.document_number = '1234567890' # 10 digits
     assert_not @psp.valid?
-    assert_includes @psp.errors[:document_number], 'must be 11 digits for CPF'
+    assert_includes @psp.errors[:document_number], 'deve ter 11 dígitos para CPF'
     
     @psp.document_type = 'CPF'
     @psp.document_number = '12345678901' # 11 digits
@@ -211,10 +214,15 @@ class PaymentServiceProviderTest < ActiveSupport::TestCase
   end
 
   test 'operational_status should return correct status' do
-    # Operational
+    # Operational - need good sync health
     @psp.status = 'active'
     @psp.regulatory_status = 'authorized'
     @psp.pix_enabled = true
+    @psp.last_sync_at = 10.minutes.ago
+    @psp.last_successful_sync_at = 10.minutes.ago
+    @psp.sync_attempts = 1
+    @psp.availability_percentage = 99.9
+    @psp.error_count_24h = 0
     assert_equal 'operational', @psp.operational_status
     
     # Inactive

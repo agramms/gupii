@@ -372,6 +372,13 @@ en:
         last_30_days: "Last 30 days"
         last_3_months: "Last 3 months"
 
+  # Payment Service Providers
+  psp:
+    not_found: "PSP not found"
+    sync:
+      scheduled: "%{sync_type} sync scheduled successfully (Job ID: %{job_id})"
+      failed: "Sync scheduling failed: %{error}"
+
   # Common actions
   actions:
     create: "Create"

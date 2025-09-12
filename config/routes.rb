@@ -47,6 +47,19 @@ Rails.application.routes.draw do
     end
   end
   
+  # Fraud Markings Management
+  resources :fraud_markings, except: [:destroy, :edit, :update] do
+    member do
+      patch :approve
+      patch :reject
+      patch :cancel
+      patch :submit_to_jdpi
+    end
+    collection do
+      get :export
+    end
+  end
+  
   # SPI Transaction Lookup (Read-only consultation)
   resources :spi_transactions, only: [:index] do
     collection do
@@ -93,6 +106,23 @@ Rails.application.routes.draw do
           get :overdue
           get :approaching_deadline
           get :stats
+        end
+      end
+      
+      # Fraud Markings API
+      resources :fraud_markings, except: [:destroy, :edit, :update] do
+        member do
+          patch :approve
+          patch :reject
+          patch :cancel
+          patch :submit_to_jdpi
+        end
+        collection do
+          get :pending_approval
+          get :high_priority
+          get :overdue
+          get :stats
+          get :export
         end
       end
       

@@ -3,35 +3,27 @@ require 'test_helper'
 class Api::V1::PaymentServiceProvidersControllerTest < ActionDispatch::IntegrationTest
   def setup
     @psp = PaymentServiceProvider.create!(
-      ispb: '12345678',
-      name: 'Test Payment Provider',
-      short_name: 'TestPSP',
-      document_number: '12345678000199',
-      document_type: 'CNPJ',
-      status: 'active',
-      psp_type: 'commercial_bank',
-      services_offered: ['pix_payment', 'pix_receiving'],
-      pix_enabled: true,
-      regulatory_status: 'authorized',
-      state: 'SP',
-      city: 'São Paulo',
-      contact_email: 'contact@testpsp.com',
-      website: 'https://testpsp.com',
-      last_sync_at: 1.hour.ago,
-      total_transactions: 1000,
-      total_volume: 50000.00
+      valid_psp_attributes.merge(
+        state: 'SP',
+        city: 'São Paulo',
+        contact_email: 'contact@testpsp.com',
+        website: 'https://testpsp.com',
+        last_sync_at: 1.hour.ago,
+        total_transactions: 1000,
+        total_volume: 50000.00
+      )
     )
     
     @inactive_psp = PaymentServiceProvider.create!(
-      ispb: '87654321',
-      name: 'Inactive PSP',
-      document_number: '87654321000188',
-      document_type: 'CNPJ',
-      status: 'inactive',
-      psp_type: 'cooperative',
-      services_offered: ['ted_transfer'],
-      pix_enabled: false,
-      regulatory_status: 'authorized'
+      valid_psp_attributes.merge(
+        ispb: '87654321',
+        name: 'Inactive PSP',
+        document_number: '87654321000188',
+        status: 'inactive',
+        psp_type: 'cooperative',
+        services_offered: ['ted_transfer'],
+        pix_enabled: false
+      )
     )
     
     @headers = { 'Content-Type' => 'application/json' }

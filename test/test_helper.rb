@@ -2,11 +2,20 @@ ENV["RAILS_ENV"] ||= "test"
 require_relative "../config/environment"
 require "rails/test_help"
 require "minitest/mock"
+require "mocha/minitest"
+
+# Force English locale for tests
+I18n.locale = :en
 
 module ActiveSupport
   class TestCase
     # Run tests in parallel with specified workers
     parallelize(workers: :number_of_processors)
+    
+    # Ensure tests run in English
+    setup do
+      I18n.locale = :en
+    end
 
     # Setup all fixtures in test/fixtures/*.yml for all tests in alphabetical order.
     fixtures :all
@@ -53,6 +62,25 @@ module ActiveSupport
     
     def valid_uuid
       '550e8400-e29b-41d4-a716-446655440000'
+    end
+    
+    # Valid PSP attributes for testing
+    def valid_psp_attributes(overrides = {})
+      {
+        ispb: '12345678',
+        name: 'Test Payment Provider',
+        short_name: 'TestPSP',
+        document_number: '12345678000199',
+        document_type: 'CNPJ',
+        status: 'active',
+        psp_type: 'commercial_bank',
+        services_offered: ['pix_payment', 'pix_receiving'],
+        pix_enabled: true,
+        regulatory_status: 'authorized',
+        last_sync_errors: ['no_errors'],
+        jdpi_metadata: { 'test' => 'data' },
+        validation_errors: ['no_errors']
+      }.merge(overrides)
     end
     
     # Test data for JDPI services

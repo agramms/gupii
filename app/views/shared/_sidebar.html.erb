@@ -37,6 +37,10 @@
     <%= nav_link(disputes_path, 'scale', t('sidebar.disputes'), 
                  active: controller_name == 'disputes') %>
 
+    <!-- Fraud Markings -->
+    <%= nav_link(fraud_markings_path, 'shield-exclamation', t('sidebar.fraud_markings'), 
+                 active: controller_name == 'fraud_markings') %>
+
     <!-- SPI Transactions -->
     <%= nav_link(spi_transactions_path, 'magnifying-glass', t('sidebar.spi_transactions'), 
                  active: controller_name == 'spi_transactions') %>

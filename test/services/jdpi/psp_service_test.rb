@@ -163,16 +163,14 @@ class Jdpi::PspServiceTest < ActiveSupport::TestCase
   test 'should update existing PSP instead of creating duplicate' do
     # Create existing PSP
     existing_psp = PaymentServiceProvider.create!(
-      ispb: "12345678",
-      name: "Old Name",
-      short_name: "OldBank",
-      document_number: "12345678000199",
-      document_type: "CNPJ",
-      status: "inactive",
-      psp_type: "unknown",
-      services_offered: [],
-      pix_enabled: false,
-      regulatory_status: "authorized"
+      valid_psp_attributes.merge(
+        name: "Old Name",
+        short_name: "OldBank",
+        status: "inactive",
+        psp_type: "unknown",
+        services_offered: ['ted_transfer'],
+        pix_enabled: false
+      )
     )
     
     # Mock API response with updated data

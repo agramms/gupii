@@ -387,7 +387,7 @@ module Jdpi
     end
     
     def default_scopes
-      ["auth"] # PSP data is managed through DICT API
+      ["dict_api"] # PSP data is managed through DICT API
     end
   end
 end

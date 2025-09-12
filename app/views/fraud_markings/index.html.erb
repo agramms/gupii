@@ -1,0 +1,384 @@
+<div class="min-h-screen bg-gray-50">
+  <!-- Critical Alerts Banner -->
+  <% if @critical_alerts.any? %>
+    <div class="sticky top-0 z-50">
+      <% @critical_alerts.each do |alert| %>
+        <div class="bg-<%= alert[:severity] == 'danger' ? 'red' : alert[:severity] == 'warning' ? 'yellow' : 'blue' %>-50 border-l-4 border-<%= alert[:severity] == 'danger' ? 'red' : alert[:severity] == 'warning' ? 'yellow' : 'blue' %>-500 p-4">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center">
+              <div class="flex-shrink-0">
+                <% if alert[:severity] == 'danger' %>
+                  <svg class="animate-pulse h-5 w-5 text-red-400" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"/>
+                  </svg>
+                <% elsif alert[:severity] == 'warning' %>
+                  <svg class="h-5 w-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+                  </svg>
+                <% else %>
+                  <svg class="h-5 w-5 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a.75.75 0 000 1.5v2.25a.75.75 0 001.5 0v-3a.75.75 0 00-.75-.75H9z" clip-rule="evenodd"/>
+                  </svg>
+                <% end %>
+              </div>
+              <div class="ml-3">
+                <h3 class="text-sm font-medium text-<%= alert[:severity] == 'danger' ? 'red' : alert[:severity] == 'warning' ? 'yellow' : 'blue' %>-800">
+                  🚨 <%= alert[:message] %>
+                </h3>
+                <div class="mt-1 text-sm text-<%= alert[:severity] == 'danger' ? 'red' : alert[:severity] == 'warning' ? 'yellow' : 'blue' %>-700">
+                  <%= t('fraud_markings.alerts.count_items', count: alert[:count]) %>
+                </div>
+              </div>
+            </div>
+            <div class="flex-shrink-0">
+              <button class="bg-<%= alert[:severity] == 'danger' ? 'red' : alert[:severity] == 'warning' ? 'yellow' : 'blue' %>-100 rounded-md p-2 text-<%= alert[:severity] == 'danger' ? 'red' : alert[:severity] == 'warning' ? 'yellow' : 'blue' %>-400 hover:text-<%= alert[:severity] == 'danger' ? 'red' : alert[:severity] == 'warning' ? 'yellow' : 'blue' %>-500 transition-colors duration-200">
+                <span class="text-xs font-semibold"><%= t('actions.view_all') %></span>
+              </button>
+            </div>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  <% end %>
+
+  <!-- Main Header -->
+  <div class="bg-white shadow">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between items-center py-6">
+        <div class="flex items-center">
+          <h1 class="text-3xl font-bold text-gray-900"><%= t('fraud_markings.dashboard.title') %></h1>
+          <span class="ml-3 text-sm text-gray-500"><%= t('fraud_markings.dashboard.subtitle') %></span>
+        </div>
+        <div class="flex items-center space-x-4">
+          <!-- Export dropdown -->
+          <div class="relative inline-block text-left">
+            <button type="button" class="bg-gray-100 text-gray-700 px-4 py-2 rounded-md text-sm font-medium hover:bg-gray-200 transition-all duration-200 flex items-center" onclick="toggleDropdown('export-menu')">
+              <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+              </svg>
+              <%= t('actions.export') %>
+              <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+              </svg>
+            </button>
+            <div id="export-menu" class="hidden origin-top-right absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 divide-y divide-gray-100 focus:outline-none z-50">
+              <div class="py-1">
+                <%= link_to export_fraud_markings_path(format: :csv), class: "group flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900" do %>
+                  <svg class="mr-3 h-5 w-5 text-gray-400 group-hover:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                  </svg>
+                  <%= t('actions.export_csv') %>
+                <% end %>
+                <%= link_to export_fraud_markings_path(format: :xlsx), class: "group flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900" do %>
+                  <svg class="mr-3 h-5 w-5 text-gray-400 group-hover:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                  </svg>
+                  <%= t('actions.export_excel') %>
+                <% end %>
+              </div>
+            </div>
+          </div>
+          <%= link_to new_fraud_marking_path, 
+                      class: "bg-indigo-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-indigo-700 transition-all duration-200 transform hover:scale-105 flex items-center" do %>
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+            </svg>
+            <%= t('fraud_markings.actions.create_marking') %>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stats Dashboard -->
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+      <!-- Total Markings -->
+      <div class="bg-white rounded-lg shadow p-6 border-l-4 border-blue-500">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-sm font-medium text-gray-600"><%= t('fraud_markings.stats.total_markings') %></p>
+            <p class="text-2xl font-bold text-gray-900"><%= number_with_delimiter(@dashboard_stats[:total_markings]) %></p>
+          </div>
+          <div class="flex-shrink-0">
+            <svg class="h-8 w-8 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pending Approval -->
+      <div class="bg-white rounded-lg shadow p-6 border-l-4 border-yellow-500">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-sm font-medium text-gray-600"><%= t('fraud_markings.stats.pending_approval') %></p>
+            <p class="text-2xl font-bold text-gray-900"><%= number_with_delimiter(@dashboard_stats[:pending_approval]) %></p>
+          </div>
+          <div class="flex-shrink-0">
+            <svg class="h-8 w-8 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <!-- Active Markings -->
+      <div class="bg-white rounded-lg shadow p-6 border-l-4 border-green-500">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-sm font-medium text-gray-600"><%= t('fraud_markings.stats.active_markings') %></p>
+            <p class="text-2xl font-bold text-gray-900"><%= number_with_delimiter(@dashboard_stats[:active_markings]) %></p>
+          </div>
+          <div class="flex-shrink-0">
+            <svg class="h-8 w-8 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <!-- High Priority -->
+      <div class="bg-white rounded-lg shadow p-6 border-l-4 border-red-500">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-sm font-medium text-gray-600"><%= t('fraud_markings.stats.high_priority') %></p>
+            <p class="text-2xl font-bold text-gray-900"><%= number_with_delimiter(@dashboard_stats[:high_priority]) %></p>
+          </div>
+          <div class="flex-shrink-0">
+            <svg class="h-8 w-8 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"/>
+            </svg>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tabs Navigation -->
+  <div class="bg-white border-b border-gray-200">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <nav class="-mb-px flex space-x-1" aria-label="Tabs">
+        <%= link_to fraud_markings_path(tab: 'pending'), 
+                    class: "#{@tab == 'pending' ? 'border-indigo-500 text-indigo-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'} whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm flex items-center" do %>
+          <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+          <%= t('fraud_markings.tabs.pending') %>
+          <span class="ml-2 py-0.5 px-2 text-xs rounded-full bg-yellow-100 text-yellow-800"><%= @pending_count %></span>
+        <% end %>
+
+        <%= link_to fraud_markings_path(tab: 'active'), 
+                    class: "#{@tab == 'active' ? 'border-indigo-500 text-indigo-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'} whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm flex items-center" do %>
+          <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+          <%= t('fraud_markings.tabs.active') %>
+          <span class="ml-2 py-0.5 px-2 text-xs rounded-full bg-green-100 text-green-800"><%= @active_count %></span>
+        <% end %>
+
+        <%= link_to fraud_markings_path(tab: 'rejected'), 
+                    class: "#{@tab == 'rejected' ? 'border-indigo-500 text-indigo-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'} whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm flex items-center" do %>
+          <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+          <%= t('fraud_markings.tabs.rejected') %>
+          <span class="ml-2 py-0.5 px-2 text-xs rounded-full bg-red-100 text-red-800"><%= @rejected_count %></span>
+        <% end %>
+
+        <%= link_to fraud_markings_path(tab: 'all'), 
+                    class: "#{@tab == 'all' ? 'border-indigo-500 text-indigo-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'} whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm flex items-center" do %>
+          <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"/>
+          </svg>
+          <%= t('fraud_markings.tabs.all') %>
+        <% end %>
+      </nav>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <div class="bg-gray-50 border-b border-gray-200">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+      <div class="flex flex-wrap items-center gap-4">
+        <!-- Search -->
+        <div class="flex-1 max-w-md">
+          <%= form_with url: fraud_markings_path, method: :get, local: true, class: "flex" do |form| %>
+            <%= form.hidden_field :tab, value: @tab %>
+            <%= form.text_field :search, placeholder: t('fraud_markings.filters.search_placeholder'), value: params[:search], 
+                                class: "flex-1 block w-full rounded-l-md border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" %>
+            <%= form.submit t('actions.search'), 
+                            class: "inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-r-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" %>
+          <% end %>
+        </div>
+
+        <!-- Fraud Type Filter -->
+        <%= form_with url: fraud_markings_path, method: :get, local: true, class: "inline-block" do |form| %>
+          <%= form.hidden_field :tab, value: @tab %>
+          <%= form.hidden_field :search, value: params[:search] %>
+          <%= form.select :fraud_type_filter, 
+                         options_for_select([
+                           [t('actions.all_types'), '']
+                         ] + FraudMarking::FraudTypes::ALL.map { |type| [t("fraud_markings.fraud_types.#{type.downcase}"), type] }, @fraud_type_filter),
+                         {},
+                         { class: "block w-full rounded-md border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm",
+                           onchange: "this.form.submit();" } %>
+        <% end %>
+
+        <!-- Risk Level Filter -->
+        <%= form_with url: fraud_markings_path, method: :get, local: true, class: "inline-block" do |form| %>
+          <%= form.hidden_field :tab, value: @tab %>
+          <%= form.hidden_field :search, value: params[:search] %>
+          <%= form.hidden_field :fraud_type_filter, value: @fraud_type_filter %>
+          <%= form.select :risk_level_filter, 
+                         options_for_select([
+                           [t('actions.all_risks'), '']
+                         ] + FraudMarking::RiskLevel::ALL.map { |level| [t("fraud_markings.risk_levels.#{level.downcase}"), level] }, @risk_level_filter),
+                         {},
+                         { class: "block w-full rounded-md border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm",
+                           onchange: "this.form.submit();" } %>
+        <% end %>
+
+        <!-- Clear Filters -->
+        <% if params[:search].present? || @fraud_type_filter.present? || @risk_level_filter.present? %>
+          <%= link_to fraud_markings_path(tab: @tab), 
+                      class: "inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" do %>
+            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+            <%= t('actions.clear_filters') %>
+          <% end %>
+        <% end %>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+    <% if @fraud_markings.any? %>
+      <!-- Fraud Markings Table -->
+      <div class="bg-white shadow overflow-hidden sm:rounded-lg">
+        <div class="overflow-x-auto">
+          <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+              <tr>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <%= t('fraud_markings.table.pix_key') %>
+                </th>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <%= t('fraud_markings.table.fraud_type') %>
+                </th>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <%= t('fraud_markings.table.status') %>
+                </th>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <%= t('fraud_markings.table.priority') %>
+                </th>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <%= t('fraud_markings.table.created') %>
+                </th>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <%= t('fraud_markings.table.deadline') %>
+                </th>
+                <th scope="col" class="relative px-6 py-3">
+                  <span class="sr-only"><%= t('actions.actions') %></span>
+                </th>
+              </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+              <% @fraud_markings.each do |marking| %>
+                <tr class="hover:bg-gray-50">
+                  <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                    <div class="flex items-center">
+                      <div class="flex-shrink-0 h-2 w-2 rounded-full <%= marking.high_priority? ? 'bg-red-500' : 'bg-gray-300' %> mr-3"></div>
+                      <%= link_to marking.masked_pix_key_display, marking, class: "text-indigo-600 hover:text-indigo-900" %>
+                    </div>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                      <%= marking.fraud_type_description %>
+                    </span>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium 
+                      <%= case marking.status
+                          when 'PENDING' then 'bg-yellow-100 text-yellow-800'
+                          when 'ACTIVE' then 'bg-green-100 text-green-800'
+                          when 'REJECTED' then 'bg-red-100 text-red-800'
+                          when 'CANCELLED' then 'bg-gray-100 text-gray-800'
+                          else 'bg-blue-100 text-blue-800'
+                          end %>">
+                      <%= marking.status_description %>
+                    </span>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium 
+                      <%= case marking.priority_level
+                          when 'critical' then 'bg-purple-100 text-purple-800'
+                          when 'high' then 'bg-red-100 text-red-800'
+                          when 'medium' then 'bg-yellow-100 text-yellow-800'
+                          else 'bg-green-100 text-green-800'
+                          end %>">
+                      <%= t("fraud_markings.priority_levels.#{marking.priority_level}") %>
+                    </span>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <div class="flex items-center">
+                      <svg class="w-4 h-4 mr-1 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                      </svg>
+                      <%= marking.created_at.strftime("%d/%m/%Y %H:%M") %>
+                    </div>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm">
+                    <% if marking.response_due_at.present? %>
+                      <div class="flex items-center">
+                        <div class="flex-shrink-0 h-2 w-2 rounded-full mr-2 <%= marking.deadline_urgency_class == 'deadline-critical' ? 'bg-red-500 animate-pulse' : marking.deadline_urgency_class == 'deadline-urgent' ? 'bg-yellow-500' : 'bg-green-500' %>"></div>
+                        <span class="<%= marking.overdue_for_response? ? 'text-red-600 font-medium' : 'text-gray-500' %>">
+                          <%= marking.overdue_for_response? ? t('fraud_markings.status.overdue') : t('fraud_markings.status.days_remaining', count: marking.days_until_deadline) %>
+                        </span>
+                      </div>
+                    <% else %>
+                      <span class="text-gray-400">-</span>
+                    <% end %>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                    <%= link_to t('actions.view'), marking, 
+                                class: "text-indigo-600 hover:text-indigo-900 mr-3" %>
+                  </td>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    <% else %>
+      <!-- Empty State -->
+      <div class="text-center py-12">
+        <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+        </svg>
+        <h3 class="mt-2 text-sm font-medium text-gray-900"><%= t('fraud_markings.empty_state.title') %></h3>
+        <p class="mt-1 text-sm text-gray-500"><%= t('fraud_markings.empty_state.description') %></p>
+        <div class="mt-6">
+          <%= link_to t('fraud_markings.actions.create_first'), new_fraud_marking_path, 
+                      class: "inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" %>
+        </div>
+      </div>
+    <% end %>
+  </div>
+</div>
+
+<script>
+function toggleDropdown(id) {
+  const dropdown = document.getElementById(id);
+  dropdown.classList.toggle('hidden');
+  
+  // Close dropdown when clicking outside
+  document.addEventListener('click', function(event) {
+    if (!event.target.closest(`#${id}`) && !event.target.closest('button')) {
+      dropdown.classList.add('hidden');
+    }
+  });
+}
+</script>

@@ -80,4 +80,9 @@ group :test do
   gem "capybara"
   gem "selenium-webdriver"
   
+  # Mocking and stubbing library for tests
+  gem "mocha", "~> 2.1"
+  
+  # Add ostruct for Ruby 3.4+ compatibility  
+  gem "ostruct"
 end
