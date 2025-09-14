@@ -82,6 +82,8 @@
         "ruby.lint": {
           "rubocop": true
         },
+        "rubyLsp.rubyVersionManager": "none",
+        "rubyLsp.customRubyCommand": "/usr/local/bin/ruby",
         "editor.formatOnSave": true,
         "editor.defaultFormatter": "shopify.ruby-lsp",
         "tailwindCSS.includeLanguages": {
