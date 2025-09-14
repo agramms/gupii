@@ -61,7 +61,7 @@ class PrometheusMiddleware
 
     # Increment request counter
     metrics[:rails_requests].increment(
-      labels: {
+      {
         controller: controller,
         action: action,
         method: method,
@@ -72,7 +72,7 @@ class PrometheusMiddleware
     # Record request duration
     metrics[:rails_request_duration].observe(
       duration,
-      labels: {
+      {
         controller: controller,
         action: action,
         method: method
