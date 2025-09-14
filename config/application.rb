@@ -33,8 +33,10 @@ module Gupii
     # Fallback to English if translation missing
     config.i18n.fallbacks = [:"pt-BR", :en]
     
-    # Rails is served at root path (/) via nginx proxy
-    # No relative URL root needed for this development setup
+    # Configure relative URL root for development environment
+    if Rails.env.development?
+      config.relative_url_root = "/app"
+    end
     
     # Load locale files from subdirectories
     config.i18n.load_path += Dir[Rails.root.join('config', 'locales', '**', '*.{rb,yml}')]

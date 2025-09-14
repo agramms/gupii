@@ -1,6 +1,6 @@
 class ApplicationController < ActionController::Base
-  # Include subpath helpers for development environment
-  include SubpathHelpers
+  # Include subpath helpers for development environment - now available as module method
+  # include SubpathHelpers
   
   # Only allow modern browsers supporting webp images, web push, badges, import maps, CSS nesting, and CSS :has.
   allow_browser versions: :modern
@@ -51,7 +51,7 @@ class ApplicationController < ActionController::Base
   end
   
   # Make current locale and subpath helpers available in views
-  helper_method :current_locale, :app_root_url, :app_base_url, :oauth_callback_url, :subpath_aware_url
+  helper_method :current_locale, :app_root_url
   
   def current_locale
     I18n.locale
