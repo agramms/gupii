@@ -40,6 +40,10 @@ Rails.application.configure do
   # Disable host checking completely in development for container networking
   config.hosts = nil
 
+  # Configure Rails to run under /app subpath in development
+  config.relative_url_root = "/app"
+  config.action_controller.relative_url_root = "/app"
+
   # Print deprecation notices to the Rails logger.
   config.active_support.deprecation = :log
 

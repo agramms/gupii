@@ -2,12 +2,19 @@ class AuthenticationController < ApplicationController
   def authorize
     redirect_host = request.protocol + request.host_with_port
     
+    # Include subpath in development for OAuth callback
+    redirect_host += Rails.application.config.relative_url_root if Rails.env.development? && Rails.application.config.relative_url_root
+    
     authorization_url = IdentityClient.authorize_url(redirect_host: redirect_host)
     redirect_to authorization_url, allow_other_host: true
   end
 
   def callback
     redirect_host = request.protocol + request.host_with_port
+    
+    # Include subpath in development for OAuth callback
+    redirect_host += Rails.application.config.relative_url_root if Rails.env.development? && Rails.application.config.relative_url_root
+    
     callback_url = "#{redirect_host}/oauth2/callback"
     
     access_token = IdentityClient.oauth2_client.auth_code.get_token(params[:code], redirect_uri: callback_url)
