@@ -39,6 +39,13 @@ module Gupii
     # Load locale files from subdirectories
     config.i18n.load_path += Dir[Rails.root.join('config', 'locales', '**', '*.{rb,yml}')]
     
+    # Track application start time for metrics
+    config.start_time = Time.current
+    
+    # Add Prometheus metrics middleware
+    require_relative '../lib/prometheus_middleware' unless Rails.env.test?
+    config.middleware.use PrometheusMiddleware unless Rails.env.test?
+    
     # config.eager_load_paths << Rails.root.join("extras")
   end
 end

@@ -205,6 +205,33 @@ GEM
       prettyprint
     prettyprint (0.2.0)
     prism (1.4.0)
+    prometheus-client (4.2.5)
+      base64
+    prometheus-client-mmap (1.2.10)
+      base64
+      bigdecimal
+      logger
+      rb_sys (~> 0.9.109)
+    prometheus-client-mmap (1.2.10-aarch64-linux-gnu)
+      base64
+      bigdecimal
+      logger
+      rb_sys (~> 0.9.109)
+    prometheus-client-mmap (1.2.10-aarch64-linux-musl)
+      base64
+      bigdecimal
+      logger
+      rb_sys (~> 0.9.109)
+    prometheus-client-mmap (1.2.10-x86_64-linux-gnu)
+      base64
+      bigdecimal
+      logger
+      rb_sys (~> 0.9.109)
+    prometheus-client-mmap (1.2.10-x86_64-linux-musl)
+      base64
+      bigdecimal
+      logger
+      rb_sys (~> 0.9.109)
     propshaft (1.2.1)
       actionpack (>= 7.0.0)
       activesupport (>= 7.0.0)
@@ -262,10 +289,13 @@ GEM
       zeitwerk (~> 2.6)
     rainbow (3.1.1)
     rake (13.3.0)
+    rake-compiler-dock (1.9.1)
     ransack (4.3.0)
       activerecord (>= 6.1.5)
       activesupport (>= 6.1.5)
       i18n
+    rb_sys (0.9.117)
+      rake-compiler-dock (= 1.9.1)
     rdoc (6.14.2)
       erb
       psych (>= 4.0.0)
@@ -399,6 +429,8 @@ DEPENDENCIES
   ostruct
   pagy (~> 6.2)
   pg (~> 1.1)
+  prometheus-client (~> 4.0)
+  prometheus-client-mmap (~> 1.0)
   propshaft
   pry (~> 0.14)
   pry-byebug (~> 3.10)

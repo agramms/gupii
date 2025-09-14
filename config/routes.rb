@@ -14,6 +14,9 @@ Rails.application.routes.draw do
   get "oauth2/callback", to: "authentication#callback"
   get "logout", to: "authentication#logout"
 
+  # Prometheus metrics endpoint
+  get "metrics", to: "metrics#show"
+
   # Root route - Dashboard
   root "dashboard#index"
   
