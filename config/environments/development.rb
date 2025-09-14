@@ -37,14 +37,8 @@ Rails.application.configure do
   # Make template changes take effect immediately.
   config.action_mailer.perform_caching = false
   
-  # Allow connections from nginx container and localhost for development
-  config.hosts << "localhost"
-  config.hosts << "nginx"
-  config.hosts << /.*\.docker\.internal/
-  config.hosts << "172.18.0.1"
-  
-  # Disable host checking in development for easier container networking
-  config.hosts.clear
+  # Disable host checking completely in development for container networking
+  config.hosts = nil
 
   # Print deprecation notices to the Rails logger.
   config.active_support.deprecation = :log

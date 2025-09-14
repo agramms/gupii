@@ -14,7 +14,7 @@ services:
       BUNDLE_PATH: /usr/local/bundle
     ports:
       - "3000:3000"
-    command: sleep infinity
+    command: bin/rails server -b 0.0.0.0
     depends_on:
       postgres:
         condition: service_healthy
@@ -158,7 +158,7 @@ services:
     environment:
       MINIO_ROOT_USER: minioadmin
       MINIO_ROOT_PASSWORD: minioadmin123
-      MINIO_BROWSER_REDIRECT_URL: http://localhost/minio/
+      MINIO_BROWSER_REDIRECT_URL: http://localhost/minio/ui/
     volumes:
       - minio_data:/data
     ports:

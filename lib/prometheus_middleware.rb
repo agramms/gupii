@@ -59,25 +59,20 @@ class PrometheusMiddleware
 
     metrics = Rails.application.config.prometheus_metrics
 
-    # Increment request counter
-    metrics[:rails_requests].increment(
-      {
-        controller: controller,
-        action: action,
-        method: method,
-        status: status
-      }
-    )
+    # Ensure all label values are strings
+    labels = {
+      controller: controller.to_s,
+      action: action.to_s,
+      method: method.to_s,
+      status: status.to_s
+    }
 
-    # Record request duration
-    metrics[:rails_request_duration].observe(
-      duration,
-      {
-        controller: controller,
-        action: action,
-        method: method
-      }
-    )
+    # Increment request counter
+    metrics[:rails_requests].increment(labels)
+
+    # Record request duration (without status)
+    duration_labels = labels.except(:status)
+    metrics[:rails_request_duration].observe(duration, duration_labels)
   rescue => e
     Rails.logger.error "Failed to record Prometheus metrics: #{e.message}"
   end
