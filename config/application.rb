@@ -44,9 +44,9 @@ module Gupii
     # Track application start time for metrics
     config.start_time = Time.current
     
-    # Add Prometheus metrics middleware
-    require_relative '../lib/prometheus_middleware' unless Rails.env.test?
-    config.middleware.use PrometheusMiddleware unless Rails.env.test?
+    # Add simple Prometheus metrics middleware
+    require_relative '../lib/simple_prometheus_middleware' unless Rails.env.test?
+    config.middleware.use SimplePrometheusMiddleware unless Rails.env.test?
     
     # config.eager_load_paths << Rails.root.join("extras")
   end

@@ -55,25 +55,30 @@ class PrometheusMiddleware
   end
 
   def record_request_metrics(controller:, action:, method:, status:, duration:)
-    return unless Rails.application.config.prometheus_metrics
+    return unless Rails.application.config.respond_to?(:prometheus_metrics) && 
+                  Rails.application.config.prometheus_metrics
 
-    metrics = Rails.application.config.prometheus_metrics
+    begin
+      metrics = Rails.application.config.prometheus_metrics
 
-    # Ensure all label values are strings
-    labels = {
-      controller: controller.to_s,
-      action: action.to_s,
-      method: method.to_s,
-      status: status.to_s
-    }
+      # Ensure all label values are strings
+      labels = {
+        controller: controller.to_s,
+        action: action.to_s,
+        method: method.to_s,
+        status: status.to_s
+      }
 
-    # Increment request counter
-    metrics[:rails_requests].increment(labels)
+      # Increment request counter
+      metrics[:rails_requests].increment(labels)
 
-    # Record request duration (without status)
-    duration_labels = labels.except(:status)
-    metrics[:rails_request_duration].observe(duration, duration_labels)
-  rescue => e
-    Rails.logger.error "Failed to record Prometheus metrics: #{e.message}"
+      # Record request duration (without status) - correct argument order
+      duration_labels = labels.except(:status)
+      metrics[:rails_request_duration].observe(duration, duration_labels)
+      
+    rescue => e
+      Rails.logger.error "Failed to record Prometheus metrics: #{e.message}"
+      Rails.logger.debug e.backtrace.join("\n") if Rails.logger.debug?
+    end
   end
 end
