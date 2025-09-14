@@ -64,10 +64,8 @@ class AuthBaseController < ApplicationController
 
   def redirect_user_to_auth
     redirect_host = request.protocol + request.host_with_port
-    # Handle subpath deployment - use the script name from nginx proxy headers
-    subpath = request.headers['X-Script-Name'] || ''
     
-    authorization_url = IdentityClient.authorize_url(redirect_host: redirect_host, subpath: subpath)
+    authorization_url = IdentityClient.authorize_url(redirect_host: redirect_host)
     redirect_to authorization_url, allow_other_host: true
   end
 

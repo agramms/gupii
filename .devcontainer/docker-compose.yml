@@ -90,7 +90,7 @@ services:
       - '--storage.tsdb.retention.time=200h'
       - '--web.enable-lifecycle'
       - '--web.external-url=http://localhost/prometheus/'
-      - '--web.route-prefix=/'
+      - '--web.route-prefix=/prometheus'
     volumes:
       - ./config/prometheus.yml:/etc/prometheus/prometheus.yml
       - prometheus_data:/prometheus
@@ -158,6 +158,7 @@ services:
     environment:
       MINIO_ROOT_USER: minioadmin
       MINIO_ROOT_PASSWORD: minioadmin123
+      MINIO_BROWSER_REDIRECT_URL: http://localhost/minio/
     volumes:
       - minio_data:/data
     ports:

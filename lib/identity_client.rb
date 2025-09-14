@@ -53,8 +53,8 @@ module IdentityClient
 
   def from_hash(hash) = OAuth2::AccessToken.from_hash(oauth2_client, hash)
 
-  def authorize_url(redirect_host:, subpath: '')
-    redirect_uri = "#{redirect_host}#{subpath}/oauth2/callback"
+  def authorize_url(redirect_host:)
+    redirect_uri = "#{redirect_host}/oauth2/callback"
     oauth2_client.auth_code.authorize_url(redirect_uri:)
   end
 
