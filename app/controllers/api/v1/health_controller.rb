@@ -1,6 +1,6 @@
 class Api::V1::HealthController < Api::V1::BaseController
   skip_before_action :authenticate_api_client!
-  
+
   def show
     render_success({
       status: "healthy",

@@ -3,19 +3,19 @@
 module Api
   module V1
     class InfractionNotificationsController < Api::V1::BaseController
-      before_action :set_infraction_notification, only: [:show, :cancel]
+      before_action :set_infraction_notification, only: [ :show, :cancel ]
 
       def index
         notifications = InfractionNotification.recent
-        
+
         # Apply search filters if provided
         notifications = filter_notifications(notifications, search_params)
-        
+
         # Apply pagination
-        limit = [params[:limit].to_i, 100].min
+        limit = [ params[:limit].to_i, 100 ].min
         limit = 20 if limit <= 0
-        offset = [params[:offset].to_i, 0].max
-        
+        offset = [ params[:offset].to_i, 0 ].max
+
         @infraction_notifications = notifications.limit(limit).offset(offset)
         total_count = notifications.count
 
@@ -31,7 +31,7 @@ module Api
       end
 
       def show
-        return render json: { error: 'Notification not found' }, status: :not_found unless @infraction_notification
+        return render json: { error: "Notification not found" }, status: :not_found unless @infraction_notification
 
         render json: {
           notification: notification_json(@infraction_notification, include_logs: true)
@@ -49,7 +49,7 @@ module Api
 
           render json: {
             notification: notification_json(@infraction_notification),
-            message: 'Infraction notification created successfully'
+            message: "Infraction notification created successfully"
           }, status: :created
         else
           render json: {
@@ -59,20 +59,20 @@ module Api
       end
 
       def cancel
-        return render json: { error: 'Notification not found' }, status: :not_found unless @infraction_notification
+        return render json: { error: "Notification not found" }, status: :not_found unless @infraction_notification
 
-        reason = params[:reason].presence || 'Cancelled via API'
-        cancelled_by = params[:cancelled_by].presence || 'api_user'
+        reason = params[:reason].presence || "Cancelled via API"
+        cancelled_by = params[:cancelled_by].presence || "api_user"
 
         if @infraction_notification.soft_delete!(reason: reason, cancelled_by: cancelled_by)
           render json: {
             notification: notification_json(@infraction_notification),
-            message: 'Infraction notification cancelled successfully'
+            message: "Infraction notification cancelled successfully"
           }
         else
           render json: {
-            error: 'Unable to cancel infraction notification',
-            details: @infraction_notification.can_be_cancelled? ? 'Unknown error' : 'Notification cannot be cancelled in current status'
+            error: "Unable to cancel infraction notification",
+            details: @infraction_notification.can_be_cancelled? ? "Unknown error" : "Notification cannot be cancelled in current status"
           }, status: :unprocessable_entity
         end
       end
@@ -168,14 +168,14 @@ module Api
         notifications = notifications.where("created_at <= ?", filters[:created_at_lteq]) if filters[:created_at_lteq].present?
         notifications = notifications.where("submitted_at >= ?", filters[:submitted_at_gteq]) if filters[:submitted_at_gteq].present?
         notifications = notifications.where("submitted_at <= ?", filters[:submitted_at_lteq]) if filters[:submitted_at_lteq].present?
-        
+
         notifications
       end
 
       def submit_to_jdpi_later(infraction_notification)
         # This would typically be a background job
         Rails.logger.info "[API] Scheduling JDPI submission for notification #{infraction_notification.id}"
-        
+
         # TODO: Implement background job to submit to JDPI
         # SubmitInfractionToJdpiJob.perform_later(infraction_notification)
       end

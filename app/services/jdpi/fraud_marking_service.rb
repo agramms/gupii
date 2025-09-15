@@ -6,55 +6,55 @@ module Jdpi
   class FraudMarkingService < BaseService
     include StatusCodes
     include Logging
-    
+
     # JDPI Fraud Marking API Endpoints
     module Endpoints
-      BASE = '/chave-gestao-api/jdpi/dict/api/v2'
+      BASE = "/chave-gestao-api/jdpi/dict/api/v2"
       INCLUDE_FRAUD_MARKING = "#{BASE}/marcacao-fraude"
       QUERY_FRAUD_MARKING = "#{BASE}/marcacao-fraude/consultar"
       CANCEL_FRAUD_MARKING = "#{BASE}/marcacao-fraude/cancelar"
       LIST_FRAUD_MARKINGS = "#{BASE}/marcacao-fraude/listar"
     end
-    
+
     # Fraud marking types as per JDPI API specification
     module FraudTypes
-      ACCOUNT_TAKEOVER = 'ACCOUNT_TAKEOVER'.freeze
-      SIM_SWAP = 'SIM_SWAP'.freeze
-      PHISHING = 'PHISHING'.freeze
-      SOCIAL_ENGINEERING = 'SOCIAL_ENGINEERING'.freeze
-      IDENTITY_THEFT = 'IDENTITY_THEFT'.freeze
-      FAKE_REGISTRATION = 'FAKE_REGISTRATION'.freeze
-      SUSPICIOUS_TRANSACTION = 'SUSPICIOUS_TRANSACTION'.freeze
-      MONEY_LAUNDERING = 'MONEY_LAUNDERING'.freeze
-      OTHER_FRAUD = 'OTHER_FRAUD'.freeze
-      
+      ACCOUNT_TAKEOVER = "ACCOUNT_TAKEOVER".freeze
+      SIM_SWAP = "SIM_SWAP".freeze
+      PHISHING = "PHISHING".freeze
+      SOCIAL_ENGINEERING = "SOCIAL_ENGINEERING".freeze
+      IDENTITY_THEFT = "IDENTITY_THEFT".freeze
+      FAKE_REGISTRATION = "FAKE_REGISTRATION".freeze
+      SUSPICIOUS_TRANSACTION = "SUSPICIOUS_TRANSACTION".freeze
+      MONEY_LAUNDERING = "MONEY_LAUNDERING".freeze
+      OTHER_FRAUD = "OTHER_FRAUD".freeze
+
       ALL = [
         ACCOUNT_TAKEOVER, SIM_SWAP, PHISHING, SOCIAL_ENGINEERING,
         IDENTITY_THEFT, FAKE_REGISTRATION, SUSPICIOUS_TRANSACTION,
         MONEY_LAUNDERING, OTHER_FRAUD
       ].freeze
     end
-    
+
     # Error messages specific to fraud marking operations
     module ErrorMessages
-      INVALID_FRAUD_TYPE = 'Invalid fraud type: %{type}'
-      MARKING_NOT_FOUND = 'Fraud marking not found: %{id}'
-      MARKING_ALREADY_CANCELLED = 'Fraud marking already cancelled'
-      MARKING_CANNOT_BE_CANCELLED = 'Fraud marking cannot be cancelled in current state'
-      INSUFFICIENT_EVIDENCE = 'Insufficient evidence provided for fraud marking'
-      PIX_KEY_ALREADY_MARKED = 'PIX key already has an active fraud marking'
+      INVALID_FRAUD_TYPE = "Invalid fraud type: %{type}"
+      MARKING_NOT_FOUND = "Fraud marking not found: %{id}"
+      MARKING_ALREADY_CANCELLED = "Fraud marking already cancelled"
+      MARKING_CANNOT_BE_CANCELLED = "Fraud marking cannot be cancelled in current state"
+      INSUFFICIENT_EVIDENCE = "Insufficient evidence provided for fraud marking"
+      PIX_KEY_ALREADY_MARKED = "PIX key already has an active fraud marking"
     end
-    
+
     attr_accessor :marking_id, :pix_key, :fraud_type, :description, :evidence_data
-    
+
     def initialize(attributes = {})
       super
-      
+
       # Force appropriate API scope for fraud marking operations
-      @scopes = [ApiScopes::DICT_API]
+      @scopes = [ ApiScopes::DICT_API ]
       @errors = []
     end
-    
+
     # 8.2.34. Incluir Marcação de Fraude (Include Fraud Marking)
     # Creates a new fraud marking in JDPI system
     def create_fraud_marking(pix_key:, fraud_type:, description:, evidence_data: nil)
@@ -62,23 +62,23 @@ module Jdpi
       @fraud_type = fraud_type&.to_s&.upcase
       @description = description
       @evidence_data = evidence_data || {}
-      
+
       return false unless validate_include_parameters
-      
+
       request_body = build_include_request
       idempotency_key = IdempotencyService.generate_key
-      
+
       log_info("Creating fraud marking for PIX key: #{Jdpi::StatusCodes::Utils.mask_sensitive_data(@pix_key)}")
-      
+
       response = execute_request(
         :post,
         Endpoints::INCLUDE_FRAUD_MARKING,
         body: request_body,
         idempotent: true
       )
-      
+
       if response
-        @marking_id = response['markingId'] || response['id']
+        @marking_id = response["markingId"] || response["id"]
         log_info("#{SuccessMessages::FRAUD_MARKING_CREATED % { id: @marking_id }}")
         true
       else
@@ -90,21 +90,21 @@ module Jdpi
       add_error("Failed to create fraud marking: #{e.message}")
       false
     end
-    
+
     # 8.2.35. Consultar Marcação de Fraude (Query Fraud Marking)
     # Queries a specific fraud marking by ID
     def query_fraud_marking(marking_id)
       @marking_id = marking_id
-      
+
       return false unless validate_marking_id
-      
+
       log_info("Querying fraud marking: #{marking_id}")
-      
+
       query_params = build_query_params(marking_id)
       path = "#{Endpoints::QUERY_FRAUD_MARKING}?#{query_params}"
-      
+
       response = execute_request(:get, path)
-      
+
       if response
         log_info("Fraud marking queried successfully: #{marking_id}")
         response
@@ -117,24 +117,24 @@ module Jdpi
       add_error("Failed to query fraud marking: #{e.message}")
       false
     end
-    
+
     # 8.2.36. Cancelar Marcação de Fraude (Cancel Fraud Marking)
     # Cancels an active fraud marking
     def cancel_fraud_marking(marking_id, reason: nil)
       @marking_id = marking_id
-      
+
       return false unless validate_marking_id
-      
+
       log_info("Cancelling fraud marking: #{marking_id}")
-      
+
       request_body = build_cancel_request(marking_id, reason)
-      
+
       response = execute_request(
         :post,
         Endpoints::CANCEL_FRAUD_MARKING,
         body: request_body
       )
-      
+
       if response
         log_info("#{SuccessMessages::FRAUD_MARKING_CANCELLED}")
         true
@@ -147,21 +147,21 @@ module Jdpi
       add_error("Failed to cancel fraud marking: #{e.message}")
       false
     end
-    
+
     # 8.2.37. Listar Marcações de Fraude (List Fraud Markings)
     # Lists fraud markings with optional filters
     def list_fraud_markings(filters = {})
       return false unless validate_list_parameters(filters)
-      
+
       log_info("Listing fraud markings with filters: #{filters.keys.join(', ')}")
-      
+
       query_params = build_list_query_params(filters)
       path = "#{Endpoints::LIST_FRAUD_MARKINGS}?#{query_params}"
-      
+
       response = execute_request(:get, path)
-      
+
       if response
-        count = response['markings']&.length || 0
+        count = response["markings"]&.length || 0
         log_info("Listed #{count} fraud markings")
         response
       else
@@ -173,27 +173,27 @@ module Jdpi
       add_error("Failed to list fraud markings: #{e.message}")
       false
     end
-    
+
     private
-    
+
     # Validation methods
-    
+
     def validate_include_parameters
       validate_pix_key && validate_fraud_type && validate_description && validate_evidence_data
     end
-    
+
     def validate_pix_key
       if @pix_key.blank?
         add_error("PIX key is required")
         return false
       elsif !Jdpi::StatusCodes::Utils.valid_pix_key?(@pix_key)
         key_type = Jdpi::StatusCodes::Utils.detect_pix_key_type(@pix_key)
-        add_error(ErrorMessages::INVALID_PIX_KEY_FORMAT % { type: key_type || 'unknown' })
+        add_error(ErrorMessages::INVALID_PIX_KEY_FORMAT % { type: key_type || "unknown" })
         return false
       end
       true
     end
-    
+
     def validate_fraud_type
       if @fraud_type.blank?
         add_error("Fraud type is required")
@@ -204,7 +204,7 @@ module Jdpi
       end
       true
     end
-    
+
     def validate_description
       if @description.blank?
         add_error("Description is required")
@@ -215,10 +215,10 @@ module Jdpi
       end
       true
     end
-    
+
     def validate_evidence_data
       return true if @evidence_data.blank?
-      
+
       if !@evidence_data.is_a?(Hash)
         add_error("Evidence data must be a valid object")
         return false
@@ -228,7 +228,7 @@ module Jdpi
       end
       true
     end
-    
+
     def validate_marking_id
       if @marking_id.blank?
         add_error("Marking ID is required")
@@ -239,13 +239,13 @@ module Jdpi
       end
       true
     end
-    
+
     def validate_list_parameters(filters)
       if filters[:limit].present? && filters[:limit] > BusinessRules::MAX_PAGINATION_LIMIT
         add_error("Limit cannot exceed #{BusinessRules::MAX_PAGINATION_LIMIT}")
         return false
       end
-      
+
       if filters[:start_date].present? && filters[:end_date].present?
         if filters[:start_date] > filters[:end_date]
           add_error("Start date cannot be after end date")
@@ -254,9 +254,9 @@ module Jdpi
       end
       true
     end
-    
+
     # Request building methods
-    
+
     def build_include_request
       {
         pixKey: @pix_key,
@@ -267,11 +267,11 @@ module Jdpi
         timestamp: Time.current.iso8601
       }.compact
     end
-    
+
     def build_query_params(marking_id)
       "markingId=#{marking_id}&ispb=#{BusinessRules::DEFAULT_ISPB}"
     end
-    
+
     def build_cancel_request(marking_id, reason)
       {
         markingId: marking_id,
@@ -280,7 +280,7 @@ module Jdpi
         timestamp: Time.current.iso8601
       }.compact
     end
-    
+
     def build_list_query_params(filters)
       params = []
       params << "ispb=#{BusinessRules::DEFAULT_ISPB}"
@@ -291,21 +291,21 @@ module Jdpi
       params << "offset=#{filters[:offset] || 0}"
       params << "startDate=#{filters[:start_date].iso8601}" if filters[:start_date].present?
       params << "endDate=#{filters[:end_date].iso8601}" if filters[:end_date].present?
-      
+
       params.join("&")
     end
-    
-    
+
+
     # Logging methods
-    
+
     def log_info(message)
       Rails.logger.info "#{SERVICE_PREFIX} FraudMarking] #{message}"
     end
-    
+
     def log_error(message)
       Rails.logger.error "#{SERVICE_PREFIX} FraudMarking] #{message}"
     end
-    
+
     def log_warn(message)
       Rails.logger.warn "#{SERVICE_PREFIX} FraudMarking] #{message}"
     end

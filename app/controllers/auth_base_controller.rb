@@ -1,28 +1,28 @@
-require 'oauth2'
-require 'ostruct'
+require "oauth2"
+require "ostruct"
 
 class AuthBaseController < ApplicationController
   before_action :authenticated
   before_action :refresh_auth_vars
   rescue_from OAuth2::Error, with: :handle_oauth2_errors
-  
+
   helper_method :current_user
 
   private
 
-  CONSOLE_WORKSPACES_URL = 'https://api.console.iugu.com/workspaces'.freeze
+  CONSOLE_WORKSPACES_URL = "https://api.console.iugu.com/workspaces".freeze
 
   def read_access_token = JwtCache.read_access_token(session[:user_id])
 
   def current_user
     return @current_user_object if defined?(@current_user_object)
-    
+
     user_id = session[:user_id]
     return nil unless user_id
-    
+
     access_token = read_access_token
     return nil unless access_token
-    
+
     # Create a simple user object with essential info
     @current_user_object = OpenStruct.new(
       id: user_id,
@@ -33,7 +33,7 @@ class AuthBaseController < ApplicationController
   def refresh_auth_vars
     @current_user = session[:user_id]
     return unless @current_user
-    
+
     access_token = read_access_token
     return unless access_token
 
@@ -43,19 +43,19 @@ class AuthBaseController < ApplicationController
         JSON.parse(access_token.get(CONSOLE_WORKSPACES_URL).body)
       rescue OAuth2::Error => e
         # If token is expired, let the main authentication flow handle it
-        raise e if e.code == 'Expired JWT'
+        raise e if e.code == "Expired JWT"
         # For other errors, return empty workspaces to avoid blocking the request
         Rails.logger.error "[AuthBaseController] Failed to fetch workspaces: #{e.message}"
-        { 'current' => nil, 'workspaces' => [] }
+        { "current" => nil, "workspaces" => [] }
       end
     end
 
-    @current_workspace = workspaces['current']
-    @current_workspace_name = workspaces['workspaces'].find { |d| d['id'] == workspaces['current'] }&.dig('name')
+    @current_workspace = workspaces["current"]
+    @current_workspace_name = workspaces["workspaces"].find { |d| d["id"] == workspaces["current"] }&.dig("name")
   end
 
   def handle_oauth2_errors(exception)
-    if exception.code == 'Expired JWT'
+    if exception.code == "Expired JWT"
       redirect_user_to_auth
       return false
     end
@@ -65,7 +65,7 @@ class AuthBaseController < ApplicationController
   def redirect_user_to_auth
     redirect_host = request.protocol + request.host_with_port
     puts "🚨 AUTH DEBUG: redirect_host=#{redirect_host.inspect}, request.url=#{request.url.inspect}"
-    
+
     authorization_url = IdentityClient.authorize_url(redirect_host: redirect_host)
     puts "🚨 AUTH DEBUG: authorization_url=#{authorization_url.inspect}"
     redirect_to authorization_url, allow_other_host: true
@@ -81,13 +81,13 @@ class AuthBaseController < ApplicationController
     # Only refresh if token is expired
     begin
       new_access_token = access_token.refresh!
-      
+
       # Store the refreshed token
       JwtCache.write_access_token(session[:user_id], new_access_token)
-      
+
       # Clear workspace cache when token is refreshed to ensure fresh data
       Rails.cache.delete("#{session[:user_id]}/workspaces")
-      
+
       true
     rescue OAuth2::Error => e
       Rails.logger.info "[AuthBaseController] Token refresh failed: #{e.message}"
