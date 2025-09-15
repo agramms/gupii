@@ -20,34 +20,34 @@ module Gupii
     #
     # These settings can be overridden in specific environments using the files
     # in config/environments, which are processed later.
-    
+
     # Brazilian timezone for PIX integration
     config.time_zone = "America/Sao_Paulo"
-    
+
     # Default locale for Brazilian Portuguese
     config.i18n.default_locale = :"pt-BR"
-    
+
     # Available locales for PIX system
-    config.i18n.available_locales = [:"pt-BR", :en]
-    
+    config.i18n.available_locales = [ :"pt-BR", :en ]
+
     # Fallback to English if translation missing
-    config.i18n.fallbacks = [:"pt-BR", :en]
-    
+    config.i18n.fallbacks = [ :"pt-BR", :en ]
+
     # Configure relative URL root for development environment
     if Rails.env.development?
       config.relative_url_root = "/app"
     end
-    
+
     # Load locale files from subdirectories
-    config.i18n.load_path += Dir[Rails.root.join('config', 'locales', '**', '*.{rb,yml}')]
-    
+    config.i18n.load_path += Dir[Rails.root.join("config", "locales", "**", "*.{rb,yml}")]
+
     # Track application start time for metrics
     config.start_time = Time.current
-    
+
     # Add simple Prometheus metrics middleware
-    require_relative '../lib/simple_prometheus_middleware' unless Rails.env.test?
+    require_relative "../lib/simple_prometheus_middleware" unless Rails.env.test?
     config.middleware.use SimplePrometheusMiddleware unless Rails.env.test?
-    
+
     # config.eager_load_paths << Rails.root.join("extras")
   end
 end

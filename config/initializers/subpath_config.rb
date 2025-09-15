@@ -1,5 +1,5 @@
 # Subpath Configuration Initializer
-# 
+#
 # This initializer handles Rails application subpath configuration with
 # environment-specific safety checks to prevent production misconfigurations.
 
@@ -44,7 +44,7 @@ module SubpathHelpers
   def subpath_aware_url(path, request = nil)
     if Rails.env.development? && Rails.application.config.relative_url_root.present?
       base = app_base_url(request)
-      path = path.start_with?('/') ? path : "/#{path}"
+      path = path.start_with?("/") ? path : "/#{path}"
       "#{base}#{path}"
     else
       path

@@ -44,7 +44,7 @@ Rails.application.configure do
 
   # Raises error for missing translations.
   # config.i18n.raise_on_missing_translations = true
-  
+
   # Use English locale for tests to match test expectations
   config.i18n.default_locale = :en
 

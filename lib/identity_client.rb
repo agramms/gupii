@@ -59,7 +59,7 @@ module IdentityClient
     if Rails.env.development? && Rails.application.config.relative_url_root.present?
       callback_path = "#{Rails.application.config.relative_url_root}#{callback_path}"
     end
-    
+
     redirect_uri = "#{redirect_host}#{callback_path}"
     oauth2_client.auth_code.authorize_url(redirect_uri:)
   end

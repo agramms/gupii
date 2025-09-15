@@ -68,7 +68,7 @@ group :development, :test do
   # Omakase Ruby styling [https://github.com/rails/rubocop-rails-omakase/]
   gem "rubocop-rails-omakase", require: false
 
-  
+
   # Development tools
   gem "pry", "~> 0.14"
   gem "pry-byebug", "~> 3.10"
@@ -83,10 +83,14 @@ group :test do
   # Use system testing [https://guides.rubyonrails.org/testing.html#system-testing]
   gem "capybara"
   gem "selenium-webdriver"
-  
+
   # Mocking and stubbing library for tests
   gem "mocha", "~> 2.1"
-  
-  # Add ostruct for Ruby 3.4+ compatibility  
+
+  # Code coverage analysis
+  gem "simplecov", "~> 0.22", require: false
+  gem "simplecov-lcov", "~> 0.8", require: false
+
+  # Add ostruct for Ruby 3.4+ compatibility
   gem "ostruct"
 end

@@ -7,7 +7,7 @@ module AppSettings
     # Try Rails credentials first, then config file, then environment variables
     credentials_value = Rails.application.credentials.dig(*path)
     config_file_value = ROOT.dig(*path)
-    env_var_value = ENV.fetch(path.join('__').upcase, nil)
+    env_var_value = ENV.fetch(path.join("__").upcase, nil)
 
     value = credentials_value || config_file_value
 
@@ -24,8 +24,8 @@ module AppSettings
   end
 
   APP_NAME = AppSettings.get(:appname).freeze
-  SERVICE_NAME = ENV.fetch('DD_SERVICE', AppSettings::APP_NAME).freeze
-  APP_VERSION = ENV.fetch('DD_VERSION', '').freeze
+  SERVICE_NAME = ENV.fetch("DD_SERVICE", AppSettings::APP_NAME).freeze
+  APP_VERSION = ENV.fetch("DD_VERSION", "").freeze
 
   API_DOCUMENTATION = AppSettings.get(:api_documentation, :base_url).freeze
   BILLING_BASE_URL = AppSettings.get(:billing, :base_url).freeze

@@ -3,9 +3,9 @@
 # Includes compliance and audit trail information
 class FraudMarkingExportService
   include ActiveModel::Model
-  
+
   attr_reader :fraud_markings, :options
-  
+
   def initialize(fraud_markings, options = {})
     @fraud_markings = fraud_markings
     @options = {
@@ -15,29 +15,29 @@ class FraudMarkingExportService
       format_dates: true
     }.merge(options)
   end
-  
+
   # Generate CSV export
   def to_csv
-    require 'csv'
-    
+    require "csv"
+
     CSV.generate(headers: true) do |csv|
       # Add header row
       csv << csv_headers
-      
+
       # Add data rows
       @fraud_markings.includes(:fraud_marking_logs, evidence_files_attachments: :blob).find_each do |marking|
         csv << format_row_for_csv(marking)
       end
     end
   end
-  
+
   # Generate Excel export (requires additional gem in production)
   def to_xlsx
     # This would require the 'axlsx' or 'xlsx_writer' gem
     # For now, return CSV format as fallback
     to_csv
   end
-  
+
   # Generate detailed report with compliance information
   def to_compliance_report
     {
@@ -46,55 +46,55 @@ class FraudMarkingExportService
       markings: @fraud_markings.map { |marking| format_detailed_marking(marking) }
     }.to_json(indent: 2)
   end
-  
+
   private
-  
+
   def csv_headers
     headers = [
-      'ID',
-      'Short ID',
-      'PIX Key',
-      'PIX Key Type',
-      'Fraud Type',
-      'Classification',
-      'Risk Level',
-      'Priority Level',
-      'Status',
-      'Description',
-      'Transaction Amount',
-      'Currency',
-      'Created By Source',
-      'Requested By',
-      'Approved By',
-      'Approved At',
-      'Created At',
-      'Response Due At',
-      'Days Remaining',
-      'JDPI Marking ID',
-      'Reference Case ID',
-      'Sensitive Case',
-      'Requires Approval'
+      "ID",
+      "Short ID",
+      "PIX Key",
+      "PIX Key Type",
+      "Fraud Type",
+      "Classification",
+      "Risk Level",
+      "Priority Level",
+      "Status",
+      "Description",
+      "Transaction Amount",
+      "Currency",
+      "Created By Source",
+      "Requested By",
+      "Approved By",
+      "Approved At",
+      "Created At",
+      "Response Due At",
+      "Days Remaining",
+      "JDPI Marking ID",
+      "Reference Case ID",
+      "Sensitive Case",
+      "Requires Approval"
     ]
-    
+
     if @options[:include_evidence_summary]
       headers += [
-        'Evidence Files Count',
-        'Evidence Total Size',
-        'Evidence File Types'
+        "Evidence Files Count",
+        "Evidence Total Size",
+        "Evidence File Types"
       ]
     end
-    
+
     if @options[:include_logs]
       headers += [
-        'Last Activity',
-        'Last Activity User',
-        'Total Log Entries'
+        "Last Activity",
+        "Last Activity User",
+        "Total Log Entries"
       ]
     end
-    
+
     headers
   end
-  
+
   def format_row_for_csv(marking)
     row = [
       marking.id,
@@ -118,31 +118,31 @@ class FraudMarkingExportService
       marking.days_until_deadline,
       marking.jdpi_marking_id,
       marking.reference_case_id,
-      marking.sensitive_case? ? 'Yes' : 'No',
-      marking.requires_supervisor_approval? ? 'Yes' : 'No'
+      marking.sensitive_case? ? "Yes" : "No",
+      marking.requires_supervisor_approval? ? "Yes" : "No"
     ]
-    
+
     if @options[:include_evidence_summary]
       evidence_summary = get_evidence_summary(marking)
       row += [
         evidence_summary[:count],
         evidence_summary[:total_size_human],
-        evidence_summary[:file_types].join(', ')
+        evidence_summary[:file_types].join(", ")
       ]
     end
-    
+
     if @options[:include_logs]
       last_log = marking.fraud_marking_logs.recent.first
       row += [
-        last_log ? format_datetime(last_log.created_at) : '',
-        last_log&.user_display || '',
+        last_log ? format_datetime(last_log.created_at) : "",
+        last_log&.user_display || "",
         marking.fraud_marking_logs.count
       ]
     end
-    
+
     row
   end
-  
+
   def format_detailed_marking(marking)
     {
       id: marking.id,
@@ -179,7 +179,7 @@ class FraudMarkingExportService
         description: marking.description,
         detailed_description: marking.detailed_description,
         supporting_details: marking.supporting_details,
-        internal_notes: @options[:mask_sensitive_data] ? '[MASKED]' : marking.internal_notes
+        internal_notes: @options[:mask_sensitive_data] ? "[MASKED]" : marking.internal_notes
       },
       financial_info: {
         transaction_amount: marking.transaction_amount&.to_f,
@@ -199,10 +199,10 @@ class FraudMarkingExportService
       activity_logs: @options[:include_logs] ? format_activity_logs(marking) : nil
     }
   end
-  
+
   def get_evidence_summary(marking)
     files = marking.evidence_files
-    
+
     {
       count: files.count,
       total_size: files.sum(&:byte_size),
@@ -219,10 +219,10 @@ class FraudMarkingExportService
       end
     }
   end
-  
+
   def format_activity_logs(marking)
     logs = marking.fraud_marking_logs.recent.limit(20)
-    
+
     {
       total_entries: marking.fraud_marking_logs.count,
       recent_entries: logs.map do |log|
@@ -238,42 +238,42 @@ class FraudMarkingExportService
       end
     }
   end
-  
+
   def format_datetime(datetime)
-    return '' unless datetime
-    
+    return "" unless datetime
+
     if @options[:format_dates]
-      datetime.strftime('%d/%m/%Y %H:%M:%S')
+      datetime.strftime("%d/%m/%Y %H:%M:%S")
     else
       datetime.iso8601
     end
   end
-  
+
   def truncate_text(text, length)
-    return '' unless text
-    
+    return "" unless text
+
     if text.length > length
       "#{text[0..length-4]}..."
     else
       text
     end
   end
-  
+
   def export_metadata
     {
       export_date: format_datetime(Time.current),
-      export_type: 'fraud_markings',
+      export_type: "fraud_markings",
       total_records: @fraud_markings.count,
       options: @options,
       filters_applied: extract_filters_from_scope,
-      exported_by: 'system', # This could be enhanced to track actual user
-      export_version: '1.0'
+      exported_by: "system", # This could be enhanced to track actual user
+      export_version: "1.0"
     }
   end
-  
+
   def generate_summary
     markings = @fraud_markings.to_a # Load all records for summary
-    
+
     {
       total_markings: markings.count,
       by_status: markings.group_by(&:status).transform_values(&:count),
@@ -293,7 +293,7 @@ class FraudMarkingExportService
       completion_rate: calculate_completion_rate(markings)
     }
   end
-  
+
   def extract_filters_from_scope
     # This would analyze the ActiveRecord scope to extract applied filters
     # For now, return a simple representation
@@ -302,21 +302,21 @@ class FraudMarkingExportService
       loaded: @fraud_markings.loaded?
     }
   end
-  
+
   def calculate_average_approval_time(markings)
     approved_markings = markings.select { |m| m.approved_at.present? }
     return 0 if approved_markings.empty?
-    
+
     total_hours = approved_markings.sum do |marking|
       ((marking.approved_at - marking.created_at) / 1.hour).round(2)
     end
-    
+
     (total_hours / approved_markings.count).round(2)
   end
-  
+
   def calculate_completion_rate(markings)
     return 0 if markings.empty?
-    
+
     completed = markings.count(&:final_state?)
     ((completed.to_f / markings.count) * 100).round(2)
   end

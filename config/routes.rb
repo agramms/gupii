@@ -19,28 +19,28 @@ Rails.application.routes.draw do
 
   # Root route - Dashboard
   root "dashboard#index"
-  
+
   # Web UI routes
   # Dashboard (Home)
-  resources :dashboard, only: [:index]
-  
+  resources :dashboard, only: [ :index ]
+
   # PIX Key Management
   resources :pix_keys
-  
+
   # Infraction Notifications Management
-  resources :infraction_notifications, except: [:destroy, :edit, :update] do
+  resources :infraction_notifications, except: [ :destroy, :edit, :update ] do
     member do
       patch :cancel
     end
     # Nested dispute creation from infraction notifications
-    resources :disputes, only: [:new, :create]
+    resources :disputes, only: [ :new, :create ]
   end
-  
+
   # Disputes Management (standalone routes)
-  resources :disputes, except: [:destroy, :edit, :update, :new, :create] do
+  resources :disputes, except: [ :destroy, :edit, :update, :new, :create ] do
     member do
       patch :approve
-      patch :reject  
+      patch :reject
       patch :escalate
       patch :assign
       patch :cancel
@@ -49,9 +49,9 @@ Rails.application.routes.draw do
       post :auto_decline_overdue
     end
   end
-  
+
   # Fraud Markings Management
-  resources :fraud_markings, except: [:destroy, :edit, :update] do
+  resources :fraud_markings, except: [ :destroy, :edit, :update ] do
     member do
       patch :approve
       patch :reject
@@ -62,16 +62,16 @@ Rails.application.routes.draw do
       get :export
     end
   end
-  
+
   # SPI Transaction Lookup (Read-only consultation)
-  resources :spi_transactions, only: [:index] do
+  resources :spi_transactions, only: [ :index ] do
     collection do
-      get :lookup, to: 'spi_transactions#index'
+      get :lookup, to: "spi_transactions#index"
     end
   end
-  
+
   # Payment Service Providers Management (Read-only)
-  resources :payment_service_providers, only: [:index, :show] do
+  resources :payment_service_providers, only: [ :index, :show ] do
     collection do
       post :sync
       get :sync_status
@@ -85,22 +85,22 @@ Rails.application.routes.draw do
     namespace :v1 do
       # Polling endpoint for client updates
       get "events/poll", to: "events#poll"
-      
+
       # PIX operations
-      resources :pix_operations, only: [:create, :show, :index]
-      
+      resources :pix_operations, only: [ :create, :show, :index ]
+
       # Infraction Notifications API
-      resources :infraction_notifications, except: [:destroy, :edit, :update] do
+      resources :infraction_notifications, except: [ :destroy, :edit, :update ] do
         member do
           patch :cancel
         end
       end
-      
+
       # Disputes API
-      resources :disputes, except: [:destroy, :edit, :update] do
+      resources :disputes, except: [ :destroy, :edit, :update ] do
         member do
           patch :approve
-          patch :reject  
+          patch :reject
           patch :escalate
           patch :assign
         end
@@ -111,9 +111,9 @@ Rails.application.routes.draw do
           get :stats
         end
       end
-      
+
       # Fraud Markings API
-      resources :fraud_markings, except: [:destroy, :edit, :update] do
+      resources :fraud_markings, except: [ :destroy, :edit, :update ] do
         member do
           patch :approve
           patch :reject
@@ -128,9 +128,9 @@ Rails.application.routes.draw do
           get :export
         end
       end
-      
+
       # Payment Service Providers API (Read-only)
-      resources :payment_service_providers, only: [:index, :show] do
+      resources :payment_service_providers, only: [ :index, :show ] do
         collection do
           get :search
           get :active
@@ -139,7 +139,7 @@ Rails.application.routes.draw do
           get "by_ispb/:ispb", to: "payment_service_providers#by_ispb", as: :by_ispb
         end
       end
-      
+
       # Health check
       get "health", to: "health#show"
     end

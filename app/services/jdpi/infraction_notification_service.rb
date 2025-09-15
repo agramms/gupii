@@ -4,32 +4,32 @@ module Jdpi
   # Complies with JDPI v5.2.1 specifications for fraud reporting and PIX key misuse
   class InfractionNotificationService < BaseService
     include Jdpi::StatusCodes
-    
+
     attr_accessor :notification_id, :pix_key, :infraction_type, :description, :evidence_data
-    
+
     def initialize(attributes = {})
       super
-      
+
       # Force DICT API scope for infraction operations
-      @scopes = [ApiScopes::DICT_API]
+      @scopes = [ ApiScopes::DICT_API ]
       @errors = []
     end
-    
-    # 8.2.16 - Include Infraction Notification 
+
+    # 8.2.16 - Include Infraction Notification
     # POST Endpoints::INFRACTIONS
     def create_notification(pix_key:, infraction_type:, description:, evidence_data: nil)
       @pix_key = pix_key
       @infraction_type = infraction_type
       @description = description
       @evidence_data = evidence_data
-      
+
       return false unless validate_notification_data
-      
+
       request_body = build_create_request_body
       idempotency_key = Jdpi::IdempotencyService.generate_key
-      
+
       Rails.logger.info "#{Logging::SERVICE_PREFIX} #{Logging::INFRACTION_TAG} Creating notification for PIX key: #{Utils.mask_sensitive_data(@pix_key)}"
-      
+
       response = execute_request(
         :post,
         Endpoints::INFRACTIONS,
@@ -37,9 +37,9 @@ module Jdpi
         idempotent: true,
         idempotency_key: idempotency_key
       )
-      
+
       if response
-        @notification_id = response['notificationId'] || response['id']
+        @notification_id = response["notificationId"] || response["id"]
         Rails.logger.info "#{Logging::SERVICE_PREFIX} #{Logging::INFRACTION_TAG} #{SuccessMessages::INFRACTION_CREATED % { id: @notification_id }}"
         true
       else
@@ -51,7 +51,7 @@ module Jdpi
       add_error("Failed to create infraction notification: #{e.message}")
       false
     end
-    
+
     # 8.2.17 - List Processing Infraction Notifications
     # GET Endpoints::INFRACTION_PROCESSING
     # Requires PI-PayerId header - uses default bank CNPJ if not provided
@@ -59,11 +59,11 @@ module Jdpi
       params = build_pagination_params(limit, offset)
       path = Endpoints::INFRACTION_PROCESSING
       path += "?#{params}" unless params.empty?
-      
+
       Rails.logger.info "#{Logging::SERVICE_PREFIX} #{Logging::INFRACTION_TAG} Listing processing notifications (limit: #{limit}, offset: #{offset})"
-      
+
       response = execute_request(:get, path, pi_payer_id: pi_payer_id)
-      
+
       if response
         Rails.logger.info "#{Logging::SERVICE_PREFIX} #{Logging::INFRACTION_TAG} Retrieved #{response['notifications']&.size || 0} processing notifications"
         response
@@ -76,20 +76,20 @@ module Jdpi
       add_error("Failed to list processing notifications: #{e.message}")
       nil
     end
-    
+
     # 8.2.18 - Query Infraction Notification
     # GET Endpoints::INFRACTION_BY_ID with query parameters
     def get_notification_status(notification_id)
       return nil unless validate_notification_id(notification_id)
-      
+
       # Build query string with required parameters
       query_params = "idRelatoInfracao=#{notification_id}&ispb=#{Utils.ispb_value}"
       path = "#{Endpoints::INFRACTION_BY_ID}?#{query_params}"
-      
+
       Rails.logger.info "#{Logging::SERVICE_PREFIX} #{Logging::INFRACTION_TAG} Querying notification status: #{notification_id}"
-      
+
       response = execute_request(:get, path)
-      
+
       if response
         Rails.logger.info "#{Logging::SERVICE_PREFIX} #{Logging::INFRACTION_TAG} Retrieved notification status: #{response['status']}"
         response
@@ -102,27 +102,27 @@ module Jdpi
       add_error("Failed to query notification: #{e.message}")
       nil
     end
-    
+
     # 8.2.19 - Cancel Infraction Notification
     # DELETE Endpoints::INFRACTION_BY_ID
     def cancel_notification(notification_id, reason:)
       return false unless validate_notification_id(notification_id)
       return false if reason.blank?
-      
+
       request_body = {
         cancellationReason: reason,
         cancelledAt: Time.current.iso8601,
-        cancelledBy: 'REQUESTER'
+        cancelledBy: "REQUESTER"
       }
-      
+
       Rails.logger.info "#{Logging::SERVICE_PREFIX} #{Logging::INFRACTION_TAG} Cancelling notification: #{notification_id}"
-      
+
       response = execute_request(
         :delete,
         Endpoints::INFRACTION_BY_ID % { notification_id: notification_id },
         body: request_body
       )
-      
+
       if response
         Rails.logger.info "#{Logging::SERVICE_PREFIX} #{Logging::INFRACTION_TAG} #{SuccessMessages::INFRACTION_CANCELLED}"
         true
@@ -135,29 +135,29 @@ module Jdpi
       add_error("Failed to cancel notification: #{e.message}")
       false
     end
-    
+
     # 8.2.20 - Analyze Infraction Notification
     # PUT Endpoints::INFRACTION_ANALYSIS
     def analyze_notification(notification_id, analysis_result:, analysis_notes: nil)
       return false unless validate_notification_id(notification_id)
       return false if analysis_result.blank?
       return false unless valid_analysis_result?(analysis_result)
-      
+
       request_body = {
         analysisResult: analysis_result.upcase,
         analysisNotes: analysis_notes,
         analyzedAt: Time.current.iso8601,
-        analyzedBy: 'SYSTEM'
+        analyzedBy: "SYSTEM"
       }.compact
-      
+
       Rails.logger.info "#{Logging::SERVICE_PREFIX} #{Logging::INFRACTION_TAG} Analyzing notification: #{notification_id}"
-      
+
       response = execute_request(
         :put,
         Endpoints::INFRACTION_ANALYSIS % { notification_id: notification_id },
         body: request_body
       )
-      
+
       if response
         Rails.logger.info "#{Logging::SERVICE_PREFIX} #{Logging::INFRACTION_TAG} #{SuccessMessages::INFRACTION_ANALYZED % { result: analysis_result }}"
         true
@@ -170,7 +170,7 @@ module Jdpi
       add_error("Failed to analyze notification: #{e.message}")
       false
     end
-    
+
     # 8.2.21 - List Infraction Notifications
     # GET Endpoints::INFRACTIONS
     # Requires PI-PayerId header - uses default bank CNPJ if not provided
@@ -178,13 +178,13 @@ module Jdpi
       params = build_list_params(status, limit, offset, start_date, end_date)
       path = Endpoints::INFRACTION_LIST
       path += "?#{params}" unless params.empty?
-      
+
       Rails.logger.info "#{Logging::SERVICE_PREFIX} #{Logging::INFRACTION_TAG} Listing notifications (status: #{status}, limit: #{limit})"
-      
+
       response = execute_request(:get, path, pi_payer_id: pi_payer_id)
-      
+
       if response
-        count = response['notifications']&.size || 0
+        count = response["notifications"]&.size || 0
         Rails.logger.info "#{Logging::SERVICE_PREFIX} #{Logging::INFRACTION_TAG} Retrieved #{count} notifications"
         response
       else
@@ -196,48 +196,48 @@ module Jdpi
       add_error("Failed to list notifications: #{e.message}")
       nil
     end
-    
+
     private
-    
+
     def validate_notification_data
       errors.clear
-      
+
       # Validate PIX key
       if @pix_key.blank?
         add_error("PIX key is required")
       elsif !Utils.valid_pix_key?(@pix_key)
         key_type = Utils.detect_pix_key_type(@pix_key)
-        add_error(ErrorMessages::INVALID_PIX_KEY_FORMAT % { type: key_type || 'unknown' })
+        add_error(ErrorMessages::INVALID_PIX_KEY_FORMAT % { type: key_type || "unknown" })
       end
-      
+
       # Validate infraction type
       if @infraction_type.blank?
         add_error("Infraction type is required")
       elsif !Utils.valid_infraction_type?(@infraction_type)
         add_error(ErrorMessages::INVALID_INFRACTION_TYPE % { type: @infraction_type })
       end
-      
+
       # Validate description
       if @description.blank?
         add_error("Description is required")
       elsif @description.length > BusinessRules::MAX_DESCRIPTION_LENGTH
         add_error("Description cannot exceed #{BusinessRules::MAX_DESCRIPTION_LENGTH} characters")
       end
-      
+
       # Validate evidence data if provided
       if @evidence_data.present?
         unless @evidence_data.is_a?(Hash)
           add_error("Evidence data must be a valid JSON object")
         end
-        
+
         if @evidence_data.is_a?(Hash) && @evidence_data.to_json.bytesize > 64.kilobytes
           add_error("Evidence data cannot exceed 64KB in size")
         end
       end
-      
+
       errors.empty?
     end
-    
+
     def build_create_request_body
       {
         pixKey: @pix_key,
@@ -245,17 +245,17 @@ module Jdpi
         description: @description,
         evidenceData: @evidence_data,
         submittedAt: Time.current.iso8601,
-        submittedBy: 'SYSTEM'
+        submittedBy: "SYSTEM"
       }.compact
     end
-    
+
     def build_pagination_params(limit, offset)
       params = []
-      params << "limit=#{[limit, BusinessRules::MAX_PAGINATION_LIMIT].min}" if limit && limit > 0
+      params << "limit=#{[ limit, BusinessRules::MAX_PAGINATION_LIMIT ].min}" if limit && limit > 0
       params << "offset=#{offset}" if offset && offset >= 0
       params.join("&")
     end
-    
+
     def build_list_params(status, limit, offset, start_date, end_date)
       params = build_pagination_params(limit, offset).split("&")
       params << "status=#{status}" if status
@@ -264,10 +264,10 @@ module Jdpi
       params << "ispb=#{Utils.ispb_value}"
       params.reject(&:blank?).join("&")
     end
-    
+
     def normalize_infraction_type(type)
       return nil if type.blank?
-      
+
       # Handle both symbol keys and string codes
       type_symbol = type.to_s.downcase.to_sym
       if InfractionTypes::DESCRIPTIONS.has_key?(type.to_s.upcase)
@@ -285,34 +285,34 @@ module Jdpi
         end
       end
     end
-    
+
     def valid_analysis_result?(result)
       return false if result.blank?
       Utils.valid_analysis_result?(result)
     end
-    
+
     def add_error(message)
       @errors ||= []
       @errors << message
     end
-    
+
     def errors
       @errors ||= []
     end
-    
+
     # Validate notification ID format and presence
     def validate_notification_id(notification_id)
       if notification_id.blank?
         add_error("Notification ID is required")
         return false
       end
-      
+
       # Basic format validation - could be enhanced based on JDPI specs
       unless notification_id.is_a?(String) && notification_id.length > 0
         add_error("Invalid notification ID format")
         return false
       end
-      
+
       true
     end
   end

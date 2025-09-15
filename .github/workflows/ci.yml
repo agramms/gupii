@@ -6,6 +6,13 @@ on:
     branches: [ main, develop ]
   workflow_dispatch: # Allow manual trigger
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  RUBY_VERSION: '3.4.5'
+
 jobs:
   scan_ruby:
     runs-on: ubuntu-latest
@@ -52,17 +59,20 @@ jobs:
           bundler-cache: true
 
       - name: Lint code for consistent style
-        run: bin/rubocop -f github
+        run: |
+          bin/rubocop -f github
+          bin/rubocop -f json -o rubocop-report.json
 
   test:
     runs-on: ubuntu-latest
 
     services:
       postgres:
-        image: postgres
+        image: postgres:16
         env:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: gupii_test
         ports:
           - 5432:5432
         options: --health-cmd="pg_isready" --health-interval=10s --health-timeout=5s --health-retries=3
@@ -72,6 +82,15 @@ jobs:
         ports:
           - 6379:6379
         options: --health-cmd "redis-cli ping" --health-interval 10s --health-timeout 5s --health-retries 5
+
+    env:
+      RAILS_ENV: test
+      DATABASE_HOST: localhost
+      DATABASE_USERNAME: postgres
+      DATABASE_PASSWORD: postgres
+      DATABASE_URL: postgres://postgres:postgres@localhost:5432/gupii_test
+      REDIS_URL: redis://localhost:6379/0
+      COVERAGE: true
 
     steps:
       - name: Install packages
@@ -83,47 +102,70 @@ jobs:
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: .ruby-version
+          ruby-version: ${{ env.RUBY_VERSION }}
           bundler-cache: true
 
       - name: Set up test databases
-        env:
-          RAILS_ENV: test
-          DATABASE_HOST: localhost
-          DATABASE_USERNAME: postgres
-          DATABASE_PASSWORD: postgres
-          REDIS_URL: redis://localhost:6379/0
         run: |
           bin/rails db:create:all
           bin/rails db:schema:load:all
-          
-      - name: Run RSpec tests
-        env:
-          RAILS_ENV: test
-          DATABASE_HOST: localhost
-          DATABASE_USERNAME: postgres
-          DATABASE_PASSWORD: postgres
-          REDIS_URL: redis://localhost:6379/0
-          JDPI_BASE_URL: https://api.jdpi.staging.bcb.gov.br
-          IUGU_IDENTITY_BASE_URL: https://identity.staging.iugu.com
+
+      - name: Run tests with coverage
         run: |
-          bundle exec rspec --format progress --format RspecJunitFormatter --out tmp/rspec.xml
-          
+          # Run Rails tests
+          bin/rails test
+          # Run custom URL validation tests
+          bin/rails runner script/validate_subpath_urls.rb
+
       - name: Run system tests
-        env:
-          RAILS_ENV: test
-          DATABASE_HOST: localhost
-          DATABASE_USERNAME: postgres
-          DATABASE_PASSWORD: postgres
-          REDIS_URL: redis://localhost:6379/0
         run: bin/rails test:system
+
+      - name: Set up SonarQube Community Server
+        run: |
+          # Start SonarQube Community in Docker
+          docker run -d --name sonarqube-ci \
+            -p 9000:9000 \
+            -e SONAR_ES_BOOTSTRAP_CHECKS_DISABLE=true \
+            sonarqube:community
+          
+          # Wait for SonarQube to be ready
+          timeout 300 bash -c 'until curl -f http://localhost:9000/api/system/status | grep -q "UP"; do sleep 5; done'
+          
+          # Set up default admin token (for CI only)
+          SONAR_TOKEN=$(curl -u admin:admin -X POST "http://localhost:9000/api/user_tokens/generate" \
+            -d "name=ci-token" | jq -r '.token')
+          echo "SONAR_TOKEN=$SONAR_TOKEN" >> $GITHUB_ENV
+
+      - name: SonarQube Scan
+        uses: sonarqube-scanner-action@v3
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ env.SONAR_TOKEN }}
+          SONAR_HOST_URL: http://localhost:9000
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+        if: success()
+        with:
+          files: ./coverage/lcov.info
+          flags: rails
+          name: Gupii Rails Tests
+          fail_ci_if_error: false
 
       - name: Upload test results
         uses: actions/upload-artifact@v4
         if: always()
         with:
           name: test-results
-          path: tmp/rspec.xml
+          path: tmp/test_results/
+          if-no-files-found: ignore
+          
+      - name: Upload coverage results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage-report
+          path: coverage/
           if-no-files-found: ignore
           
       - name: Keep screenshots from failed system tests

@@ -36,7 +36,7 @@ Rails.application.configure do
 
   # Make template changes take effect immediately.
   config.action_mailer.perform_caching = false
-  
+
   # Disable host checking completely in development for container networking
   config.hosts = nil
 
