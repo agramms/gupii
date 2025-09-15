@@ -14,7 +14,7 @@ services:
       BUNDLE_PATH: /usr/local/bundle
     ports:
       - "3000:3000"
-    command: bin/rails server -b 0.0.0.0
+    command: bin/dev
     depends_on:
       postgres:
         condition: service_healthy
