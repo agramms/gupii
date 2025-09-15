@@ -59,9 +59,7 @@ jobs:
           bundler-cache: true
 
       - name: Lint code for consistent style
-        run: |
-          bin/rubocop -f github
-          bin/rubocop -f json -o rubocop-report.json
+        run: bin/rubocop -f github
 
   test:
     runs-on: ubuntu-latest
@@ -120,28 +118,11 @@ jobs:
       - name: Run system tests
         run: bin/rails test:system
 
-      - name: Set up SonarQube Community Server
-        run: |
-          # Start SonarQube Community in Docker
-          docker run -d --name sonarqube-ci \
-            -p 9000:9000 \
-            -e SONAR_ES_BOOTSTRAP_CHECKS_DISABLE=true \
-            sonarqube:community
-          
-          # Wait for SonarQube to be ready
-          timeout 300 bash -c 'until curl -f http://localhost:9000/api/system/status | grep -q "UP"; do sleep 5; done'
-          
-          # Set up default admin token (for CI only)
-          SONAR_TOKEN=$(curl -u admin:admin -X POST "http://localhost:9000/api/user_tokens/generate" \
-            -d "name=ci-token" | jq -r '.token')
-          echo "SONAR_TOKEN=$SONAR_TOKEN" >> $GITHUB_ENV
-
-      - name: SonarQube Scan
-        uses: sonarqube-scanner-action@v3
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          SONAR_TOKEN: ${{ env.SONAR_TOKEN }}
-          SONAR_HOST_URL: http://localhost:9000
+      - name: Code Climate Test Reporter
+        uses: qltysh/qlty-action/coverage@v2
+        with:
+          token: {{secrets.QLTY_COVERAGE_TOKEN}}
+          files: ${{github.workspace}}/coverage/lcov.info:lcov
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v3
