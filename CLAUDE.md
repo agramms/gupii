@@ -288,6 +288,29 @@ The **SPI Transaction Lookup** provides real-time consultation of PIX transactio
 - **No Local Storage**: Stateless consultation maintaining data privacy
 - **Regulatory Compliance**: Official JDPI API integration following Central Bank specifications
 
+## GitHub Workflow & Branch Protection
+
+### Protected Main Branch
+- **Main branch is protected** - All changes must go through pull requests
+- **Required CI checks** - GitHub Actions CI must pass before merging
+- **No direct pushes** - Use feature branches for all development
+- **Pull request reviews** - May require approval depending on repository settings
+
+### Development Workflow
+1. **Create feature branch** from main: `git checkout -b feature/your-feature-name`
+2. **Make changes** and commit to feature branch
+3. **Push feature branch** to remote: `git push -u origin feature/your-feature-name`
+4. **Create pull request** targeting main branch
+5. **Wait for CI checks** - All GitHub Actions must pass
+6. **Merge after approval** - Use GitHub web interface or CLI
+
+### CI/CD Pipeline
+- **GitHub Actions**: Comprehensive CI with testing, linting, security scans
+- **Code Coverage**: SimpleCov with CodeClimate and Codecov integration
+- **Quality Gates**: RuboCop linting, Brakeman security scanning
+- **Automated Testing**: Unit tests, system tests, custom validation scripts
+- **Branch Protection**: Main branch requires passing CI checks
+
 ## Important Notes
 
 - **PIX Focus**: Brazilian Central Bank PIX integration with MED (Mecanismo Especial de Devolução)
@@ -303,5 +326,6 @@ The **SPI Transaction Lookup** provides real-time consultation of PIX transactio
 - **Mascot**: Gupii 🐹 represents friendly, accessible PIX payments
 - **Monolithic**: Single Rails app with Admin UI + API scopes for development velocity
 - **Full Stack Observability**: Comprehensive monitoring with Grafana, Prometheus, Jaeger
+- **Protected Repository**: Main branch requires pull requests with passing CI checks
 
 The project combines modern Rails 8 development with enterprise-grade observability and clean service architecture to create a robust, compliant PIX payment integration solution for the Brazilian Central Bank ecosystem.
