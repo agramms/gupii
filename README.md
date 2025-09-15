@@ -1,8 +1,8 @@
 # Gupii 🐹
 
 [![CI](https://github.com/agramms/gupii/workflows/Gupii%20PIX%20Integration%20CI/badge.svg)](https://github.com/agramms/gupii/actions)
-[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=agramms_gupii&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=agramms_gupii)
-[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=agramms_gupii&metric=coverage)](https://sonarcloud.io/summary/new_code?id=agramms_gupii)
+[![SonarQube Quality Gate](https://img.shields.io/badge/SonarQube-Community-blue.svg)](http://localhost/sonar/)
+[![Code Coverage](https://img.shields.io/badge/Coverage-SimpleCov-green.svg)](http://localhost/sonar/)
 [![codecov](https://codecov.io/gh/agramms/gupii/branch/main/graph/badge.svg)](https://codecov.io/gh/agramms/gupii)
 [![Ruby Version](https://img.shields.io/badge/ruby-3.4.5-red.svg)](https://www.ruby-lang.org/)
 [![Rails Version](https://img.shields.io/badge/rails-8.0.2-red.svg)](https://rubyonrails.org/)
@@ -86,6 +86,7 @@ The development environment includes a complete observability stack:
 - **Rails App**: http://localhost/app (main application)
 - **Grafana**: http://localhost/grafana (dashboards - admin/admin123)  
 - **Prometheus**: http://localhost/prometheus (metrics)
+- **SonarQube**: http://localhost/sonar (code quality - admin/admin)
 - **pgAdmin**: http://localhost/pgadmin (database - admin@gupii.dev/admin123)
 - **MailHog**: http://localhost/mail (email testing)
 - **MinIO Console**: http://localhost/minio (S3 storage - minioadmin/minioadmin123)
@@ -261,8 +262,8 @@ Gupii uses **GitHub Actions** for comprehensive CI/CD:
 ### CI Pipeline Features
 - **Automated Testing**: Unit tests, system tests, and custom validation scripts
 - **Security Scanning**: Brakeman for Ruby vulnerabilities, ImportMap audit for JS dependencies
-- **Code Quality**: RuboCop linting with Rails Omakase style guide + SonarQube analysis
-- **Code Coverage**: SimpleCov with SonarQube Cloud and Codecov integration
+- **Code Quality**: RuboCop linting with Rails Omakase style guide + SonarQube Community analysis
+- **Code Coverage**: SimpleCov with SonarQube Community and Codecov integration
 - **Docker Builds**: Automated container builds with caching
 - **Multi-Environment**: Supports staging and production deployments
 
@@ -270,13 +271,17 @@ Gupii uses **GitHub Actions** for comprehensive CI/CD:
 
 To enable the badges and integrate with external services:
 
-1. **SonarQube Cloud Setup**:
+1. **SonarQube Community Setup**:
    ```bash
-   # 1. Sign up at https://sonarcloud.io
-   # 2. Import your GitHub repository
-   # 3. Get your project token from Project Settings > Analysis Method
-   # 4. Add SONAR_TOKEN to GitHub repository secrets
-   # 5. Configure project key in sonar-project.properties
+   # Development Environment:
+   # 1. SonarQube runs automatically in Docker Compose
+   # 2. Access at http://localhost/sonar/ (admin/admin)
+   # 3. Projects are automatically configured
+   
+   # CI Environment:
+   # 1. SonarQube Community runs in Docker during CI
+   # 2. No external setup required - fully automated
+   # 3. Analysis results available in CI logs
    ```
 
 2. **Codecov Setup**:
