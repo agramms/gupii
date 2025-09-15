@@ -59,7 +59,9 @@ jobs:
           bundler-cache: true
 
       - name: Lint code for consistent style
-        run: bin/rubocop -f github
+        run: |
+          bin/rubocop -f github
+          bin/rubocop -f json -o rubocop-report.json
 
   test:
     runs-on: ubuntu-latest
@@ -88,7 +90,6 @@ jobs:
       DATABASE_PASSWORD: postgres
       DATABASE_URL: postgres://postgres:postgres@localhost:5432/gupii_test
       REDIS_URL: redis://localhost:6379/0
-      CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
       COVERAGE: true
 
     steps:
@@ -103,12 +104,6 @@ jobs:
         with:
           ruby-version: ${{ env.RUBY_VERSION }}
           bundler-cache: true
-
-      - name: Set up Code Climate test reporter
-        run: |
-          curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
-          chmod +x ./cc-test-reporter
-          ./cc-test-reporter before-build
 
       - name: Set up test databases
         run: |
@@ -125,20 +120,18 @@ jobs:
       - name: Run system tests
         run: bin/rails test:system
 
-      - name: Generate coverage report
-        run: |
-          # SimpleCov generates coverage automatically when COVERAGE=true
-
-      - name: Upload coverage to Code Climate
-        if: success()
-        run: |
-          ./cc-test-reporter after-build --coverage-input-type simplecov --exit-code $?
+      - name: SonarQube Scan
+        uses: sonarqube-scanner-action@v3
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: https://sonarcloud.io
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v3
         if: success()
         with:
-          files: ./coverage/.resultset.json
+          files: ./coverage/lcov.info
           flags: rails
           name: Gupii Rails Tests
           fail_ci_if_error: false

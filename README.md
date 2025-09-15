@@ -1,9 +1,9 @@
 # Gupii 🐹
 
-[![CI](https://github.com/your-org/gupii/workflows/Gupii%20PIX%20Integration%20CI/badge.svg)](https://github.com/your-org/gupii/actions)
-[![Test Coverage](https://api.codeclimate.com/v1/badges/your-repo-id/test_coverage)](https://codeclimate.com/github/your-org/gupii/test_coverage)
-[![Maintainability](https://api.codeclimate.com/v1/badges/your-repo-id/maintainability)](https://codeclimate.com/github/your-org/gupii/maintainability)
-[![codecov](https://codecov.io/gh/your-org/gupii/branch/main/graph/badge.svg)](https://codecov.io/gh/your-org/gupii)
+[![CI](https://github.com/agramms/gupii/workflows/Gupii%20PIX%20Integration%20CI/badge.svg)](https://github.com/agramms/gupii/actions)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=agramms_gupii&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=agramms_gupii)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=agramms_gupii&metric=coverage)](https://sonarcloud.io/summary/new_code?id=agramms_gupii)
+[![codecov](https://codecov.io/gh/agramms/gupii/branch/main/graph/badge.svg)](https://codecov.io/gh/agramms/gupii)
 [![Ruby Version](https://img.shields.io/badge/ruby-3.4.5-red.svg)](https://www.ruby-lang.org/)
 [![Rails Version](https://img.shields.io/badge/rails-8.0.2-red.svg)](https://rubyonrails.org/)
 
@@ -261,8 +261,8 @@ Gupii uses **GitHub Actions** for comprehensive CI/CD:
 ### CI Pipeline Features
 - **Automated Testing**: Unit tests, system tests, and custom validation scripts
 - **Security Scanning**: Brakeman for Ruby vulnerabilities, ImportMap audit for JS dependencies
-- **Code Quality**: RuboCop linting with Rails Omakase style guide
-- **Code Coverage**: SimpleCov with CodeClimate and Codecov integration
+- **Code Quality**: RuboCop linting with Rails Omakase style guide + SonarQube analysis
+- **Code Coverage**: SimpleCov with SonarQube Cloud and Codecov integration
 - **Docker Builds**: Automated container builds with caching
 - **Multi-Environment**: Supports staging and production deployments
 
@@ -270,13 +270,13 @@ Gupii uses **GitHub Actions** for comprehensive CI/CD:
 
 To enable the badges and integrate with external services:
 
-1. **CodeClimate Setup**:
+1. **SonarQube Cloud Setup**:
    ```bash
-   # 1. Sign up at https://codeclimate.com
-   # 2. Add your repository
-   # 3. Get your Test Reporter ID
-   # 4. Add CC_TEST_REPORTER_ID to GitHub repository secrets
-   # 5. Update README badges with your repo ID
+   # 1. Sign up at https://sonarcloud.io
+   # 2. Import your GitHub repository
+   # 3. Get your project token from Project Settings > Analysis Method
+   # 4. Add SONAR_TOKEN to GitHub repository secrets
+   # 5. Configure project key in sonar-project.properties
    ```
 
 2. **Codecov Setup**:
@@ -284,13 +284,13 @@ To enable the badges and integrate with external services:
    # 1. Sign up at https://codecov.io
    # 2. Install GitHub app for your repository
    # 3. Coverage automatically uploaded by CI
-   # 4. Update README badge with your repo path
+   # 4. Badges automatically work with repository path
    ```
 
-3. **Update README Badges**:
-   Replace placeholders in README badges:
-   - `your-org/gupii` → Your actual GitHub repository path
-   - `your-repo-id` → Your CodeClimate repository ID
+3. **Configuration Files**:
+   - `sonar-project.properties` - SonarQube project configuration
+   - `.simplecov` - Ruby code coverage configuration with LCOV output
+   - `.github/workflows/ci.yml` - GitHub Actions workflow with SonarQube integration
 
 ### CI Triggers
 - **Pull Requests**: Full test suite with coverage reporting
