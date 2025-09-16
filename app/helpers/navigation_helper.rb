@@ -1,10 +1,5 @@
 module NavigationHelper
   def nav_link(path, icon_name, text, active: false, disabled: false, method: :get)
-    # Ensure path includes subpath in development
-    Rails.logger.debug "🔍 NAV_LINK DEBUG: path=#{path.inspect}, env=#{Rails.env}, relative_url_root=#{Rails.application.config.relative_url_root.inspect}"
-
-    full_path = subpath_aware_url(path)
-    Rails.logger.debug "🔍 NAV_LINK DEBUG: final full_path=#{full_path.inspect}"
 
     css_classes = [
       "group flex items-center px-3 py-3 text-sm font-medium rounded-lg transition-all duration-300",
@@ -13,7 +8,7 @@ module NavigationHelper
       "focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-1"
     ].join(" ")
 
-    link_to full_path,
+    link_to path,
             class: css_classes,
             method: method,
             "aria-current": (active ? "page" : nil),
@@ -44,24 +39,6 @@ module NavigationHelper
     end
   end
 
-  # Enhanced subpath-aware URL helper that works with both paths and URLs
-  def subpath_aware_url(path_or_url, request = nil)
-    # If it's already a full URL, return as-is
-    return path_or_url if path_or_url.to_s.start_with?("http")
-
-    # Ensure we have a path string
-    path = path_or_url.to_s
-
-    # In development with subpath configured, prepend subpath if not already present
-    if Rails.env.development? && Rails.application.config.relative_url_root.present?
-      subpath = Rails.application.config.relative_url_root
-      unless path.start_with?(subpath)
-        path = "#{subpath}#{path.start_with?('/') ? path : "/#{path}"}"
-      end
-    end
-
-    path
-  end
 
   private
 

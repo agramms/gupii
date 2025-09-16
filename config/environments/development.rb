@@ -42,6 +42,9 @@ Rails.application.configure do
 
   # Domain-based routing - Rails serves from root on gupii.local
   # No subpath configuration needed with domain-based development setup
+  
+  # Set default URL options for development
+  config.action_mailer.default_url_options = { host: 'gupii.local', protocol: 'https' }
 
   # Print deprecation notices to the Rails logger.
   config.active_support.deprecation = :log

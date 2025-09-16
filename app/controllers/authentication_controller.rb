@@ -8,11 +8,7 @@ class AuthenticationController < ApplicationController
   def callback
     redirect_host = request.protocol + request.host_with_port
 
-    # Include subpath in development mode for proper OAuth callback routing
     callback_path = "/oauth2/callback"
-    if Rails.env.development? && Rails.application.config.relative_url_root.present?
-      callback_path = "#{Rails.application.config.relative_url_root}#{callback_path}"
-    end
 
     callback_url = "#{redirect_host}#{callback_path}"
 

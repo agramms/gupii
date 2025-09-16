@@ -158,7 +158,11 @@
     }
   },
   "postCreateCommand": ".devcontainer/scripts/setup-environment.sh && .devcontainer/setup.sh",
-  "remoteUser": "vscode"
+  "remoteUser": "vscode",
+  "containerEnv": {
+    "RAILS_RELATIVE_URL_ROOT": ""
+  },
+  "postStartCommand": "echo 'alias claude=\"claude-code\"' >> ~/.bashrc && echo 'alias claude=\"claude-code\"' >> ~/.zshrc"
 }
 
 

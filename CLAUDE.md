@@ -329,3 +329,33 @@ The **SPI Transaction Lookup** provides real-time consultation of PIX transactio
 - **Protected Repository**: Main branch requires pull requests with passing CI checks
 
 The project combines modern Rails 8 development with enterprise-grade observability and clean service architecture to create a robust, compliant PIX payment integration solution for the Brazilian Central Bank ecosystem.
+
+## Important Notes
+
+- **Domain-Based Development**: Professional development environment using *.gupii.local domains with HTTPS
+- **PIX Focus**: Brazilian Central Bank PIX integration with MED (Mecanismo Especial de Devolução)
+- **Rails Version**: 8.0 (latest stable) with Ruby 3.4.5
+- **Multi-Database**: Separate PostgreSQL databases for app, cache, and queue
+- **Authentication**: iugu Identity Provider with JWT tokens
+- **API Strategy**: Polling-based client communication pattern
+- **Service Architecture**: Clean JDPI integration in `app/services/jdpi/`
+- **Disputes System**: Complete lifecycle management with 6-day customer response SLA
+- **SPI Transaction Lookup**: Real-time consultation via JDPI API 8.4.7 without local persistence
+- **Reference Templates**: Use `tmp/platform2-app-boleto` for Tailwind patterns only
+- **JDPI Documentation**: API specification in `tmp/jdpi-api-doc.5.2.1.pdf`
+- **Mascot**: Gupii 🐹 represents friendly, accessible PIX payments
+- **Monolithic**: Single Rails app with Admin UI + API scopes for development velocity
+- **Full Stack Observability**: Comprehensive monitoring with Grafana, Prometheus, Jaeger
+
+## Development Environment
+
+### Domain-Based Access
+- **Primary URLs**: All services accessible via https://*.gupii.local domains
+- **SSL Certificates**: Auto-generated wildcard certificates for development
+- **Team Onboarding**: Automated setup scripts solve developer environment consistency
+- **Environment Detection**: Supports local development, GitHub Codespaces, and CI
+
+### Code Style Guidelines
+- **File Formatting**: Remove trailing whitespace and ensure files end with a single newline
+- **No Comments**: Do not add code comments unless explicitly requested
+- **Follow Conventions**: Match existing codebase patterns and style

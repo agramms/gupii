@@ -36,7 +36,7 @@ Gupii is a Rails 8 application that provides seamless integration with Brazil's 
 - **JDPI API** integration for Central Bank compliance
 - **Tailwind CSS 4.x** responsive admin interface with professional components
 - **Docker** containerized deployment with comprehensive DevContainer setup
-- **Nginx** reverse proxy with smart routing and subpath support
+- **Nginx** reverse proxy with domain-based routing and HTTPS support
 
 ## 🛠️ Development Setup
 
@@ -149,8 +149,8 @@ The development environment includes a complete observability stack with domain-
 
 2. **Run tests**
    ```bash
-   # Validation script for subpath URL generation  
-   bin/rails runner script/validate_subpath_urls.rb
+   # Run comprehensive test suite
+   bin/rails test
    
    # Unit tests (when test environment is configured)
    bin/rails test
@@ -160,7 +160,7 @@ The development environment includes a complete observability stack with domain-
    ```bash
    bundle exec rubocop              # Ruby style checks
    bundle exec brakeman            # Security analysis  
-   bin/rails runner script/validate_subpath_urls.rb  # URL validation
+   bin/rails test  # Run test suite
    ```
 
 4. **Database operations**
@@ -174,7 +174,7 @@ The development environment includes a complete observability stack with domain-
 
 ```bash
 # URL generation validation (custom test)
-bin/rails runner script/validate_subpath_urls.rb
+bin/rails test
 
 # Run all tests (when test environment is configured)
 bin/rails test

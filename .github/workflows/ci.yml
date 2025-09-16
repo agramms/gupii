@@ -110,10 +110,8 @@ jobs:
 
       - name: Run tests with coverage
         run: |
-          # Run Rails tests
+          # Run Rails test suite
           bin/rails test
-          # Run custom URL validation tests
-          bin/rails runner script/validate_subpath_urls.rb
 
       - name: Run system tests
         run: bin/rails test:system

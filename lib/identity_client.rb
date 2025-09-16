@@ -54,13 +54,7 @@ module IdentityClient
   def from_hash(hash) = OAuth2::AccessToken.from_hash(oauth2_client, hash)
 
   def authorize_url(redirect_host:)
-    # Include subpath in development mode for proper OAuth callback routing
-    callback_path = "/oauth2/callback"
-    if Rails.env.development? && Rails.application.config.relative_url_root.present?
-      callback_path = "#{Rails.application.config.relative_url_root}#{callback_path}"
-    end
-
-    redirect_uri = "#{redirect_host}#{callback_path}"
+    redirect_uri = "#{redirect_host}/oauth2/callback"
     oauth2_client.auth_code.authorize_url(redirect_uri:)
   end
 
