@@ -11,7 +11,7 @@
 
 Gupii is a Rails 8 application that provides seamless integration with Brazil's PIX instant payment system through the JDPI (Diretório de Identificadores de Contas Transacionais) API.
 
-![Gupii Mascot](tmp/gupii.png)
+![Gupii Mascot](https://github.com/agramms/gupii/app/assets/images/gupii.png)
 
 ## 🚀 Features
 
@@ -75,21 +75,27 @@ Gupii is a Rails 8 application that provides seamless integration with Brazil's 
    ```
 
 5. **Access the application**
-   - **Rails App**: http://localhost/app (with nginx proxy)
+   - **Rails App**: https://gupii.local (primary domain)
    - **Direct Access**: http://localhost:3000 (Rails server only)
-   - **API Health**: http://localhost/app/api/v1/health
+   - **API Health**: https://gupii.local/api/v1/health
 
 ### DevContainer Services
 
-The development environment includes a complete observability stack:
+The development environment includes a complete observability stack with domain-based access:
 
-- **Rails App**: http://localhost/app (main application)
-- **Grafana**: http://localhost/grafana (dashboards - admin/admin123)  
-- **Prometheus**: http://localhost/prometheus (metrics)
-- **pgAdmin**: http://localhost/pgadmin (database - admin@gupii.dev/admin123)
-- **MailHog**: http://localhost/mail (email testing)
-- **MinIO Console**: http://localhost/minio (S3 storage - minioadmin/minioadmin123)
-- **Jaeger**: http://localhost/jaeger (distributed tracing)
+- **Rails App**: https://gupii.local (main application)
+- **Grafana**: https://grafana.gupii.local (dashboards - admin/admin123)  
+- **Prometheus**: https://prometheus.gupii.local (metrics)
+- **Code Quality**: Integrated with Code Climate for maintainability analysis
+- **pgAdmin**: https://pgadmin.gupii.local (database - admin@gupii.dev/admin123)
+- **MailHog**: https://mail.gupii.local (email testing)
+- **MinIO Console**: https://minio.gupii.local (S3 storage - minioadmin/minioadmin123)
+- **Jaeger**: https://jaeger.gupii.local (distributed tracing)
+
+**Setup Requirements**:
+- Run `.devcontainer/scripts/setup-environment.sh` for automated domain configuration
+- Or manually add domains to `/etc/hosts`: `127.0.0.1 gupii.local grafana.gupii.local prometheus.gupii.local pgadmin.gupii.local mail.gupii.local minio.gupii.local jaeger.gupii.local`
+- SSL certificates are automatically generated for HTTPS access
 
 ### Local Development Setup
 
@@ -274,7 +280,7 @@ To enable the badges and integrate with external services:
    ```bash
    # 1. Sign up at https://codeclimate.com
    # 2. Connect your GitHub repository
-   # 3. Add QLTY_COVERAGE_TOKEN secret to GitHub repository
+   # 3. Add CC_TEST_REPORTER_ID secret to GitHub repository
    # 4. Coverage and quality metrics automatically uploaded by CI
    ```
 
@@ -299,32 +305,32 @@ To enable the badges and integrate with external services:
 
 ### Health Check
 ```bash
-# With nginx proxy (DevContainer)
-curl http://localhost/app/api/v1/health
+# Domain-based access (DevContainer)
+curl https://gupii.local/api/v1/health
 
-# Direct access
+# Direct access (bypass nginx)
 curl http://localhost:3000/api/v1/health
 ```
 
 ### Polling for Updates
 ```bash
 # PIX operations polling
-curl http://localhost/app/api/v1/events/poll
+curl https://gupii.local/api/v1/events/poll
 
 # Disputes polling  
-curl http://localhost/app/api/v1/disputes/stats
+curl https://gupii.local/api/v1/disputes/stats
 
 # Fraud markings polling
-curl http://localhost/app/api/v1/fraud_markings/stats
+curl https://gupii.local/api/v1/fraud_markings/stats
 ```
 
 ### PIX Operations API
 ```bash
 # List PIX operations
-curl http://localhost/app/api/v1/pix_operations
+curl https://gupii.local/api/v1/pix_operations
 
 # Create PIX operation
-curl -X POST http://localhost/app/api/v1/pix_operations \
+curl -X POST https://gupii.local/api/v1/pix_operations \
   -H "Content-Type: application/json" \
   -d '{"amount": 100.00, "recipient_key": "user@example.com"}'
 ```
@@ -332,10 +338,10 @@ curl -X POST http://localhost/app/api/v1/pix_operations \
 ### Payment Service Providers API
 ```bash
 # List active PSPs
-curl http://localhost/app/api/v1/payment_service_providers/active
+curl https://gupii.local/api/v1/payment_service_providers/active
 
 # Search PSPs by ISPB
-curl http://localhost/app/api/v1/payment_service_providers/by_ispb/12345678
+curl https://gupii.local/api/v1/payment_service_providers/by_ispb/12345678
 ```
 
 ## 🔧 Configuration
@@ -394,19 +400,20 @@ test:
 
 ### Development-Specific Configuration
 
-In development, the application runs with subpath routing:
+In development, the application uses domain-based routing for production-like experience:
 
-- **Nginx Proxy**: Routes requests intelligently based on path
-- **Rails Subpath**: Configured to run under `/app` prefix  
-- **URL Generation**: Automatic subpath-aware URL helpers
-- **OAuth Callbacks**: Properly configured for subpath environment
+- **Domain Routing**: Each service gets its own subdomain (*.gupii.local)
+- **HTTPS by Default**: Self-signed certificates for secure development
+- **No Subpaths**: Applications serve from root, matching production behavior
+- **OAuth Callbacks**: Clean URLs without path prefixes
+- **Team Onboarding**: Automated setup scripts for consistent environments
 
-This allows multiple services to run simultaneously:
-- Rails app at `/app`
-- Grafana at `/grafana`  
-- MinIO at `/minio`
-- pgAdmin at `/pgadmin`
-- And more...
+This provides a professional development environment that closely mirrors production:
+- Rails app at `https://gupii.local`
+- Grafana at `https://grafana.gupii.local`  
+- MinIO at `https://minio.gupii.local`
+- pgAdmin at `https://pgadmin.gupii.local`
+- All services accessible with clean, memorable URLs
 
 ## 🤝 Contributing
 

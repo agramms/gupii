@@ -1,16 +1,18 @@
 # Gupii Development Environment
 
-A comprehensive Rails development environment with DevOps tooling and infrastructure services.
+A comprehensive Rails 8 development environment with domain-based routing, HTTPS support, and complete observability stack.
 
 ## 🏗️ Architecture
 
 This development environment provides:
 
-- **Application Stack**: Rails 7+ with PostgreSQL and Redis
+- **Application Stack**: Rails 8.0.2.1 with Ruby 3.4.5, PostgreSQL 16, Redis 7
+- **Domain Architecture**: Production-like *.gupii.local domains with HTTPS
 - **Monitoring**: Prometheus, Grafana, StatsD/Graphite
 - **Development Tools**: pgAdmin, MailHog, MinIO
 - **Observability**: Jaeger distributed tracing
-- **Proxy**: Nginx reverse proxy
+- **Reverse Proxy**: Nginx with SSL termination and domain routing
+- **Automation**: Team onboarding scripts and environment detection
 
 ## 🚀 Services
 
@@ -38,20 +40,29 @@ This development environment provides:
   - Secret Key: `minioadmin123`
 - **Jaeger** (Port 16686): Distributed tracing UI
 
-### Reverse Proxy
-- **Nginx** (Port 80): Unified access point
-  - `/` → Rails app
-  - `/grafana/` → Grafana
-  - `/prometheus/` → Prometheus
-  - `/pgadmin/` → pgAdmin
-  - `/mail/` → MailHog
-  - `/minio/` → MinIO Console
-  - `/jaeger/` → Jaeger UI
+### Domain-Based Routing
+- **Nginx** (Ports 80/443): HTTPS-first domain routing
+  - `https://gupii.local` → Rails app
+  - `https://grafana.gupii.local` → Grafana
+  - `https://prometheus.gupii.local` → Prometheus
+  - `https://pgadmin.gupii.local` → pgAdmin
+  - `https://mail.gupii.local` → MailHog
+  - `https://minio.gupii.local` → MinIO Console
+  - `https://jaeger.gupii.local` → Jaeger UI
+- **SSL Certificates**: Auto-generated wildcard certificates for *.gupii.local
 
 ## 📱 Quick Access URLs
 
-When the devcontainer is running:
+### Primary Access (Domain-based HTTPS)
+- **Rails App**: https://gupii.local
+- **Grafana**: https://grafana.gupii.local (admin/admin123)
+- **Prometheus**: https://prometheus.gupii.local
+- **pgAdmin**: https://pgadmin.gupii.local (admin@gupii.dev/admin123)
+- **MailHog**: https://mail.gupii.local
+- **MinIO Console**: https://minio.gupii.local (minioadmin/minioadmin123)
+- **Jaeger**: https://jaeger.gupii.local
 
+### Direct Port Access (Bypass nginx)
 - Rails App: http://localhost:3000
 - pgAdmin: http://localhost:5050
 - Grafana: http://localhost:3001
@@ -59,7 +70,18 @@ When the devcontainer is running:
 - MailHog: http://localhost:8025
 - MinIO Console: http://localhost:9001
 - Jaeger: http://localhost:16686
-- Unified Proxy: http://localhost
+
+### Setup Requirements
+**Automatic Setup** (Recommended):
+```bash
+.devcontainer/scripts/setup-environment.sh
+```
+
+**Manual Setup**:
+Add to `/etc/hosts`:
+```
+127.0.0.1 gupii.local grafana.gupii.local prometheus.gupii.local pgadmin.gupii.local mail.gupii.local minio.gupii.local jaeger.gupii.local
+```
 
 ## 🔧 Environment Variables
 
@@ -73,11 +95,20 @@ RAILS_ENV=development
 
 ## 🛠️ Development Workflow
 
-1. **Start Environment**: Open in VS Code with Dev Containers extension
-2. **Database Setup**: Rails will auto-create with PostgreSQL + Tailwind
-3. **Monitor**: Use Grafana for metrics, pgAdmin for database management
-4. **Email Testing**: Configure Rails to use MailHog SMTP (localhost:1025)
-5. **File Storage**: Use MinIO for S3-compatible storage testing
+1. **Environment Setup**: Open in VS Code with Dev Containers extension
+2. **Domain Configuration**: Run setup scripts or manually configure /etc/hosts
+3. **Access Application**: Navigate to https://gupii.local (accept SSL warnings)
+4. **Development**: Use domain-based URLs for all services
+5. **Monitoring**: Grafana dashboards at https://grafana.gupii.local
+6. **Database Management**: pgAdmin at https://pgadmin.gupii.local
+7. **Email Testing**: MailHog at https://mail.gupii.local
+8. **File Storage**: MinIO console at https://minio.gupii.local
+
+### First-Time Setup
+1. DevContainer automatically runs environment detection
+2. SSL certificates are generated for *.gupii.local
+3. Domain configuration is validated
+4. Services start with production-like URLs
 
 ## 📊 Monitoring Setup
 
@@ -118,10 +149,23 @@ statsd.increment('gupii.user.login')
 
 ## 🚀 Getting Started
 
-1. Ensure Docker and VS Code with Dev Containers extension are installed
-2. Open this project in VS Code
-3. Click "Reopen in Container" when prompted
-4. Wait for all services to start (check ports panel)
-5. Access services via the URLs above
+### For New Team Members
+1. **Prerequisites**: Docker Desktop + VS Code with Dev Containers extension
+2. **Clone & Open**: Clone repository and open in VS Code
+3. **DevContainer**: Click "Reopen in Container" when prompted
+4. **Automated Setup**: Environment detection and domain setup runs automatically
+5. **Access**: Navigate to https://gupii.local (accept SSL certificate)
+6. **Team Onboarding**: All domains and certificates configured automatically
+
+### For GitHub Codespaces
+- Domain setup is automatically bypassed
+- Port forwarding used instead of local domains
+- All services accessible via VS Code ports panel
+
+### Environment Detection
+The DevContainer automatically detects:
+- **Local Development**: Full domain setup with SSL certificates
+- **GitHub Codespaces**: Port-based access with forwarding
+- **CI Environment**: Minimal setup for testing
 
 Happy coding! 🎉

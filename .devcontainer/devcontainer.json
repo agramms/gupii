@@ -157,7 +157,7 @@
       "protocol": "http"
     }
   },
-  "postCreateCommand": ".devcontainer/setup.sh",
+  "postCreateCommand": ".devcontainer/scripts/setup-environment.sh && .devcontainer/setup.sh",
   "remoteUser": "vscode"
 }
 

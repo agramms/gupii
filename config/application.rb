@@ -33,10 +33,8 @@ module Gupii
     # Fallback to English if translation missing
     config.i18n.fallbacks = [ :"pt-BR", :en ]
 
-    # Configure relative URL root for development environment
-    if Rails.env.development?
-      config.relative_url_root = "/app"
-    end
+    # Domain-based development environment - no subpath configuration needed
+    # Applications now run on dedicated domains (gupii.local, grafana.gupii.local, etc.)
 
     # Load locale files from subdirectories
     config.i18n.load_path += Dir[Rails.root.join("config", "locales", "**", "*.{rb,yml}")]
