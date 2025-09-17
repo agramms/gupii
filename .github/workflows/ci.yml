@@ -87,8 +87,13 @@ jobs:
       DATABASE_USERNAME: postgres
       DATABASE_PASSWORD: postgres
       DATABASE_URL: postgres://postgres:postgres@localhost:5432/gupii_test
+      CACHE_DATABASE_URL: postgres://postgres:postgres@localhost:5432/gupii_cache_test
+      QUEUE_DATABASE_URL: postgres://postgres:postgres@localhost:5432/gupii_queue_test
       REDIS_URL: redis://localhost:6379/0
       COVERAGE: true
+      # Disable observability features in CI
+      OTEL_SDK_DISABLED: true
+      STATSD_HOST: ""
 
     steps:
       - name: Install packages
@@ -107,6 +112,7 @@ jobs:
         run: |
           bin/rails db:create:all
           bin/rails db:schema:load:all
+          bin/rails solid_queue:install
 
       - name: Run tests with coverage
         run: |
@@ -119,8 +125,8 @@ jobs:
       - name: Code Climate Test Reporter
         uses: qltysh/qlty-action/coverage@v2
         with:
-          token: {{secrets.QLTY_COVERAGE_TOKEN}}
-          files: ${{github.workspace}}/coverage/lcov.info:lcov
+          token: ${{ secrets.QLTY_COVERAGE_TOKEN }}
+          files: ${{ github.workspace }}/coverage/lcov.info:lcov
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v3
