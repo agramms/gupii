@@ -53,7 +53,7 @@ gem "thruster", require: false
 # gem "image_processing", "~> 1.2"
 
 # Pagination and search
-gem "pagy", "~> 6.2"
+gem "pagy", "~> 9.4"
 gem "ransack", "~> 4.1"
 
 # Generate short, URL-safe, unique identifiers from integers
