@@ -1,7 +1,6 @@
-class ApplicationController < ActionController::Base
-  # Include subpath helpers for development environment - now available as module method
-  # include SubpathHelpers
+# frozen_string_literal: true
 
+class ApplicationController < ActionController::Base
   # Only allow modern browsers supporting webp images, web push, badges, import maps, CSS nesting, and CSS :has.
   allow_browser versions: :modern
 
@@ -42,45 +41,10 @@ class ApplicationController < ActionController::Base
     I18n.locale = locale || I18n.default_locale
   end
 
-  # Override url_for to ensure subpath-aware URLs in development
-  def url_for(options = nil)
-    return super(options) if @url_for_recursive_guard
-
-    @url_for_recursive_guard = true
-    begin
-      if options.is_a?(Hash) && I18n.locale != I18n.default_locale
-        options[:locale] = I18n.locale unless options.key?(:locale)
-      end
-      url = super(options)
-
-      # Apply subpath in development environment only for relative URLs
-      if Rails.env.development? && Rails.application.config.relative_url_root.present?
-        subpath = Rails.application.config.relative_url_root
-        # Only apply subpath to relative URLs that don't already have it
-        if !url.start_with?("http") && !url.start_with?(subpath) && url.start_with?("/")
-          url = "#{subpath}#{url}"
-        end
-      end
-
-      url
-    ensure
-      @url_for_recursive_guard = false
-    end
-  end
-
-  # Make current locale and subpath helpers available in views
-  helper_method :current_locale, :app_root_url
+  # Make current locale helpers available in views
+  helper_method :current_locale
 
   def current_locale
     I18n.locale
-  end
-
-  # Helper method for subpath-aware root URL generation
-  def app_root_url
-    if Rails.env.development? && Rails.application.config.relative_url_root
-      root_url
-    else
-      root_url
-    end
   end
 end

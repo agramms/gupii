@@ -43,6 +43,6 @@ unless Rails.env.test?
     rails_request_duration: rails_request_duration,
     database_connections: database_connections,
     psp_sync_duration: psp_sync_duration,
-    fraud_markings_created: fraud_markings_created
+    fraud_markings_created: fraud_markings_created,
   }
 end

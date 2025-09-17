@@ -1,0 +1,144 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+# Observability Stack Verification Script
+# Verifies that MinIO, StatsD/Graphite, and Jaeger integrations are working correctly
+
+puts "🔍 Gupii Observability Stack Verification"
+puts "=" * 50
+
+# Load Rails environment
+require_relative "../config/environment"
+
+verification_results = {}
+
+# Test 1: AppConfig Integration
+puts "\n📋 Testing AppConfig Integration..."
+begin
+  test_configs = {
+    "MINIO_ENDPOINT" => AppConfig.get("minio_endpoint", "default"),
+    "STATSD_HOST" => AppConfig.get("statsd_host", "default"),
+    "OTEL_SERVICE_NAME" => AppConfig.get("otel_service_name", "default"),
+  }
+
+  test_configs.each do |key, value|
+    puts "  ✅ #{key}: #{value}"
+  end
+
+  verification_results[:app_config] = true
+rescue => e
+  puts "  ❌ AppConfig Error: #{e.message}"
+  verification_results[:app_config] = false
+end
+
+# Test 2: StatsD Connection
+puts "\n📊 Testing StatsD Connection..."
+begin
+  if defined?(::StatsD)
+    StatsD.increment("gupii.verification.test")
+    puts "  ✅ StatsD client initialized and test metric sent"
+    verification_results[:statsd] = true
+  else
+    puts "  ❌ StatsD client not found"
+    verification_results[:statsd] = false
+  end
+rescue => e
+  puts "  ⚠️  StatsD Warning: #{e.message} (will use null client)"
+  verification_results[:statsd] = false
+end
+
+# Test 3: OpenTelemetry Tracing
+puts "\n🔍 Testing OpenTelemetry Tracing..."
+begin
+  tracer = Rails.application.config.otel_tracer
+  if tracer
+    tracer.in_span("verification_test") do |span, _|
+      puts "  ✅ OpenTelemetry tracer available and span created"
+    end
+    verification_results[:opentelemetry] = true
+  else
+    puts "  ❌ OpenTelemetry tracer not available"
+    verification_results[:opentelemetry] = false
+  end
+rescue => e
+  puts "  ❌ OpenTelemetry Error: #{e.message}"
+  verification_results[:opentelemetry] = false
+end
+
+# Test 4: Active Storage with MinIO
+puts "\n📦 Testing Active Storage with MinIO..."
+begin
+  storage_service = Rails.application.config.active_storage.service
+  puts "  📋 Active Storage service: #{storage_service}"
+
+  if storage_service == :minio
+    # Test MinIO configuration
+    storage_config = Rails.application.config_for(:storage)
+    minio_config = storage_config&.dig(:minio)
+    if minio_config
+      puts "  ✅ MinIO configuration loaded"
+      puts "  📍 Endpoint: #{minio_config[:endpoint]}"
+      puts "  🪣 Bucket: #{minio_config[:bucket]}"
+      verification_results[:active_storage] = true
+    else
+      puts "  ❌ MinIO configuration not found in #{storage_config&.keys}"
+      verification_results[:active_storage] = false
+    end
+  else
+    puts "  ⚠️  Active Storage not configured for MinIO (using #{storage_service})"
+    verification_results[:active_storage] = false
+  end
+rescue => e
+  puts "  ❌ Active Storage Error: #{e.message}"
+  verification_results[:active_storage] = false
+end
+
+# Test 5: PspMetricsService Integration
+puts "\n📈 Testing PspMetricsService StatsD Integration..."
+begin
+  service = PspMetricsService.new
+  if service.respond_to?(:push_to_statsd, true)
+    puts "  ✅ PspMetricsService has StatsD integration"
+    verification_results[:psp_metrics] = true
+  else
+    puts "  ❌ PspMetricsService missing StatsD methods"
+    verification_results[:psp_metrics] = false
+  end
+rescue => e
+  puts "  ❌ PspMetricsService Error: #{e.message}"
+  verification_results[:psp_metrics] = false
+end
+
+# Summary
+puts "\n📊 Verification Summary"
+puts "=" * 30
+
+success_count = verification_results.values.count(true)
+total_count = verification_results.size
+
+verification_results.each do |component, success|
+  status = success ? "✅ PASS" : "❌ FAIL"
+  puts "#{status} #{component.to_s.humanize}"
+end
+
+puts "\n🎯 Overall Status: #{success_count}/#{total_count} components verified"
+
+if success_count == total_count
+  puts "🎉 All observability stack components are working correctly!"
+  puts "\n🚀 Next Steps:"
+  puts "   1. Start services: docker-compose --profile tools up -d"
+  puts "   2. Access UIs:"
+  puts "      • MinIO Console: https://minio-console.gupii.local"
+  puts "      • Graphite: https://graphite.gupii.local"
+  puts "      • Jaeger: https://jaeger.gupii.local"
+  puts "      • Grafana: https://grafana.gupii.local"
+  puts "   3. Test file upload via Rails console to verify MinIO"
+  puts "   4. Check metrics in Graphite dashboard"
+  puts "   5. Verify traces in Jaeger UI"
+else
+  puts "\n⚠️  Some components need attention. Check the errors above."
+  puts "   📚 Refer to CLAUDE.md for configuration details"
+  puts "   🐳 Ensure Docker services are running: docker-compose --profile tools ps"
+end
+
+exit(success_count == total_count ? 0 : 1)

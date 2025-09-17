@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Jdpi
   # Service for managing Payment Service Provider (PSP) data from JDPI API
   # Handles fetching participant information with comprehensive monitoring
@@ -251,7 +253,7 @@ module Jdpi
         contact_email: psp_record["email"],
         website: psp_record["website"] || psp_record["site"],
         jdpi_metadata: psp_record.except("ispb", "name", "shortName"), # Store original data
-        jdpi_status: psp_record["status"]
+        jdpi_status: psp_record["status"],
       }.compact
     end
 

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require "test_helper"
 
 class Jdpi::PspServiceTest < ActiveSupport::TestCase
@@ -20,7 +22,7 @@ class Jdpi::PspServiceTest < ActiveSupport::TestCase
           "city" => "São Paulo",
           "state" => "SP",
           "email" => "contact@testbank.com",
-          "phone" => "+5511999999999"
+          "phone" => "+5511999999999",
         },
         {
           "ispb" => "87654321",
@@ -30,9 +32,9 @@ class Jdpi::PspServiceTest < ActiveSupport::TestCase
           "type" => "cooperative",
           "services" => [ "ted_transfer" ],
           "pixEnabled" => false,
-          "cnpj" => "87654321000188"
-        }
-      ]
+          "cnpj" => "87654321000188",
+        },
+      ],
     }
 
     @single_psp_response = @mock_psp_response["participants"].first
@@ -225,7 +227,7 @@ class Jdpi::PspServiceTest < ActiveSupport::TestCase
       "uf" => "RJ",
       "telefone" => "+5521888888888",
       "email" => "info@fullbank.com",
-      "site" => "https://www.fullbank.com"
+      "site" => "https://www.fullbank.com",
     }
 
     mapped_fields = @service.send(:map_jdpi_fields, psp_data)
@@ -255,7 +257,7 @@ class Jdpi::PspServiceTest < ActiveSupport::TestCase
       "psp.records.total",
       "psp.records.created",
       "psp.sync.duration",
-      "psp.sync.completed"
+      "psp.sync.completed",
     ]
 
     metric_calls.each do |metric|
@@ -295,9 +297,9 @@ class Jdpi::PspServiceTest < ActiveSupport::TestCase
       "participants" => [
         {
           "ispb" => "invalid", # Invalid ISPB format
-          "name" => "" # Empty name
-        }
-      ]
+          "name" => "", # Empty name
+        },
+      ],
     }
 
     @service.expects(:execute_request).returns(invalid_response)

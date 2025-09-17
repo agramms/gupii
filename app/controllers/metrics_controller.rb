@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class MetricsController < ApplicationController
   # Simplified - no authentication skipping needed
 
@@ -39,7 +41,7 @@ class MetricsController < ApplicationController
       "",
       "# HELP rails_info Rails application information",
       "# TYPE rails_info gauge",
-      "rails_info{version=\"#{Rails.version}\",environment=\"#{Rails.env}\"} 1"
+      "rails_info{version=\"#{Rails.version}\",environment=\"#{Rails.env}\"} 1",
     ]
 
     # Add simple metrics if available
@@ -57,7 +59,7 @@ class MetricsController < ApplicationController
         "",
         "# HELP http_request_last_duration_seconds Last HTTP request duration in seconds",
         "# TYPE http_request_last_duration_seconds gauge",
-        "http_request_last_duration_seconds #{simple[:last_request_duration] || 0}"
+        "http_request_last_duration_seconds #{simple[:last_request_duration] || 0}",
       ]
     end
 

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # SimpleCov configuration for Gupii PIX Integration
 SimpleCov.start 'rails' do
   # Enable branch coverage for more detailed metrics
@@ -43,7 +45,7 @@ SimpleCov.start 'rails' do
 
     formatter SimpleCov::Formatter::MultiFormatter.new([
       SimpleCov::Formatter::HTMLFormatter,
-      SimpleCov::Formatter::LcovFormatter
+      SimpleCov::Formatter::LcovFormatter,
     ])
   end
 

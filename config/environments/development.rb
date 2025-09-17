@@ -28,8 +28,8 @@ Rails.application.configure do
   # Change to :null_store to avoid any caching.
   config.cache_store = :memory_store
 
-  # Store uploaded files on the local file system (see config/storage.yml for options).
-  config.active_storage.service = :local
+  # Store uploaded files on MinIO S3-compatible storage (see config/storage.yml for options).
+  config.active_storage.service = :minio
 
   # Don't care if the mailer can't send.
   config.action_mailer.raise_delivery_errors = false
@@ -40,9 +40,11 @@ Rails.application.configure do
   # Disable host checking completely in development for container networking
   config.hosts = nil
 
-  # Configure Rails to run under /app subpath in development
-  config.relative_url_root = "/app"
-  config.action_controller.relative_url_root = "/app"
+  # Domain-based routing - Rails serves from root on gupii.local
+  # No subpath configuration needed with domain-based development setup
+  
+  # Set default URL options for development
+  config.action_mailer.default_url_options = { host: 'gupii.local', protocol: 'https' }
 
   # Print deprecation notices to the Rails logger.
   config.active_support.deprecation = :log

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # Infraction Notification Model
 # Tracks infraction notifications submitted to JDPI for PIX key violations
 # Maintains local state and audit trail for compliance purposes
@@ -14,7 +16,7 @@ class InfractionNotification < ApplicationRecord
     approved: 3,
     rejected: 4,
     auto_declined: 5,
-    escalated: 6
+    escalated: 6,
   }, prefix: true, default: :none
 
   # Validations
@@ -108,7 +110,7 @@ class InfractionNotification < ApplicationRecord
         action: "soft_delete",
         cancelled_by: cancelled_by,
         reason: reason,
-        cancelled_at: Time.current
+        cancelled_at: Time.current,
       }
     )
 
@@ -272,7 +274,7 @@ class InfractionNotification < ApplicationRecord
       completed: completed.count,
       overdue: where("submitted_at < ? AND status IN (?)",
                     Duration::MAX_ANALYSIS_DAYS.days.ago,
-                    [ InfractionStatus::SUBMITTED, InfractionStatus::PROCESSING, InfractionStatus::ANALYZING ]).count
+                    [ InfractionStatus::SUBMITTED, InfractionStatus::PROCESSING, InfractionStatus::ANALYZING ]).count,
     }
   end
 
@@ -343,7 +345,7 @@ class InfractionNotification < ApplicationRecord
         action: "status_change",
         old_value: status_was,
         new_value: status,
-        changed_at: Time.current
+        changed_at: Time.current,
       }
     )
   end

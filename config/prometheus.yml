@@ -1,3 +1,5 @@
+# Prometheus Configuration for Gupii Development
+
 global:
   scrape_interval: 15s
   evaluation_interval: 15s
@@ -12,32 +14,21 @@ scrape_configs:
     static_configs:
       - targets: ['localhost:9090']
 
-  # Rails Application (direct to container)
-  - job_name: 'rails-app'
+  # Rails application (when metrics are enabled)
+  - job_name: 'gupii-rails'
     static_configs:
-      - targets: ['app:3000']
+      - targets: ['host.docker.internal:3000']
     metrics_path: '/metrics'
     scrape_interval: 30s
 
-  # PostgreSQL Exporter (optional - can be added later)
+  # PostgreSQL (if postgres_exporter is added)
   - job_name: 'postgres'
     static_configs:
       - targets: ['postgres:5432']
     scrape_interval: 30s
 
-  # Redis Exporter (optional - can be added later)  
+  # Redis (if redis_exporter is added)
   - job_name: 'redis'
     static_configs:
       - targets: ['redis:6379']
     scrape_interval: 30s
-
-  # StatsD/Graphite
-  - job_name: 'statsd'
-    static_configs:
-      - targets: ['statsd:8080']
-    scrape_interval: 30s
-
-  # Node Exporter for system metrics (optional)
-  # - job_name: 'node'
-  #   static_configs:
-  #     - targets: ['node-exporter:9100']

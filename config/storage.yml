@@ -6,6 +6,18 @@ local:
   service: Disk
   root: <%= Rails.root.join("storage") %>
 
+development:
+  # MinIO S3-compatible storage for development
+  minio:
+    service: S3
+    access_key_id: <%= AppConfig.get('minio_access_key_id', 'minioadmin') %>
+    secret_access_key: <%= AppConfig.get('minio_secret_access_key', 'minioadmin123') %>
+    endpoint: <%= AppConfig.get('minio_endpoint', 'https://minio.gupii.local') %>
+    region: <%= AppConfig.get('minio_region', 'us-east-1') %>
+    bucket: <%= AppConfig.get('minio_bucket', "gupii-#{Rails.env}") %>
+    force_path_style: true
+    public: false
+
 # Use bin/rails credentials:edit to set the AWS secrets (as aws:access_key_id|secret_access_key)
 # amazon:
 #   service: S3

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Jdpi
   # JDPI Status Codes and Constants Module
   # Centralizes all status codes, error codes, and business constants used across JDPI services
@@ -85,7 +87,7 @@ module Jdpi
         cnpj: { pattern: CNPJ_PATTERN, description: "CNPJ - 14 digits" },
         email: { pattern: EMAIL_PATTERN, description: "Email address" },
         phone: { pattern: PHONE_PATTERN, description: "Phone with +55 prefix" },
-        uuid: { pattern: UUID_PATTERN, description: "UUID format" }
+        uuid: { pattern: UUID_PATTERN, description: "UUID format" },
       }.freeze
     end
 
@@ -102,7 +104,7 @@ module Jdpi
         AML_VIOLATION => "Anti-money laundering violations",
         ACCOUNT_MISUSE => "Inappropriate account usage",
         INVALID_KEY => "PIX key validation issues",
-        UNAUTHORIZED_USE => "Usage without proper authorization"
+        UNAUTHORIZED_USE => "Usage without proper authorization",
       }.freeze
 
       ALL = DESCRIPTIONS.keys.freeze
@@ -117,7 +119,7 @@ module Jdpi
       DESCRIPTIONS = {
         CUSTOMER_SERVICE => "Customer Service Department",
         CUSTOMER_EXPERIENCE => "Customer Experience Department",
-        DICT_AUTOMATIC => "Automatic DICT System"
+        DICT_AUTOMATIC => "Automatic DICT System",
       }.freeze
 
       ALL = DESCRIPTIONS.keys.freeze
@@ -142,7 +144,7 @@ module Jdpi
         APPROVED => "Aprovado",
         REJECTED => "Rejeitado",
         COMPLETED => "Concluído",
-        CANCELLED => "Cancelado"
+        CANCELLED => "Cancelado",
       }.freeze
 
       # Valid status transitions
@@ -153,7 +155,7 @@ module Jdpi
         APPROVED => [ COMPLETED ],
         REJECTED => [ COMPLETED ],
         CANCELLED => [],
-        COMPLETED => []
+        COMPLETED => [],
       }.freeze
     end
 
@@ -168,7 +170,7 @@ module Jdpi
       DESCRIPTIONS = {
         CONFIRMED => "Infraction confirmed - action required",
         REJECTED => "Infraction rejected - no action needed",
-        NEEDS_MORE_INFO => "Additional information required for analysis"
+        NEEDS_MORE_INFO => "Additional information required for analysis",
       }.freeze
     end
 
@@ -191,7 +193,7 @@ module Jdpi
         QRCODE_API => "QR Code generation and management",
         SPI_WEBHOOK_API => "Webhook notification handling",
         SPIAUT_API => "SPI authentication operations",
-        SPIAGE_API => "SPI agent operations"
+        SPIAGE_API => "SPI agent operations",
       }.freeze
     end
 
@@ -249,7 +251,7 @@ module Jdpi
         OPERATIONAL_FAILURE => "Operational failure refund",
         FRAUD_SUSPICION => "Fraud suspicion refund",
         USER_REQUESTED => "User requested refund",
-        SAQUE_TROCO_ERROR => "PIX Cash withdrawal/Change error"
+        SAQUE_TROCO_ERROR => "PIX Cash withdrawal/Change error",
       }.freeze
     end
 
@@ -400,7 +402,7 @@ module Jdpi
       def self.ispb_value
         if defined?(Rails)
           Rails.application.credentials.jdpi&.dig(:ispb) ||
-            ENV["JDPI_ISPB"] ||
+            AppConfig.get("JDPI_ISPB") ||
             BusinessRules::DEFAULT_ISPB
         else
           BusinessRules::DEFAULT_ISPB

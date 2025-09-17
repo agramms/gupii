@@ -109,9 +109,9 @@ class InfractionNotificationsController < AuthBaseController
         :created_at_gteq,
         :created_at_lteq,
         :submitted_at_gteq,
-        :submitted_at_lteq
+        :submitted_at_lteq,
       ] },
-      :page
+      :page,
     ])
   end
 
@@ -136,7 +136,7 @@ class InfractionNotificationsController < AuthBaseController
       total_pending: InfractionNotification.pending.count,
       high_priority: high_priority_count,
       overdue: overdue_count,
-      sla_at_risk: sla_at_risk_count
+      sla_at_risk: sla_at_risk_count,
     }
   end
 
@@ -144,7 +144,7 @@ class InfractionNotificationsController < AuthBaseController
     {
       burning_deadlines: burning_deadlines_count,
       high_value_transactions: high_value_count,
-      repeat_offenders: repeat_offenders_count
+      repeat_offenders: repeat_offenders_count,
     }
   end
 
