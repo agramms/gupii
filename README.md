@@ -42,149 +42,208 @@ Gupii is a Rails 8 application that provides seamless integration with Brazil's 
 
 ### Prerequisites
 
-**Option A: DevContainer (Recommended)**
-- Docker Desktop
-- VS Code with Dev Containers extension
+- **Docker Desktop** (for PostgreSQL, Redis, and development tools)
+- **Ruby 3.4.5** (install via rbenv, rvm, or asdf)
+- **Node.js** (for Tailwind CSS compilation)
+- **Git** (for version control)
 
-**Option B: Local Development**
-- Ruby 3.4.5
-- PostgreSQL 16+
-- Redis 7+
-- Node.js (for Tailwind CSS compilation)
+### Quick Start
 
-### Quick Start with DevContainers
-
-1. **Clone and open in VS Code**
+1. **Clone the repository**
    ```bash
    git clone https://github.com/your-org/gupii.git
    cd gupii
-   code .
    ```
 
-2. **Reopen in Container**
-   - VS Code will prompt to "Reopen in Container"
-   - Or use Command Palette: `Dev Containers: Reopen in Container`
+2. **Set up the development environment**
+   ```bash
+   # Run the automated setup script
+   ./bin/setup-dev
 
-3. **Wait for DevContainer setup** (first time takes 2-3 minutes)
-   - Automatic Ruby, PostgreSQL, Redis, and all tools installation
-   - Gems and dependencies automatically installed
+   # Or run with optional development tools (pgAdmin, MailHog)
+   ./bin/setup-dev --with-tools
+   ```
 
-4. **Start the development environment**
+3. **Start the Rails application**
    ```bash
    bin/dev
+   # or
+   rails server
    ```
 
-5. **Access the application**
-   - **Rails App**: https://gupii.local (primary domain)
-   - **Direct Access**: http://localhost:3000 (Rails server only)
-   - **API Health**: https://gupii.local/api/v1/health
+4. **Access the application**
+   - **Rails App**: http://localhost:3000
+   - **API Health**: http://localhost:3000/api/v1/health
 
-### DevContainer Services
+### Development Services
 
-The development environment includes a complete observability stack with domain-based access:
+The local development environment provides essential services via Docker Compose:
 
-- **Rails App**: https://gupii.local (main application)
-- **Grafana**: https://grafana.gupii.local (dashboards - admin/admin123)  
-- **Prometheus**: https://prometheus.gupii.local (metrics)
-- **Code Quality**: Integrated with Code Climate for maintainability analysis
-- **pgAdmin**: https://pgadmin.gupii.local (database - admin@gupii.dev/admin123)
-- **MailHog**: https://mail.gupii.local (email testing)
-- **MinIO Console**: https://minio.gupii.local (S3 storage - minioadmin/minioadmin123)
-- **Jaeger**: https://jaeger.gupii.local (distributed tracing)
+**Core Services** (always available):
+- **PostgreSQL**: localhost:5432 (postgres/postgres)
+- **Redis**: localhost:6379 (password: redis123)
 
-**Setup Requirements**:
-- Run `.devcontainer/scripts/setup-environment.sh` for automated domain configuration
-- Or manually add domains to `/etc/hosts`: `127.0.0.1 gupii.local grafana.gupii.local prometheus.gupii.local pgadmin.gupii.local mail.gupii.local minio.gupii.local jaeger.gupii.local`
-- SSL certificates are automatically generated for HTTPS access
+**Optional Tools** (start with `--with-tools`):
+- **pgAdmin**: http://localhost:5050 (admin@example.com/admin123)
+- **MailHog**: http://localhost:8025 (email testing interface)
 
-### Local Development Setup
+### Manual Setup (Alternative)
 
-1. **Install Ruby and dependencies**
+If you prefer manual setup instead of the automated script:
+
+1. **Install Ruby dependencies**
    ```bash
-   # Using rbenv
-   rbenv install 3.4.5
-   rbenv global 3.4.5
-   
-   # Install bundler
-   gem install bundler
-   
-   # Install gems
    bundle install
    ```
 
-2. **Setup PostgreSQL**
+2. **Start Docker services**
    ```bash
-   # macOS with Homebrew
-   brew install postgresql@16
-   brew services start postgresql@16
-   
-   # Create databases
-   bin/rails db:create:all
-   bin/rails db:migrate:all
+   docker-compose up -d
+
+   # Or with optional tools
+   docker-compose --profile tools up -d
    ```
 
-3. **Setup Redis**
+3. **Set up database**
    ```bash
-   # macOS with Homebrew  
-   brew install redis
-   brew services start redis
+   bin/rails db:create db:migrate db:seed
    ```
 
-4. **Start development server**
+4. **Start Rails**
    ```bash
-   # Start both Rails server and Tailwind watcher
    bin/dev
-   
-   # Or start individually:
-   bin/rails server
-   bin/rails tailwindcss:watch
    ```
 
-### Development Workflow
+### Environment Configuration
 
-1. **Start services**
-   ```bash
-   bin/dev  # Starts Rails server + Tailwind CSS watcher
-   ```
+Copy `.env.example` to `.env` and adjust values as needed:
 
-2. **Run tests**
-   ```bash
-   # Run comprehensive test suite
-   bin/rails test
-   
-   # Unit tests (when test environment is configured)
-   bin/rails test
-   ```
+```bash
+cp .env.example .env
+```
 
-3. **Code quality**
-   ```bash
-   bundle exec rubocop              # Ruby style checks
-   bundle exec brakeman            # Security analysis  
-   bin/rails test  # Run test suite
-   ```
+Key configuration values:
+- `DATABASE_URL`: PostgreSQL connection (preconfigured for Docker Compose)
+- `REDIS_URL`: Redis connection (preconfigured for Docker Compose)
+- `OAUTH2_CLIENT_ID/SECRET`: iugu Identity Provider credentials
+- `JDPI_*`: PIX integration settings
 
-4. **Database operations**
-   ```bash
-   bin/rails db:migrate:all        # Run migrations on all databases
-   bin/rails db:rollback:all       # Rollback migrations on all databases
-   bin/rails db:reset:all          # Reset all databases
-   ```
+### Common Commands
+
+```bash
+# Start development environment (automated)
+./bin/setup-dev
+
+# Start services manually
+docker-compose up -d
+
+# Start Rails application
+bin/dev                    # Starts Rails server + Tailwind CSS watcher
+rails server              # Rails only
+bin/rails tailwindcss:watch # Tailwind only
+
+# Database operations
+bin/rails db:create db:migrate db:seed
+bin/rails db:reset
+
+# Testing
+bin/rails test
+
+# Stop Docker services
+docker-compose down
+```
+
+## ⚙️ Configuration Management
+
+Gupii uses a custom `AppConfig` class that provides unified configuration management with the following priority:
+
+1. **Environment Variables** (`.env` file or system ENV)
+2. **Rails Credentials** (`rails credentials:edit`)
+3. **Default Values** (fallback)
+
+### Usage Examples
+
+```ruby
+# Basic usage - checks ENV first, then credentials, then default
+AppConfig.get('DATABASE_URL')
+AppConfig.get('OAUTH_CLIENT_ID', 'default_value')
+
+# Type-specific methods
+AppConfig.get_boolean('FEATURE_ENABLED', false)
+AppConfig.get_integer('MAX_CONNECTIONS', 10)
+AppConfig.get_array('ALLOWED_HOSTS', ['localhost'])
+
+# Dynamic method access
+AppConfig.database_url          # DATABASE_URL or credentials.database.url
+AppConfig.oauth_client_id       # OAUTH_CLIENT_ID or credentials.oauth.client_id
+AppConfig.jdpi_base_url         # JDPI_BASE_URL or credentials.jdpi.base_url
+```
+
+### Environment Variable → Credentials Mapping
+
+Environment variables are automatically mapped to Rails credentials paths:
+
+- `DATABASE_URL` → `credentials.database.url`
+- `OAUTH_CLIENT_SECRET` → `credentials.oauth.client_secret`
+- `JDPI_API_BASE_URL` → `credentials.jdpi.api.base_url`
+- `SMTP_HOST` → `credentials.smtp.host`
+
+### Rails Credentials Structure
+
+```yaml
+# rails credentials:edit
+database:
+  url: postgresql://postgres:postgres@localhost:5432/gupii_development
+
+oauth:
+  client_id: your_oauth_client_id
+  client_secret: your_oauth_client_secret
+  base_url: https://identity.iugu.com
+
+jdpi:
+  base_url: https://api.jdpi.gov.br
+  client_id: your_jdpi_client_id
+  client_secret: your_jdpi_client_secret
+  ispb: "15111975"
+  api:
+    base_url: https://api.jdpi.gov.br/v2
+
+smtp:
+  host: localhost
+  port: 1025
+```
+
+### Service Configuration Example
+
+```ruby
+# Instead of: ENV['DATABASE_URL']
+ActiveRecord::Base.establish_connection(AppConfig.get('DATABASE_URL'))
+
+# SMTP configuration
+ActionMailer::Base.smtp_settings = {
+  address: AppConfig.get('SMTP_HOST', 'localhost'),
+  port: AppConfig.get_integer('SMTP_PORT', 1025),
+  user_name: AppConfig.get('SMTP_USERNAME'),
+  password: AppConfig.get('SMTP_PASSWORD')
+}
+
+# API client configuration
+JdpiClient.configure do |config|
+  config.base_url = AppConfig.get('JDPI_BASE_URL')
+  config.client_id = AppConfig.get('JDPI_CLIENT_ID')
+  config.client_secret = AppConfig.get('JDPI_CLIENT_SECRET')
+end
+```
 
 ## 🧪 Testing
 
 ```bash
-# URL generation validation (custom test)
+# Run the test suite
 bin/rails test
 
-# Run all tests (when test environment is configured)
-bin/rails test
-
-# Run security scans
-bundle exec brakeman
-
-# Code style and formatting
-bundle exec rubocop
-bundle exec rubocop --auto-correct  # Auto-fix issues
+# Code quality checks (if configured)
+bundle exec rubocop              # Ruby style checks
+bundle exec brakeman            # Security analysis
 ```
 
 ## 💎 Gems & Dependencies
