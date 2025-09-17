@@ -6,6 +6,9 @@ require "rails/all"
 # you've limited to :test, :development, or :production.
 Bundler.require(*Rails.groups)
 
+# Load AppConfig early so it's available during configuration
+require_relative "../app/lib/app_config"
+
 module Gupii
   class Application < Rails::Application
     # Initialize configuration defaults for originally generated Rails version.
