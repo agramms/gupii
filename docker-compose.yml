@@ -49,6 +49,13 @@ services:
       PGADMIN_DEFAULT_EMAIL: admin@example.com
       PGADMIN_DEFAULT_PASSWORD: admin123
       PGADMIN_CONFIG_SERVER_MODE: 'False'
+      PGADMIN_CONFIG_WTF_CSRF_CHECK_DEFAULT: 'False'
+      PGADMIN_CONFIG_ENHANCED_COOKIE_PROTECTION: 'False'
+      PGADMIN_CONFIG_PROXY_FIX_NUM_PROXIES: 1
+      PGADMIN_CONFIG_PROXY_FIX_ENABLE: 'True'
+      PGADMIN_CONFIG_FORCE_SCRIPT_NAME: ''
+      PGADMIN_CONFIG_PREFERRED_URL_SCHEME: 'https'
+      SCRIPT_NAME: ''
     volumes:
       - pgadmin_data:/var/lib/pgadmin
     ports:
