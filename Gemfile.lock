@@ -179,6 +179,8 @@ GEM
       racc (~> 1.4)
     nokogiri (1.18.9-arm-linux-musl)
       racc (~> 1.4)
+    nokogiri (1.18.9-arm64-darwin)
+      racc (~> 1.4)
     nokogiri (1.18.9-x86_64-linux-gnu)
       racc (~> 1.4)
     nokogiri (1.18.9-x86_64-linux-musl)
@@ -200,6 +202,7 @@ GEM
     pg (1.6.2)
     pg (1.6.2-aarch64-linux)
     pg (1.6.2-aarch64-linux-musl)
+    pg (1.6.2-arm64-darwin)
     pg (1.6.2-x86_64-linux)
     pg (1.6.2-x86_64-linux-musl)
     pp (0.6.2)
@@ -219,6 +222,11 @@ GEM
       logger
       rb_sys (~> 0.9.109)
     prometheus-client-mmap (1.2.10-aarch64-linux-musl)
+      base64
+      bigdecimal
+      logger
+      rb_sys (~> 0.9.109)
+    prometheus-client-mmap (1.2.10-arm64-darwin)
       base64
       bigdecimal
       logger
@@ -375,17 +383,17 @@ GEM
     stimulus-rails (1.3.4)
       railties (>= 6.0.0)
     stringio (3.1.7)
-    tailwindcss-rails (4.3.0)
+    tailwindcss-rails (3.3.2)
       railties (>= 7.0.0)
-      tailwindcss-ruby (~> 4.0)
-    tailwindcss-ruby (4.1.12)
-    tailwindcss-ruby (4.1.12-aarch64-linux-gnu)
-    tailwindcss-ruby (4.1.12-aarch64-linux-musl)
-    tailwindcss-ruby (4.1.12-x86_64-linux-gnu)
-    tailwindcss-ruby (4.1.12-x86_64-linux-musl)
+      tailwindcss-ruby (~> 3.0)
+    tailwindcss-ruby (3.4.17-aarch64-linux)
+    tailwindcss-ruby (3.4.17-arm-linux)
+    tailwindcss-ruby (3.4.17-arm64-darwin)
+    tailwindcss-ruby (3.4.17-x86_64-linux)
     thor (1.4.0)
     thruster (0.1.15)
     thruster (0.1.15-aarch64-linux)
+    thruster (0.1.15-arm64-darwin)
     thruster (0.1.15-x86_64-linux)
     timeout (0.4.3)
     turbo-rails (2.0.16)
@@ -418,6 +426,7 @@ PLATFORMS
   aarch64-linux-musl
   arm-linux-gnu
   arm-linux-musl
+  arm64-darwin-24
   x86_64-linux
   x86_64-linux-gnu
   x86_64-linux-musl
@@ -454,7 +463,7 @@ DEPENDENCIES
   solid_cache
   solid_queue
   stimulus-rails
-  tailwindcss-rails
+  tailwindcss-rails (~> 3.3.1)
   thruster
   turbo-rails
   tzinfo-data
