@@ -74,10 +74,36 @@ This project uses a comprehensive DevContainer setup with full observability sta
 - **Cache Setup**: Solid Cache with dedicated database
 
 ### Development Server
-- **Main Application**: http://localhost:3000
+
+#### Option 1: Foreman (Recommended for Full Development)
+Start all development processes (Rails + Solid Queue workers + CSS watcher):
+
+```bash
+# Install dependencies
+bundle install
+
+# Start Docker services
+docker-compose up -d  # or with --profile tools for full stack
+
+# Start all development processes
+foreman start -f Procfile.dev
+```
+
+This starts:
+- **Rails server** (port 3000)
+- **Solid Queue workers** (3 worker processes: high_priority, default, low_priority)
+- **Tailwind CSS watcher** (auto-rebuilds on file changes)
+
+#### Option 2: Manual Setup
+- **Main Application**: http://localhost:3000 (`bin/rails server`)
+- **Background Workers**: `bin/rails solid_queue:start` (separate terminal)
+- **CSS Watcher**: `bin/rails tailwindcss:watch` (separate terminal)
+
+#### Access Points
 - **Admin UI**: `/admin` routes for PIX management
 - **API Endpoints**: `/api/v1` for client applications
 - **Polling Endpoint**: `/api/v1/events/poll` for client updates
+- **Job Admin**: `/admin/jobs` (Mission Control interface)
 
 ### Code Quality (Using Reference Project)
 The `tmp/platform2-app-boleto` contains a reference Rails project for Tailwind templates and frontend patterns:
@@ -216,6 +242,49 @@ RAILS_ENV=development
 - Email Testing: http://localhost:8025
 - Metrics: http://localhost:9090
 - Tracing: http://localhost:16686
+
+## Background Job Processing (Solid Queue)
+
+The project uses **Solid Queue** for reliable background job processing with dedicated PostgreSQL database for job storage.
+
+### Queue Configuration
+
+#### Queue Priorities
+- **high_priority**: Time-sensitive operations (disputes, fraud markings, customer notifications)
+- **default**: Standard operations (metrics collection, sync operations, email notifications)
+- **low_priority**: Heavy operations (bulk processing, report generation, data exports)
+
+#### Worker Setup
+```bash
+# Via Foreman (recommended) - starts Rails server, workers, and CSS watcher
+foreman start -f Procfile.dev
+
+# Manual worker management - single worker for all queues in development
+bin/rails solid_queue:start
+```
+
+#### Job Examples
+```ruby
+# High-priority: Customer dispute resolution
+DisputeProcessingJob.set(queue: :high_priority).perform_later(dispute_id)
+
+# Default: PSP metrics collection
+PspMetricsCollectionJob.perform_later
+
+# Low-priority: Bulk data export
+DataExportJob.set(queue: :low_priority).perform_later(export_params)
+```
+
+### Job Administration
+- **Mission Control Interface**: `/admin/jobs`
+- **Queue Monitoring**: Real-time job status and metrics
+- **Error Handling**: Failed job retry and inspection
+- **Performance Tracking**: Job execution timing and queue health
+
+### Database Configuration
+- **Dedicated Database**: `gupii_queue_[env]` for job storage
+- **Migration Path**: `db/queue_migrate/` for Solid Queue schema
+- **Connection**: Separate database connection for job processing isolation
 
 ## Disputes System Architecture
 

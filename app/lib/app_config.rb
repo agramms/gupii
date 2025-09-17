@@ -17,6 +17,14 @@
 #   DATABASE_URL          → database.url
 #   OAUTH_CLIENT_SECRET   → oauth.client_secret
 #   JDPI_API_BASE_URL     → jdpi.api.base_url
+#
+# Observability & Storage Configuration Examples:
+#   MINIO_ACCESS_KEY_ID   → minio.access_key_id     # MinIO S3 compatibility
+#   MINIO_ENDPOINT        → minio.endpoint          # MinIO API endpoint
+#   STATSD_HOST           → statsd.host             # StatsD metrics host
+#   STATSD_NAMESPACE      → statsd.namespace        # StatsD metrics namespace
+#   OTEL_SERVICE_NAME     → otel.service.name       # OpenTelemetry service name
+#   OTEL_EXPORTER_OTLP_ENDPOINT → otel.exporter.otlp.endpoint  # Jaeger endpoint
 
 class AppConfig
   class << self

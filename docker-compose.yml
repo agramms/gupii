@@ -41,6 +41,26 @@ services:
       timeout: 10s
       retries: 5
 
+  # MinIO - S3-compatible Object Storage for Active Storage
+  minio:
+    image: minio/minio:latest
+    restart: unless-stopped
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin123
+      MINIO_BROWSER_REDIRECT_URL: https://minio-console.gupii.local
+    volumes:
+      - minio_data:/data
+    ports:
+      - "9000:9000"   # API
+      - "9001:9001"   # Console
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+
   # pgAdmin - PostgreSQL Administration (Optional)
   pgadmin:
     image: dpage/pgadmin4:latest
@@ -119,6 +139,40 @@ services:
     profiles:
       - tools
 
+  # Graphite - Metrics Storage Backend for StatsD
+  graphite:
+    image: graphiteapp/graphite-statsd:latest
+    restart: unless-stopped
+    environment:
+      STATSD_INTERFACE: udp
+    volumes:
+      - graphite_data:/opt/graphite/storage
+    ports:
+      - "8080:80"     # Graphite Web UI
+      - "8125:8125/udp"  # StatsD UDP
+      - "8126:8126"   # StatsD Admin
+    profiles:
+      - tools
+
+  # Jaeger - Distributed Tracing (Optional)
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    restart: unless-stopped
+    environment:
+      COLLECTOR_OTLP_ENABLED: true
+      COLLECTOR_ZIPKIN_HOST_PORT: ":9411"
+    volumes:
+      - jaeger_data:/badger
+    ports:
+      - "16686:16686"  # Jaeger UI
+      - "14250:14250"  # gRPC
+      - "14268:14268"  # HTTP
+      - "9411:9411"    # Zipkin compatibility
+      - "4317:4317"    # OTLP gRPC
+      - "4318:4318"    # OTLP HTTP
+    profiles:
+      - tools
+
   # Nginx - Reverse Proxy with Local Domains
   nginx:
     image: nginx:alpine
@@ -141,11 +195,17 @@ volumes:
     driver: local
   redis_data:
     driver: local
+  minio_data:
+    driver: local
   pgadmin_data:
     driver: local
   prometheus_data:
     driver: local
   grafana_data:
+    driver: local
+  graphite_data:
+    driver: local
+  jaeger_data:
     driver: local
 
 # Networks are optional for simple local development
