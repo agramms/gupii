@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class AuthenticationController < ApplicationController
   def authorize
     redirect_host = request.protocol + request.host_with_port

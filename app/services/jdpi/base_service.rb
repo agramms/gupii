@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Jdpi
   class BaseService
     include ActiveModel::Model
@@ -179,7 +181,7 @@ module Jdpi
     def prepare_idempotency_key
       @idempotency_key = IdempotencyService.create_key({
         service: self.class.name,
-        created_at: Time.current.iso8601
+        created_at: Time.current.iso8601,
       })
     end
 
@@ -309,7 +311,7 @@ module Jdpi
     # Configuration methods
     def base_url
       Rails.application.credentials.jdpi&.dig(:base_url) ||
-        ENV["JDPI_BASE_URL"] ||
+        AppConfig.get("JDPI_BASE_URL") ||
         "https://api.jdpi.bcb.gov.br"
     end
 

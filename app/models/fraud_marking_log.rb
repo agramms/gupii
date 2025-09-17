@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # Fraud Marking Log Model
 # Maintains comprehensive audit trail for all fraud marking activities
 # Tracks user actions, system changes, and JDPI API interactions for compliance
@@ -136,7 +138,7 @@ class FraudMarkingLog < ApplicationRecord
       metadata: {
         jdpi_interaction: true,
         interaction_type: action,
-        timestamp: Time.current
+        timestamp: Time.current,
       }
     )
   end
@@ -157,7 +159,7 @@ class FraudMarkingLog < ApplicationRecord
       by_action: logs_in_period.group(:action).count,
       errors: logs_in_period.where(level: "error").count,
       user_actions: logs_in_period.where.not(user: [ nil, "system" ]).count,
-      system_actions: logs_in_period.where(user: [ "system", nil ]).count
+      system_actions: logs_in_period.where(user: [ "system", nil ]).count,
     }
   end
 

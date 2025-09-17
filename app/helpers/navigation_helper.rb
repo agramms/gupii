@@ -1,11 +1,12 @@
+# frozen_string_literal: true
+
 module NavigationHelper
   def nav_link(path, icon_name, text, active: false, disabled: false, method: :get)
-
     css_classes = [
       "group flex items-center px-3 py-3 text-sm font-medium rounded-lg transition-all duration-300",
       active ? "bg-indigo-100 text-indigo-700 shadow-sm" : "text-gray-700",
       disabled ? "opacity-50 cursor-not-allowed" : "hover:bg-gray-50 hover:text-indigo-600 hover:shadow-sm",
-      "focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-1"
+      "focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-1",
     ].join(" ")
 
     link_to path,
@@ -45,7 +46,7 @@ module NavigationHelper
   def heroicon_svg(icon_name, active: false)
     icon_class = [
       "mr-3 h-5 w-5 flex-shrink-0 transition-colors duration-200",
-      active ? "text-indigo-600" : "text-gray-400 group-hover:text-indigo-500"
+      active ? "text-indigo-600" : "text-gray-400 group-hover:text-indigo-500",
     ].join(" ")
 
     case icon_name

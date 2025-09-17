@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # AppConfig - Configuration Management with Environment and Credentials Fallback
 #
 # This class provides a unified way to access configuration values with the following priority:
@@ -39,9 +41,9 @@ class AppConfig
       return default if value.nil?
 
       case value.to_s.downcase
-      when 'true', '1', 'yes', 'on'
+      when "true", "1", "yes", "on"
         true
-      when 'false', '0', 'no', 'off'
+      when "false", "0", "no", "off"
         false
       else
         !!default
@@ -59,7 +61,7 @@ class AppConfig
       value = get(key)
       return default if value.blank?
 
-      value.to_s.split(',').map(&:strip)
+      value.to_s.split(",").map(&:strip)
     end
 
     # Method-based access for dynamic configuration keys
@@ -84,7 +86,7 @@ class AppConfig
     # OAUTH_CLIENT_SECRET → oauth.client_secret
     # JDPI_API_BASE_URL → jdpi.api.base_url
     def env_key_to_credentials_path(key)
-      key.to_s.downcase.split('_')
+      key.to_s.downcase.split("_")
     end
 
     # Navigate through Rails credentials using array path

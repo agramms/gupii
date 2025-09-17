@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # Fraud Marking Submission Job
 # Handles asynchronous submission of approved fraud markings to JDPI
 # Includes retry logic and comprehensive error handling for resilience
@@ -74,7 +76,7 @@ class FraudMarkingSubmissionJob < ApplicationJob
       response_data: {
         marking_id: service.marking_id,
         submitted_at: Time.current,
-        status: "SUCCESS"
+        status: "SUCCESS",
       }
     )
 
@@ -94,7 +96,7 @@ class FraudMarkingSubmissionJob < ApplicationJob
       status_changed_at: Time.current,
       internal_notes: [
         fraud_marking.internal_notes,
-        "JDPI Submission failed: #{service.errors.join(', ')}"
+        "JDPI Submission failed: #{service.errors.join(', ')}",
       ].compact.join("\n\n")
     )
 
@@ -124,7 +126,7 @@ class FraudMarkingSubmissionJob < ApplicationJob
         status_changed_at: Time.current,
         internal_notes: [
           fraud_marking.internal_notes,
-          "System error during JDPI submission: #{exception.message}"
+          "System error during JDPI submission: #{exception.message}",
         ].compact.join("\n\n")
       )
 

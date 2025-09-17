@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class PixKeysController < AuthBaseController
   def index
     # PIX Keys listing

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # Fraud Marking Model
 # Tracks PIX fraud markings submitted to JDPI for fraudulent key reporting
 # Maintains local state, approval workflows, and audit trail for compliance
@@ -27,7 +29,7 @@ class FraudMarking < ApplicationRecord
       FAKE_REGISTRATION,
       SUSPICIOUS_TRANSACTION,
       MONEY_LAUNDERING,
-      OTHER_FRAUD
+      OTHER_FRAUD,
     ].freeze
   end
 
@@ -52,7 +54,7 @@ class FraudMarking < ApplicationRecord
       REJECTED,
       EXPIRED,
       SUPERSEDED,
-      ERROR
+      ERROR,
     ].freeze
 
     PENDING_STATES = [ PENDING, SUBMITTED, PROCESSING ].freeze
@@ -339,7 +341,7 @@ class FraudMarking < ApplicationRecord
     log_action("status_updated", updated_by || "system", {
       old_status: status_was,
       new_status: new_status,
-      notes: notes
+      notes: notes,
     })
     self
   end
@@ -392,7 +394,7 @@ class FraudMarking < ApplicationRecord
       pending_approval: where(status: Status::PENDING).count,
       active: where(status: Status::ACTIVE).count,
       overdue: overdue.count,
-      high_priority: high_risk.count
+      high_priority: high_risk.count,
     }
   end
 
@@ -482,7 +484,7 @@ class FraudMarking < ApplicationRecord
       Status::SUBMITTED => [ Status::PROCESSING, Status::REJECTED, Status::CANCELLED ],
       Status::PROCESSING => [ Status::ACTIVE, Status::REJECTED, Status::ERROR ],
       Status::ACTIVE => [ Status::CANCELLED, Status::SUPERSEDED ],
-      Status::ERROR => [ Status::SUBMITTED, Status::CANCELLED ]
+      Status::ERROR => [ Status::SUBMITTED, Status::CANCELLED ],
     }
 
     valid_transitions[from_status]&.include?(to_status) || false
@@ -492,7 +494,7 @@ class FraudMarking < ApplicationRecord
     Rails.logger.info "[FraudMarking] Status changed for #{id}: #{status_was} → #{status}"
     log_action("status_changed", "system", {
       old_status: status_was,
-      new_status: status
+      new_status: status,
     })
   end
 

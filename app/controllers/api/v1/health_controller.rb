@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class Api::V1::HealthController < Api::V1::BaseController
   skip_before_action :authenticate_api_client!
 
@@ -6,7 +8,7 @@ class Api::V1::HealthController < Api::V1::BaseController
       status: "healthy",
       timestamp: Time.current.iso8601,
       version: "1.0.0",
-      environment: Rails.env
+      environment: Rails.env,
     })
   end
 end

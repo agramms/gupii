@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # Dispute Model
 # Handles internal dispute process for infraction notifications
 # Business Rule: Customer has 6 days to respond (7 - 1), or dispute is auto-declined
@@ -13,7 +15,7 @@ class Dispute < ApplicationRecord
     insufficient_evidence: 1,
     procedural_error: 2,
     escalation_required: 3,
-    technical_issue: 4
+    technical_issue: 4,
   }, prefix: true
 
   enum :status, {
@@ -23,7 +25,7 @@ class Dispute < ApplicationRecord
     approved: 3,
     rejected: 4,
     auto_declined: 5,
-    escalated: 6
+    escalated: 6,
   }, prefix: true
 
   # Validations
@@ -211,7 +213,7 @@ class Dispute < ApplicationRecord
       reviewed: reviewed_at,
       resolved: resolved_at,
       is_overdue: overdue_for_customer_response?,
-      is_approaching_deadline: approaching_deadline?
+      is_approaching_deadline: approaching_deadline?,
     }
   end
 
@@ -288,7 +290,7 @@ class Dispute < ApplicationRecord
       "pending_customer_response" => %w[under_internal_review auto_declined],
       "under_internal_review" => %w[pending_resolution approved rejected escalated],
       "pending_resolution" => %w[approved rejected escalated],
-      "escalated" => %w[approved rejected]
+      "escalated" => %w[approved rejected],
     }
 
     if old_status && !valid_transitions[old_status]&.include?(new_status)

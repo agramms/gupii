@@ -151,7 +151,7 @@ class DisputesController < AuthBaseController
     render json: {
       success: true,
       message: "Auto-declined #{count} overdue disputes",
-      count: count
+      count: count,
     }
   end
 
@@ -212,9 +212,9 @@ class DisputesController < AuthBaseController
         :created_at_gteq,
         :created_at_lteq,
         :customer_response_due_at_gteq,
-        :customer_response_due_at_lteq
+        :customer_response_due_at_lteq,
       ] },
-      :page
+      :page,
     ])
   end
 
@@ -230,7 +230,7 @@ class DisputesController < AuthBaseController
       total_pending: Dispute.active.count,
       overdue_customer_response: Dispute.overdue_customer_response.count,
       approaching_deadlines: Dispute.approaching_deadline.count,
-      under_review: Dispute.status_under_internal_review.count
+      under_review: Dispute.status_under_internal_review.count,
     }
   end
 
@@ -238,7 +238,7 @@ class DisputesController < AuthBaseController
     {
       auto_decline_candidates: Dispute.overdue_customer_response.count,
       high_priority_types: high_priority_dispute_count,
-      escalated_disputes: Dispute.status_escalated.count
+      escalated_disputes: Dispute.status_escalated.count,
     }
   end
 

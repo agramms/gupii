@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class Api::V1::BaseController < ApplicationController
   # Base controller for API endpoints
   include Pagy::Backend
@@ -33,15 +35,15 @@ class Api::V1::BaseController < ApplicationController
     render json: {
       error: {
         message: "Internal server error",
-        code: "INTERNAL_ERROR"
-      }
+        code: "INTERNAL_ERROR",
+      },
     }, status: :internal_server_error
   end
 
   def render_success(data = {}, status = :ok)
     render json: {
       success: true,
-      data: data
+      data: data,
     }, status: status
   end
 
@@ -50,8 +52,8 @@ class Api::V1::BaseController < ApplicationController
       success: false,
       error: {
         message: message,
-        code: code
-      }
+        code: code,
+      },
     }, status: status
   end
 
@@ -70,7 +72,7 @@ class Api::V1::BaseController < ApplicationController
       prev: pagy.prev,
       next: pagy.next,
       from: pagy.from,
-      to: pagy.to
+      to: pagy.to,
     }
   end
 end

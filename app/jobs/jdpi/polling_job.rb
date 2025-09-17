@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Jdpi
   # Background job for JDPI status polling using Solid Queue
   # Handles async polling with proper error handling and retry logic
@@ -116,7 +118,7 @@ module Jdpi
         success: true,
         operation_type: operation_type,
         result: result,
-        completed_at: Time.current.iso8601
+        completed_at: Time.current.iso8601,
       }
 
       Rails.cache.write(cache_key, cached_result, expires_in: 24.hours)
@@ -136,7 +138,7 @@ module Jdpi
         success: false,
         operation_type: operation_type,
         result: result,
-        failed_at: Time.current.iso8601
+        failed_at: Time.current.iso8601,
       }
 
       Rails.cache.write(cache_key, cached_result, expires_in: 24.hours)

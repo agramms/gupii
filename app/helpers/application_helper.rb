@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module ApplicationHelper
   # Sidebar toggle button helper
   def sidebar_toggle_button
