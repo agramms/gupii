@@ -45,9 +45,9 @@ fi
 
 echo "✅ Docker is running"
 
-# Start essential services (PostgreSQL + Redis)
-echo "🚀 Starting essential services (PostgreSQL, Redis)..."
-docker-compose up -d postgres redis
+# Start essential services (PostgreSQL + Redis + MinIO)
+echo "🚀 Starting essential services (PostgreSQL, Redis, MinIO)..."
+docker-compose up -d postgres redis minio
 
 # Wait for services to be healthy
 echo "⏳ Waiting for services to be ready..."
@@ -60,6 +60,13 @@ while ! docker-compose exec redis redis-cli ping >/dev/null 2>&1; do
   echo "   Waiting for Redis..."
   sleep 2
 done
+
+# Check MinIO health (optional - continue if it fails)
+if docker-compose exec minio curl -f http://localhost:9000/minio/health/live >/dev/null 2>&1; then
+  echo "   MinIO is ready"
+else
+  echo "   ⚠️  MinIO health check failed (continuing anyway)"
+fi
 
 echo "✅ Services are ready!"
 
@@ -74,19 +81,35 @@ fi
 
 # Check if we should start optional tools
 if [[ "$WITH_TOOLS" == "true" ]]; then
-  echo "🛠️  Starting optional development tools (pgAdmin, MailHog, Grafana, Prometheus)..."
+  echo "🛠️  Starting observability and development tools..."
+  echo "   • pgAdmin (Database admin)"
+  echo "   • MailHog (Email testing)"
+  echo "   • Grafana (Dashboards)"
+  echo "   • Prometheus (Metrics)"
+  echo "   • Graphite/StatsD (Application metrics)"
+  echo "   • Jaeger (Distributed tracing)"
   docker-compose --profile tools up -d
 
   if [[ "$WITH_DOMAINS" == "true" ]]; then
-    echo "   pgAdmin: https://pgadmin.gupii.local (admin@example.com / admin123)"
-    echo "   MailHog: https://mail.gupii.local"
-    echo "   Grafana: https://grafana.gupii.local (admin / admin123)"
-    echo "   Prometheus: https://prometheus.gupii.local"
+    echo ""
+    echo "🌐 Tool URLs (with domains):"
+    echo "   pgAdmin:     https://pgladmin.gupii.local (admin@example.com / admin123)"
+    echo "   MailHog:     https://mail.gupii.local"
+    echo "   MinIO Console: https://minio-console.gupii.local (minioadmin / minioadmin123)"
+    echo "   Grafana:     https://grafana.gupii.local (admin / admin123)"
+    echo "   Prometheus:  https://prometheus.gupii.local"
+    echo "   Graphite:    https://graphite.gupii.local"
+    echo "   Jaeger:      https://jaeger.gupii.local"
   else
-    echo "   pgAdmin: http://localhost:5050 (admin@example.com / admin123)"
-    echo "   MailHog: http://localhost:8025"
-    echo "   Grafana: http://localhost:3001 (admin / admin123)"
-    echo "   Prometheus: http://localhost:9090"
+    echo ""
+    echo "🌐 Tool URLs (localhost):"
+    echo "   pgAdmin:     http://localhost:5050 (admin@example.com / admin123)"
+    echo "   MailHog:     http://localhost:8025"
+    echo "   MinIO Console: http://localhost:9001 (minioadmin / minioadmin123)"
+    echo "   Grafana:     http://localhost:3001 (admin / admin123)"
+    echo "   Prometheus:  http://localhost:9090"
+    echo "   Graphite:    http://localhost:8080"
+    echo "   Jaeger:      http://localhost:16686"
   fi
 fi
 
@@ -121,9 +144,13 @@ echo "   Use AppConfig.get('KEY') in code instead of ENV['KEY']"
 echo "   Set secrets via: rails credentials:edit"
 echo ""
 echo "📋 Quick commands:"
-echo "   Start Rails:     bin/dev or rails server"
+echo "   Full dev env:    foreman start -f Procfile.dev (Rails + Workers + CSS)"
+echo "   Rails only:      bin/rails server"
+echo "   Background jobs: bin/rails solid_queue:start"
+echo "   CSS watcher:     bin/rails tailwindcss:watch"
 echo "   Run tests:       bundle exec rspec"
 echo "   Rails console:   bin/rails console"
+echo "   Verify setup:    bin/verify_observability_stack"
 echo ""
 echo "🌐 Services:"
 if [[ "$WITH_DOMAINS" == "true" ]]; then
@@ -135,6 +162,8 @@ else
 fi
 echo "   PostgreSQL:      localhost:5432 (postgres/postgres)"
 echo "   Redis:           localhost:6379 (password: redis123)"
+echo "   MinIO API:       localhost:9000 (minioadmin/minioadmin123)"
+echo "   Job Queue Admin: https://gupii.local/admin/jobs (when Rails running)"
 echo ""
 echo "🛑 To stop services: docker-compose down"
 if [[ "$WITH_DOMAINS" == "true" ]]; then
