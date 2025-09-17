@@ -73,14 +73,15 @@ begin
 
   if storage_service == :minio
     # Test MinIO configuration
-    minio_config = Rails.application.config_for(:storage)["minio"]
+    storage_config = Rails.application.config_for(:storage)
+    minio_config = storage_config&.dig(:minio)
     if minio_config
       puts "  ✅ MinIO configuration loaded"
-      puts "  📍 Endpoint: #{minio_config['endpoint']}"
-      puts "  🪣 Bucket: #{minio_config['bucket']}"
+      puts "  📍 Endpoint: #{minio_config[:endpoint]}"
+      puts "  🪣 Bucket: #{minio_config[:bucket]}"
       verification_results[:active_storage] = true
     else
-      puts "  ❌ MinIO configuration not found"
+      puts "  ❌ MinIO configuration not found in #{storage_config&.keys}"
       verification_results[:active_storage] = false
     end
   else

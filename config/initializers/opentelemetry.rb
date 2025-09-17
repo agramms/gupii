@@ -20,9 +20,9 @@ unless Rails.env.test?
 
       # Resource attributes
       c.resource = OpenTelemetry::SDK::Resources::Resource.create({
-        "service.name" => AppConfig.get("otel_service_name", "gupii"),
-        "service.version" => AppConfig.get("otel_service_version", "1.0.0"),
-        "service.environment" => Rails.env,
+        "service.name" => AppConfig.get("otel_service_name", "gupii").to_s,
+        "service.version" => AppConfig.get("otel_service_version", "1.0.0").to_s,
+        "service.environment" => Rails.env.to_s,
         "service.instance.id" => "#{`hostname`.strip}-#{Process.pid}",
       })
 
@@ -38,9 +38,7 @@ unless Rails.env.test?
         )
       )
 
-      # Configure sampling (100% in development, configurable in production)
-      sample_rate = AppConfig.get("otel_sample_rate", Rails.env.development? ? 1.0 : 0.1).to_f
-      c.sampler = OpenTelemetry::SDK::Trace::Samplers::TraceIdRatioBasedSampler.new(sample_rate)
+      # Use default sampling (can be configured via OTEL_TRACES_SAMPLER environment variable)
 
       # Auto-instrument common Rails components
       c.use_all({
