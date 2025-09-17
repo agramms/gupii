@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require "net/http"
 require "jwt"
 
@@ -21,13 +23,13 @@ module IdentityClient
       verify_iss: true,
       aud:,
       verify_aud: true,
-      jwks: { keys: get_jwks[:keys] }
+      jwks: { keys: jwks[:keys] },
     }
 
     JWT.decode(token, nil, true, options)
   end
 
-  def get_jwks
+  def jwks
     Rails.cache.fetch("well_known_jwks", expires_in: 12.hours) do
       jwks_uri = URI("#{AppSettings::IDENTITY_BASE_URL}/.well-known/jwks.json")
       jwks_response = Net::HTTP.get_response jwks_uri

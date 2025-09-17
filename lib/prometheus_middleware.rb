@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class PrometheusMiddleware
   def initialize(app)
     @app = app
@@ -47,7 +49,7 @@ class PrometheusMiddleware
       params = env["action_dispatch.request.path_parameters"]
       {
         controller: params[:controller] || "unknown",
-        action: params[:action] || "unknown"
+        action: params[:action] || "unknown",
       }
     else
       { controller: "unknown", action: "unknown" }
@@ -66,7 +68,7 @@ class PrometheusMiddleware
         controller: controller.to_s,
         action: action.to_s,
         method: method.to_s,
-        status: status.to_s
+        status: status.to_s,
       }
 
       # Increment request counter
