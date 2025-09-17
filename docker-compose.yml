@@ -1,0 +1,210 @@
+# Gupii Local Development Environment
+# Simple setup for essential services needed for Rails development
+#
+# Usage:
+#   docker-compose up -d    # Start services in background
+#   docker-compose down     # Stop services
+#   docker-compose logs     # View logs
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: gupii_development
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  # Redis - Caching, Sessions, Background Jobs
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: redis-server --appendonly yes --requirepass redis123
+    volumes:
+      - redis_data:/data
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  # MinIO - S3-compatible Object Storage for Active Storage
+  minio:
+    image: minio/minio:latest
+    restart: unless-stopped
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin123
+      MINIO_BROWSER_REDIRECT_URL: https://minio-console.gupii.local
+    volumes:
+      - minio_data:/data
+    ports:
+      - "9000:9000"   # API
+      - "9001:9001"   # Console
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+
+  # pgAdmin - PostgreSQL Administration (Optional)
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    restart: unless-stopped
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@example.com
+      PGADMIN_DEFAULT_PASSWORD: admin123
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+      PGADMIN_CONFIG_WTF_CSRF_CHECK_DEFAULT: 'False'
+      PGADMIN_CONFIG_ENHANCED_COOKIE_PROTECTION: 'False'
+      PGADMIN_CONFIG_PROXY_FIX_NUM_PROXIES: 1
+      PGADMIN_CONFIG_PROXY_FIX_ENABLE: 'True'
+      PGADMIN_CONFIG_PREFERRED_URL_SCHEME: 'https'
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    ports:
+      - "5050:80"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    profiles:
+      - tools
+
+  # MailHog - Email Testing (Optional)
+  mailhog:
+    image: mailhog/mailhog:latest
+    restart: unless-stopped
+    ports:
+      - "1025:1025"   # SMTP server
+      - "8025:8025"   # Web UI
+    profiles:
+      - tools
+
+  # Prometheus - Metrics Collection (Optional)
+  prometheus:
+    image: prom/prometheus:latest
+    restart: unless-stopped
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention.time=200h'
+      - '--web.enable-lifecycle'
+      - '--web.external-url=https://prometheus.gupii.local/'
+      - '--web.route-prefix=/'
+    volumes:
+      - ./config/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    ports:
+      - "9090:9090"
+    profiles:
+      - tools
+
+  # Grafana - Visualization & Dashboards (Optional)
+  grafana:
+    image: grafana/grafana:latest
+    restart: unless-stopped
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin123
+      GF_USERS_ALLOW_SIGN_UP: false
+      GF_SERVER_DOMAIN: localhost
+      GF_SERVER_HTTP_PORT: 3001
+      GF_SERVER_ROOT_URL: https://grafana.gupii.local/
+      GF_SERVER_SERVE_FROM_SUB_PATH: false
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./config/grafana/provisioning:/etc/grafana/provisioning:ro
+    ports:
+      - "3001:3001"
+    depends_on:
+      - prometheus
+    profiles:
+      - tools
+
+  # Graphite - Metrics Storage Backend for StatsD
+  graphite:
+    image: graphiteapp/graphite-statsd:latest
+    restart: unless-stopped
+    environment:
+      STATSD_INTERFACE: udp
+    volumes:
+      - graphite_data:/opt/graphite/storage
+    ports:
+      - "8080:80"     # Graphite Web UI
+      - "8125:8125/udp"  # StatsD UDP
+      - "8126:8126"   # StatsD Admin
+    profiles:
+      - tools
+
+  # Jaeger - Distributed Tracing (Optional)
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    restart: unless-stopped
+    environment:
+      COLLECTOR_OTLP_ENABLED: true
+      COLLECTOR_ZIPKIN_HOST_PORT: ":9411"
+    volumes:
+      - jaeger_data:/badger
+    ports:
+      - "16686:16686"  # Jaeger UI
+      - "14250:14250"  # gRPC
+      - "14268:14268"  # HTTP
+      - "9411:9411"    # Zipkin compatibility
+      - "4317:4317"    # OTLP gRPC
+      - "4318:4318"    # OTLP HTTP
+    profiles:
+      - tools
+
+  # Nginx - Reverse Proxy with Local Domains
+  nginx:
+    image: nginx:alpine
+    restart: unless-stopped
+    volumes:
+      - ./config/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./ssl:/etc/ssl/certs:ro
+      - ./ssl:/etc/ssl/private:ro
+    ports:
+      - "80:80"
+      - "443:443"
+    depends_on:
+      - postgres
+      - redis
+    profiles:
+      - domains
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+  minio_data:
+    driver: local
+  pgadmin_data:
+    driver: local
+  prometheus_data:
+    driver: local
+  grafana_data:
+    driver: local
+  graphite_data:
+    driver: local
+  jaeger_data:
+    driver: local
+
+# Networks are optional for simple local development
+# Docker Compose will create a default network automatically

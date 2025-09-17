@@ -1,0 +1,73 @@
+#!/bin/bash
+# SSL Certificate Generation Script for Gupii Local Development
+# Generates wildcard SSL certificates for *.gupii.local domains
+
+set -e
+
+echo "🔐 Setting up SSL certificates for *.gupii.local domains..."
+
+# Create SSL directory if it doesn't exist
+SSL_DIR="$(dirname "$0")/../ssl"
+mkdir -p "$SSL_DIR"
+cd "$SSL_DIR"
+
+# Check if certificates already exist
+if [[ -f "gupii.local.crt" && -f "gupii.local.key" ]]; then
+    echo "✅ SSL certificates already exist"
+
+    # Check if certificates are still valid (not expired)
+    if openssl x509 -checkend 86400 -noout -in gupii.local.crt >/dev/null 2>&1; then
+        echo "✅ Certificates are still valid"
+        exit 0
+    else
+        echo "⚠️  Certificates are expired, generating new ones..."
+    fi
+fi
+
+echo "🔧 Generating new SSL certificates..."
+
+# Generate private key
+openssl genrsa -out gupii.local.key 2048
+
+# Create certificate signing request configuration
+cat > gupii.local.conf << EOF
+[req]
+default_bits = 2048
+prompt = no
+default_md = sha256
+distinguished_name = dn
+req_extensions = v3_req
+
+[dn]
+C=BR
+ST=São Paulo
+L=São Paulo
+O=Gupii Development
+OU=IT Department
+CN=*.gupii.local
+
+[v3_req]
+basicConstraints = CA:FALSE
+keyUsage = nonRepudiation, digitalSignature, keyEncipherment
+subjectAltName = @alt_names
+
+[alt_names]
+DNS.1 = *.gupii.local
+DNS.2 = gupii.local
+EOF
+
+# Generate certificate signing request
+openssl req -new -key gupii.local.key -out gupii.local.csr -config gupii.local.conf
+
+# Generate self-signed certificate valid for 365 days
+openssl x509 -req -in gupii.local.csr -signkey gupii.local.key -out gupii.local.crt -days 365 -extensions v3_req -extfile gupii.local.conf
+
+# Clean up
+rm gupii.local.csr gupii.local.conf
+
+echo "✅ SSL certificates generated successfully!"
+echo "   📁 Certificate: ssl/gupii.local.crt"
+echo "   🔑 Private Key: ssl/gupii.local.key"
+echo ""
+echo "⚠️  Note: You may need to add these certificates to your system's trusted store"
+echo "   or accept the browser security warning for local development."

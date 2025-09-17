@@ -263,7 +263,7 @@ class FraudMarkingsController < AuthBaseController
       overdue: FraudMarking.overdue.count,
       today_created: FraudMarking.where("created_at >= ?", Time.current.beginning_of_day).count,
       avg_approval_time: calculate_avg_approval_time,
-      success_rate: calculate_success_rate
+      success_rate: calculate_success_rate,
     }
   end
 
@@ -273,20 +273,20 @@ class FraudMarkingsController < AuthBaseController
         type: "overdue",
         count: FraudMarking.overdue.count,
         message: I18n.t("fraud_markings.alerts.overdue_markings"),
-        severity: "danger"
+        severity: "danger",
       },
       {
         type: "high_priority",
         count: FraudMarking.high_risk.pending_states.count,
         message: I18n.t("fraud_markings.alerts.high_priority_pending"),
-        severity: "warning"
+        severity: "warning",
       },
       {
         type: "requires_approval",
         count: FraudMarking.requires_approval.pending_approval.count,
         message: I18n.t("fraud_markings.alerts.requires_approval"),
-        severity: "info"
-      }
+        severity: "info",
+      },
     ].select { |alert| alert[:count] > 0 }
   end
 
@@ -300,7 +300,7 @@ class FraudMarkingsController < AuthBaseController
         active: FraudMarking.where(
           status: "ACTIVE",
           updated_at: date.beginning_of_day..date.end_of_day
-        ).count
+        ).count,
       }
     end
   end
@@ -394,11 +394,11 @@ class FraudMarkingsController < AuthBaseController
           status: marking.status_description,
           priority: marking.priority_level,
           created_at: marking.created_at.strftime("%d/%m/%Y %H:%M"),
-          url: fraud_marking_path(marking)
+          url: fraud_marking_path(marking),
         }
       end,
       stats: @dashboard_stats,
-      alerts: @critical_alerts
+      alerts: @critical_alerts,
     }
   end
 

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Jdpi
   # JDPI Fraud Marking Service
   # Handles all fraud marking operations with JDPI API (endpoints 8.2.34-8.2.37)
@@ -264,7 +266,7 @@ module Jdpi
         description: @description,
         evidenceData: @evidence_data,
         institutionCode: BusinessRules::DEFAULT_ISPB,
-        timestamp: Time.current.iso8601
+        timestamp: Time.current.iso8601,
       }.compact
     end
 
@@ -277,7 +279,7 @@ module Jdpi
         markingId: marking_id,
         cancellationReason: reason,
         institutionCode: BusinessRules::DEFAULT_ISPB,
-        timestamp: Time.current.iso8601
+        timestamp: Time.current.iso8601,
       }.compact
     end
 

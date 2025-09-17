@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class DashboardController < AuthBaseController
   def index
     # Dashboard overview with key metrics

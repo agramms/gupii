@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # Fraud Marking Evidence Service
 # Manages file uploads, validation, and evidence handling for fraud markings
 # Integrates with Active Storage for secure file management and compliance
@@ -16,7 +18,7 @@ class FraudMarkingEvidenceService
     "text/plain",
     "text/csv",
     "application/vnd.ms-excel",
-    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
   ].freeze
 
   ALLOWED_EXTENSIONS = %w[
@@ -111,9 +113,9 @@ class FraudMarkingEvidenceService
           size: file.byte_size,
           size_human: ActiveSupport::NumberHelper.number_to_human_size(file.byte_size),
           created_at: file.created_at,
-          download_url: Rails.application.routes.url_helpers.rails_blob_path(file, only_path: true)
+          download_url: Rails.application.routes.url_helpers.rails_blob_path(file, only_path: true),
         }
-      end
+      end,
     }
   end
 
@@ -123,7 +125,7 @@ class FraudMarkingEvidenceService
       valid: true,
       issues: [],
       files_checked: 0,
-      suspicious_files: []
+      suspicious_files: [],
     }
 
     @fraud_marking.evidence_files.each do |file|
@@ -283,7 +285,7 @@ class FraudMarkingEvidenceService
         original_filename: original_name,
         uploaded_at: Time.current,
         uploaded_by: "system", # This could be enhanced to track actual user
-        file_index: index
+        file_index: index,
       }
     )
 
@@ -352,7 +354,7 @@ class FraudMarkingEvidenceService
       /\.vbs\./,
       /\.js\./,
       /script/,
-      /<script/i
+      /<script/i,
     ]
 
     suspicious_patterns.any? { |pattern| filename.match?(pattern) }
@@ -370,15 +372,15 @@ class FraudMarkingEvidenceService
           content_type: file.content_type,
           size: file.byte_size,
           created_at: file.created_at,
-          checksum: file.checksum
+          checksum: file.checksum,
         }
       end,
       fraud_details: {
         pix_key: @fraud_marking.masked_pix_key_display,
         fraud_type: @fraud_marking.fraud_type,
         status: @fraud_marking.status,
-        created_at: @fraud_marking.created_at
-      }
+        created_at: @fraud_marking.created_at,
+      },
     }
   end
 end

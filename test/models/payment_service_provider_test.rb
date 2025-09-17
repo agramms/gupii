@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require "test_helper"
 
 class PaymentServiceProviderTest < ActiveSupport::TestCase
@@ -15,7 +17,7 @@ class PaymentServiceProviderTest < ActiveSupport::TestCase
       regulatory_status: "authorized",
       last_sync_errors: [ "no_errors" ],
       jdpi_metadata: { "test" => "data" },
-      validation_errors: [ "no_errors" ]
+      validation_errors: [ "no_errors" ],
     }
 
     @psp = PaymentServiceProvider.new(@valid_attributes)

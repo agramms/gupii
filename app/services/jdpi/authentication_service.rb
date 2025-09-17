@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Jdpi
   # OAuth 2.0 authentication service for JDPI API
   # Handles token acquisition, caching, and refresh using Redis
@@ -55,7 +57,7 @@ module Jdpi
           client_id: client_id,
           client_secret: client_secret,
           grant_type: "client_credentials",
-          scope: scopes.join(",")
+          scope: scopes.join(","),
         })
       end
 
@@ -83,7 +85,7 @@ module Jdpi
           expires_in: token_data["expires_in"],
           token_type: token_data["token_type"],
           scope: token_data["scope"],
-          expires_at: Time.current + token_data["expires_in"].seconds
+          expires_at: Time.current + token_data["expires_in"].seconds,
         }
       when 400
         add_error("Invalid OAuth request: #{response.body&.dig('error_description') || 'Bad request'}")
@@ -153,24 +155,24 @@ module Jdpi
     end
 
     def redis_url
-      Rails.application.credentials.redis&.dig(:url) || ENV["REDIS_URL"] || "redis://redis123@redis:6379/0"
+      Rails.application.credentials.redis&.dig(:url) || AppConfig.get("REDIS_URL") || "redis://redis123@redis:6379/0"
     end
 
     def base_url
       Rails.application.credentials.jdpi&.dig(:base_url) ||
-        ENV["JDPI_BASE_URL"] ||
+        AppConfig.get("JDPI_BASE_URL") ||
         "https://api.jdpi.bcb.gov.br"
     end
 
     def client_id
       Rails.application.credentials.jdpi&.dig(:client_id) ||
-        ENV["JDPI_CLIENT_ID"] ||
+        AppConfig.get("JDPI_CLIENT_ID") ||
         raise(ArgumentError, "JDPI client_id not configured")
     end
 
     def client_secret
       Rails.application.credentials.jdpi&.dig(:client_secret) ||
-        ENV["JDPI_CLIENT_SECRET"] ||
+        AppConfig.get("JDPI_CLIENT_SECRET") ||
         raise(ArgumentError, "JDPI client_secret not configured")
     end
   end

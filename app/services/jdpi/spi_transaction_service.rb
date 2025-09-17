@@ -91,7 +91,7 @@ module Jdpi
           "statusDateTime" => api_response["dtHrSituacao"],
 
           # Raw data for debugging
-          "raw_api_response" => api_response
+          "raw_api_response" => api_response,
         }
       end
 

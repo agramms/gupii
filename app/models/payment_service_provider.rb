@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class PaymentServiceProvider < ApplicationRecord
   include ShortId
 
@@ -12,12 +14,12 @@ class PaymentServiceProvider < ApplicationRecord
   # Status validations
   validates :status, inclusion: {
     in: %w[active inactive suspended terminated],
-    message: "must be active, inactive, suspended, or terminated"
+    message: "must be active, inactive, suspended, or terminated",
   }
   validates :psp_type, presence: true
   validates :regulatory_status, inclusion: {
     in: %w[authorized provisional suspended revoked],
-    message: "must be authorized, provisional, suspended, or revoked"
+    message: "must be authorized, provisional, suspended, or revoked",
   }
 
   # Contact information validations
@@ -32,7 +34,7 @@ class PaymentServiceProvider < ApplicationRecord
   validates :sync_attempts, numericality: { greater_than_or_equal_to: 0 }
   validates :availability_percentage, numericality: {
     greater_than_or_equal_to: 0,
-    less_than_or_equal_to: 100
+    less_than_or_equal_to: 100,
   }, allow_blank: true
 
   # JSON field validations
@@ -71,7 +73,7 @@ class PaymentServiceProvider < ApplicationRecord
       total: count,
       needs_sync: needs_sync.count,
       sync_failed: sync_failed.count,
-      last_successful_sync: maximum(:last_successful_sync_at)
+      last_successful_sync: maximum(:last_successful_sync_at),
     }
   end
 

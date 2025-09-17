@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Jdpi
   # Idempotency service for JDPI API requests
   # Generates and manages idempotency keys as required by JDPI specification
@@ -20,7 +22,7 @@ module Jdpi
         data = {
           key: key,
           created_at: Time.current.iso8601,
-          context: request_context
+          context: request_context,
         }
 
         redis.setex(cache_key, DEFAULT_TTL, data.to_json)
@@ -86,7 +88,7 @@ module Jdpi
         {
           total_keys: keys.count,
           cache_prefix: CACHE_KEY_PREFIX,
-          ttl_seconds: DEFAULT_TTL
+          ttl_seconds: DEFAULT_TTL,
         }
       end
 
@@ -98,7 +100,7 @@ module Jdpi
 
       def redis_url
         Rails.application.credentials.redis&.dig(:url) ||
-          ENV["REDIS_URL"] ||
+          AppConfig.get("REDIS_URL") ||
           "redis://redis123@redis:6379/0"
       end
     end

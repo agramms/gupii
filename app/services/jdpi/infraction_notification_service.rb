@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Jdpi
   # JDPI Infraction Notification Service
   # Handles PIX key infraction reports through DICT API endpoints (8.2.16-8.2.21)
@@ -112,7 +114,7 @@ module Jdpi
       request_body = {
         cancellationReason: reason,
         cancelledAt: Time.current.iso8601,
-        cancelledBy: "REQUESTER"
+        cancelledBy: "REQUESTER",
       }
 
       Rails.logger.info "#{Logging::SERVICE_PREFIX} #{Logging::INFRACTION_TAG} Cancelling notification: #{notification_id}"
@@ -147,7 +149,7 @@ module Jdpi
         analysisResult: analysis_result.upcase,
         analysisNotes: analysis_notes,
         analyzedAt: Time.current.iso8601,
-        analyzedBy: "SYSTEM"
+        analyzedBy: "SYSTEM",
       }.compact
 
       Rails.logger.info "#{Logging::SERVICE_PREFIX} #{Logging::INFRACTION_TAG} Analyzing notification: #{notification_id}"
@@ -245,7 +247,7 @@ module Jdpi
         description: @description,
         evidenceData: @evidence_data,
         submittedAt: Time.current.iso8601,
-        submittedBy: "SYSTEM"
+        submittedBy: "SYSTEM",
       }.compact
     end
 
