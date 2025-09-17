@@ -25,7 +25,7 @@ gem "jbuilder"
 # gem "bcrypt", "~> 3.1.7"
 
 # Authentication and HTTP clients for iugu Identity and JDPI
-gem "jwt", "~> 2.8"
+gem "jwt", "~> 3.1"
 gem "oauth2", "~> 2.0"
 gem "faraday", "~> 2.8"
 
