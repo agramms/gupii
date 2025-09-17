@@ -1,8 +1,193 @@
-# Omakase Ruby styling for Rails
-inherit_gem: { rubocop-rails-omakase: rubocop.yml }
+# RuboCop Configuration for Gupii
+# Modern Ruby and Rails best practices with custom rules
 
-# Overwrite or add rules to create your own house style
-#
-# # Use `[a, [b, c]]` not `[ a, [ b, c ] ]`
-# Layout/SpaceInsideArrayLiteralBrackets:
-#   Enabled: false
+require:
+  - ./lib/rubocop/cop/gupii/direct_env_usage.rb
+
+plugins:
+  - rubocop-rails
+  - rubocop-performance
+
+inherit_gem:
+  rubocop-rails-omakase: rubocop.yml
+
+AllCops:
+  NewCops: enable
+  SuggestExtensions: false
+  TargetRubyVersion: 3.4
+  TargetRailsVersion: 8.0
+  Exclude:
+    - 'vendor/**/*'
+    - 'bin/*'
+    - 'node_modules/**/*'
+    - 'tmp/**/*'
+    - 'log/**/*'
+    - 'db/schema.rb'
+    - 'db/migrate/*.rb'
+    - 'config/boot.rb'
+    - 'config/environment.rb'
+    - 'config/application.rb'
+    - 'config/environments/*.rb'
+    - 'config/puma.rb'
+
+# Custom cops for Gupii
+Gupii/DirectEnvUsage:
+  Description: 'Use AppConfig instead of direct ENV access'
+  Enabled: true
+  Include:
+    - 'app/**/*.rb'
+    - 'lib/**/*.rb'
+    - 'config/initializers/**/*.rb'
+  Exclude:
+    - 'app/lib/app_config.rb'
+    - 'spec/**/*.rb'
+    - 'test/**/*.rb'
+    - 'lib/rubocop/**/*.rb'
+
+# Layout and formatting
+Layout/LineLength:
+  Max: 120
+  AllowedPatterns:
+    - '\A\s*#'  # Allow long comments
+    - 'https?://'  # Allow long URLs
+
+Layout/MultilineMethodCallIndentation:
+  EnforcedStyle: indented
+
+Layout/FirstHashElementIndentation:
+  EnforcedStyle: consistent
+
+Layout/HashAlignment:
+  EnforcedHashRocketStyle: table
+  EnforcedColonStyle: table
+
+# Style preferences
+Style/Documentation:
+  Enabled: false
+
+Style/FrozenStringLiteralComment:
+  Enabled: true
+  EnforcedStyle: always
+  Exclude:
+    - 'config/**/*.rb'
+    - 'db/migrate/*.rb'
+
+Style/StringLiterals:
+  EnforcedStyle: double_quotes
+
+Style/StringLiteralsInInterpolation:
+  EnforcedStyle: double_quotes
+
+Style/TrailingCommaInArrayLiteral:
+  EnforcedStyleForMultiline: comma
+
+Style/TrailingCommaInHashLiteral:
+  EnforcedStyleForMultiline: comma
+
+Style/TrailingCommaInArguments:
+  EnforcedStyleForMultiline: comma
+
+Style/HashSyntax:
+  EnforcedStyle: ruby19_no_mixed_keys
+
+Style/Lambda:
+  EnforcedStyle: literal
+
+Style/ClassAndModuleChildren:
+  EnforcedStyle: compact
+
+# Metrics
+Metrics/ClassLength:
+  Max: 150
+  Exclude:
+    - 'app/models/**/*.rb'
+    - 'config/initializers/**/*.rb'
+
+Metrics/ModuleLength:
+  Max: 150
+
+Metrics/MethodLength:
+  Max: 25
+  Exclude:
+    - 'db/migrate/*.rb'
+    - 'config/initializers/**/*.rb'
+
+Metrics/BlockLength:
+  Max: 30
+  Exclude:
+    - 'spec/**/*.rb'
+    - 'test/**/*.rb'
+    - 'config/routes.rb'
+    - 'config/initializers/**/*.rb'
+    - 'db/migrate/*.rb'
+    - 'Rakefile'
+
+Metrics/CyclomaticComplexity:
+  Max: 10
+
+Metrics/PerceivedComplexity:
+  Max: 10
+
+Metrics/AbcSize:
+  Max: 20
+
+# Rails specific
+Rails/Output:
+  Exclude:
+    - 'db/seeds.rb'
+    - 'lib/tasks/**/*.rake'
+
+Rails/SkipsModelValidations:
+  Exclude:
+    - 'db/migrate/*.rb'
+    - 'spec/**/*.rb'
+    - 'test/**/*.rb'
+
+Rails/I18nLocaleTexts:
+  Enabled: false
+
+Rails/ApplicationController:
+  Enabled: true
+
+Rails/ApplicationJob:
+  Enabled: true
+
+Rails/ApplicationMailer:
+  Enabled: true
+
+Rails/ApplicationRecord:
+  Enabled: true
+
+# Naming
+Naming/PredicatePrefix:
+  ForbiddenPrefixes:
+    - is_
+
+Naming/AccessorMethodName:
+  Enabled: true
+
+Naming/VariableNumber:
+  EnforcedStyle: snake_case
+
+# Security
+Security/Open:
+  Enabled: true
+
+Security/Eval:
+  Enabled: true
+
+Security/MarshalLoad:
+  Enabled: true
+
+Security/YAMLLoad:
+  Enabled: true
+
+# Performance
+Performance/RedundantMerge:
+  Enabled: true
+
+Performance/StringReplacement:
+  Enabled: true
+
+Performance/RegexpMatch:
+  Enabled: true
