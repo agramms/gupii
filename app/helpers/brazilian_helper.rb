@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module BrazilianHelper
   # Formata valores em Real brasileiro
   def format_currency(amount)

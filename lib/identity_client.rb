@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require "net/http"
 require "jwt"
 
@@ -21,13 +23,13 @@ module IdentityClient
       verify_iss: true,
       aud:,
       verify_aud: true,
-      jwks: { keys: get_jwks[:keys] }
+      jwks: { keys: jwks[:keys] },
     }
 
     JWT.decode(token, nil, true, options)
   end
 
-  def get_jwks
+  def jwks
     Rails.cache.fetch("well_known_jwks", expires_in: 12.hours) do
       jwks_uri = URI("#{AppSettings::IDENTITY_BASE_URL}/.well-known/jwks.json")
       jwks_response = Net::HTTP.get_response jwks_uri
@@ -54,13 +56,7 @@ module IdentityClient
   def from_hash(hash) = OAuth2::AccessToken.from_hash(oauth2_client, hash)
 
   def authorize_url(redirect_host:)
-    # Include subpath in development mode for proper OAuth callback routing
-    callback_path = "/oauth2/callback"
-    if Rails.env.development? && Rails.application.config.relative_url_root.present?
-      callback_path = "#{Rails.application.config.relative_url_root}#{callback_path}"
-    end
-
-    redirect_uri = "#{redirect_host}#{callback_path}"
+    redirect_uri = "#{redirect_host}/oauth2/callback"
     oauth2_client.auth_code.authorize_url(redirect_uri:)
   end
 

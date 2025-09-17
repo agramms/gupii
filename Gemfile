@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 source "https://rubygems.org"
 
 # Bundle edge Rails instead: gem "rails", github: "rails/rails", branch: "main"
@@ -15,7 +17,7 @@ gem "turbo-rails"
 # Hotwire's modest JavaScript framework [https://stimulus.hotwired.dev]
 gem "stimulus-rails"
 # Use Tailwind CSS [https://github.com/rails/tailwindcss-rails]
-gem "tailwindcss-rails"
+gem "tailwindcss-rails", "~> 3.3.1"
 # Build JSON APIs with ease [https://github.com/rails/jbuilder]
 gem "jbuilder"
 
@@ -38,6 +40,9 @@ gem "solid_cache"
 gem "solid_queue"
 gem "solid_cable"
 
+# Mission Control for Solid Queue administration
+gem "mission_control-jobs"
+
 # Reduces boot times through caching; required in config/boot.rb
 gem "bootsnap", require: false
 
@@ -54,9 +59,18 @@ gem "ransack", "~> 4.1"
 # Generate short, URL-safe, unique identifiers from integers
 gem "hashids", "~> 1.0"
 
-# Prometheus metrics collection
+# Metrics and observability
 gem "prometheus-client", "~> 4.0"
 gem "prometheus-client-mmap", "~> 1.0"
+gem "statsd-ruby", "~> 1.5"
+
+# OpenTelemetry distributed tracing
+gem "opentelemetry-sdk", "~> 1.4"
+gem "opentelemetry-exporter-otlp", "~> 0.28"
+gem "opentelemetry-instrumentation-all", "~> 0.65"
+
+# AWS S3 SDK for MinIO compatibility
+gem "aws-sdk-s3", "~> 1.138"
 
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
@@ -77,6 +91,9 @@ end
 group :development do
   # Use console on exceptions pages [https://github.com/rails/web-console]
   gem "web-console"
+
+  # Process manager for development services
+  gem "foreman"
 end
 
 group :test do

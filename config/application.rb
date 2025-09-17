@@ -6,6 +6,9 @@ require "rails/all"
 # you've limited to :test, :development, or :production.
 Bundler.require(*Rails.groups)
 
+# Load AppConfig early so it's available during configuration
+require_relative "../app/lib/app_config"
+
 module Gupii
   class Application < Rails::Application
     # Initialize configuration defaults for originally generated Rails version.
@@ -33,10 +36,8 @@ module Gupii
     # Fallback to English if translation missing
     config.i18n.fallbacks = [ :"pt-BR", :en ]
 
-    # Configure relative URL root for development environment
-    if Rails.env.development?
-      config.relative_url_root = "/app"
-    end
+    # Domain-based development environment - no subpath configuration needed
+    # Applications now run on dedicated domains (gupii.local, grafana.gupii.local, etc.)
 
     # Load locale files from subdirectories
     config.i18n.load_path += Dir[Rails.root.join("config", "locales", "**", "*.{rb,yml}")]
@@ -47,6 +48,12 @@ module Gupii
     # Add simple Prometheus metrics middleware
     require_relative "../lib/simple_prometheus_middleware" unless Rails.env.test?
     config.middleware.use SimplePrometheusMiddleware unless Rails.env.test?
+
+    # Configure Active Job to use Solid Queue
+    config.active_job.queue_adapter = :solid_queue
+
+    # Configure Solid Queue to use dedicated queue database
+    config.solid_queue.connects_to = { database: { writing: :queue } }
 
     # config.eager_load_paths << Rails.root.join("extras")
   end

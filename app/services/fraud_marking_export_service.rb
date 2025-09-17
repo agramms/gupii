@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # Fraud Marking Export Service
 # Handles data export for fraud markings in CSV and Excel formats
 # Includes compliance and audit trail information
@@ -12,7 +14,7 @@ class FraudMarkingExportService
       include_logs: true,
       include_evidence_summary: true,
       mask_sensitive_data: true,
-      format_dates: true
+      format_dates: true,
     }.merge(options)
   end
 
@@ -43,7 +45,7 @@ class FraudMarkingExportService
     {
       export_metadata: export_metadata,
       summary: generate_summary,
-      markings: @fraud_markings.map { |marking| format_detailed_marking(marking) }
+      markings: @fraud_markings.map { |marking| format_detailed_marking(marking) },
     }.to_json(indent: 2)
   end
 
@@ -73,14 +75,14 @@ class FraudMarkingExportService
       "JDPI Marking ID",
       "Reference Case ID",
       "Sensitive Case",
-      "Requires Approval"
+      "Requires Approval",
     ]
 
     if @options[:include_evidence_summary]
       headers += [
         "Evidence Files Count",
         "Evidence Total Size",
-        "Evidence File Types"
+        "Evidence File Types",
       ]
     end
 
@@ -88,7 +90,7 @@ class FraudMarkingExportService
       headers += [
         "Last Activity",
         "Last Activity User",
-        "Total Log Entries"
+        "Total Log Entries",
       ]
     end
 
@@ -119,7 +121,7 @@ class FraudMarkingExportService
       marking.jdpi_marking_id,
       marking.reference_case_id,
       marking.sensitive_case? ? "Yes" : "No",
-      marking.requires_supervisor_approval? ? "Yes" : "No"
+      marking.requires_supervisor_approval? ? "Yes" : "No",
     ]
 
     if @options[:include_evidence_summary]
@@ -127,7 +129,7 @@ class FraudMarkingExportService
       row += [
         evidence_summary[:count],
         evidence_summary[:total_size_human],
-        evidence_summary[:file_types].join(", ")
+        evidence_summary[:file_types].join(", "),
       ]
     end
 
@@ -136,7 +138,7 @@ class FraudMarkingExportService
       row += [
         last_log ? format_datetime(last_log.created_at) : "",
         last_log&.user_display || "",
-        marking.fraud_marking_logs.count
+        marking.fraud_marking_logs.count,
       ]
     end
 
@@ -149,7 +151,7 @@ class FraudMarkingExportService
       short_id: marking.short_id,
       pix_key_info: {
         pix_key: @options[:mask_sensitive_data] ? marking.masked_pix_key_display : marking.pix_key,
-        pix_key_type: marking.pix_key_type
+        pix_key_type: marking.pix_key_type,
       },
       fraud_details: {
         fraud_type: marking.fraud_type,
@@ -158,7 +160,7 @@ class FraudMarkingExportService
         classification: marking.classification,
         classification_description: marking.classification_description,
         risk_level: marking.risk_level,
-        priority_level: marking.priority_level
+        priority_level: marking.priority_level,
       },
       status_info: {
         status: marking.status,
@@ -167,36 +169,36 @@ class FraudMarkingExportService
         status_changed_at: format_datetime(marking.status_changed_at),
         response_due_at: format_datetime(marking.response_due_at),
         days_until_deadline: marking.days_until_deadline,
-        overdue: marking.overdue_for_response?
+        overdue: marking.overdue_for_response?,
       },
       approval_info: {
         requested_by: marking.requested_by,
         approved_by: marking.approved_by,
         approved_at: format_datetime(marking.approved_at),
-        requires_supervisor_approval: marking.requires_supervisor_approval?
+        requires_supervisor_approval: marking.requires_supervisor_approval?,
       },
       descriptions: {
         description: marking.description,
         detailed_description: marking.detailed_description,
         supporting_details: marking.supporting_details,
-        internal_notes: @options[:mask_sensitive_data] ? "[MASKED]" : marking.internal_notes
+        internal_notes: @options[:mask_sensitive_data] ? "[MASKED]" : marking.internal_notes,
       },
       financial_info: {
         transaction_amount: marking.transaction_amount&.to_f,
-        transaction_currency: marking.transaction_currency
+        transaction_currency: marking.transaction_currency,
       },
       case_management: {
         created_by_source: marking.created_by_source,
         reference_case_id: marking.reference_case_id,
-        sensitive_case: marking.sensitive_case?
+        sensitive_case: marking.sensitive_case?,
       },
       jdpi_integration: {
         jdpi_marking_id: marking.jdpi_marking_id,
         submitted_at: format_datetime(marking.submitted_at),
-        processed_at: format_datetime(marking.processed_at)
+        processed_at: format_datetime(marking.processed_at),
       },
       evidence: @options[:include_evidence_summary] ? get_evidence_summary(marking) : nil,
-      activity_logs: @options[:include_logs] ? format_activity_logs(marking) : nil
+      activity_logs: @options[:include_logs] ? format_activity_logs(marking) : nil,
     }
   end
 
@@ -214,9 +216,9 @@ class FraudMarkingExportService
           content_type: file.content_type,
           size: file.byte_size,
           size_human: ActiveSupport::NumberHelper.number_to_human_size(file.byte_size),
-          created_at: format_datetime(file.created_at)
+          created_at: format_datetime(file.created_at),
         }
-      end
+      end,
     }
   end
 
@@ -233,9 +235,9 @@ class FraudMarkingExportService
           message: log.message,
           level: log.level,
           created_at: format_datetime(log.created_at),
-          has_metadata: log.has_metadata?
+          has_metadata: log.has_metadata?,
         }
-      end
+      end,
     }
   end
 
@@ -267,7 +269,7 @@ class FraudMarkingExportService
       options: @options,
       filters_applied: extract_filters_from_scope,
       exported_by: "system", # This could be enhanced to track actual user
-      export_version: "1.0"
+      export_version: "1.0",
     }
   end
 
@@ -287,10 +289,10 @@ class FraudMarkingExportService
       sensitive_cases: markings.count(&:sensitive_case?),
       date_range: {
         earliest: markings.map(&:created_at).min,
-        latest: markings.map(&:created_at).max
+        latest: markings.map(&:created_at).max,
       },
       average_approval_time: calculate_average_approval_time(markings),
-      completion_rate: calculate_completion_rate(markings)
+      completion_rate: calculate_completion_rate(markings),
     }
   end
 
@@ -299,7 +301,7 @@ class FraudMarkingExportService
     # For now, return a simple representation
     {
       scope_class: @fraud_markings.klass.name,
-      loaded: @fraud_markings.loaded?
+      loaded: @fraud_markings.loaded?,
     }
   end
 

@@ -74,10 +74,36 @@ This project uses a comprehensive DevContainer setup with full observability sta
 - **Cache Setup**: Solid Cache with dedicated database
 
 ### Development Server
-- **Main Application**: http://localhost:3000
+
+#### Option 1: Foreman (Recommended for Full Development)
+Start all development processes (Rails + Solid Queue workers + CSS watcher):
+
+```bash
+# Install dependencies
+bundle install
+
+# Start Docker services
+docker-compose up -d  # or with --profile tools for full stack
+
+# Start all development processes
+foreman start -f Procfile.dev
+```
+
+This starts:
+- **Rails server** (port 3000)
+- **Solid Queue workers** (3 worker processes: high_priority, default, low_priority)
+- **Tailwind CSS watcher** (auto-rebuilds on file changes)
+
+#### Option 2: Manual Setup
+- **Main Application**: http://localhost:3000 (`bin/rails server`)
+- **Background Workers**: `bin/rails solid_queue:start` (separate terminal)
+- **CSS Watcher**: `bin/rails tailwindcss:watch` (separate terminal)
+
+#### Access Points
 - **Admin UI**: `/admin` routes for PIX management
 - **API Endpoints**: `/api/v1` for client applications
 - **Polling Endpoint**: `/api/v1/events/poll` for client updates
+- **Job Admin**: `/admin/jobs` (Mission Control interface)
 
 ### Code Quality (Using Reference Project)
 The `tmp/platform2-app-boleto` contains a reference Rails project for Tailwind templates and frontend patterns:
@@ -217,6 +243,49 @@ RAILS_ENV=development
 - Metrics: http://localhost:9090
 - Tracing: http://localhost:16686
 
+## Background Job Processing (Solid Queue)
+
+The project uses **Solid Queue** for reliable background job processing with dedicated PostgreSQL database for job storage.
+
+### Queue Configuration
+
+#### Queue Priorities
+- **high_priority**: Time-sensitive operations (disputes, fraud markings, customer notifications)
+- **default**: Standard operations (metrics collection, sync operations, email notifications)
+- **low_priority**: Heavy operations (bulk processing, report generation, data exports)
+
+#### Worker Setup
+```bash
+# Via Foreman (recommended) - starts Rails server, workers, and CSS watcher
+foreman start -f Procfile.dev
+
+# Manual worker management - single worker for all queues in development
+bin/rails solid_queue:start
+```
+
+#### Job Examples
+```ruby
+# High-priority: Customer dispute resolution
+DisputeProcessingJob.set(queue: :high_priority).perform_later(dispute_id)
+
+# Default: PSP metrics collection
+PspMetricsCollectionJob.perform_later
+
+# Low-priority: Bulk data export
+DataExportJob.set(queue: :low_priority).perform_later(export_params)
+```
+
+### Job Administration
+- **Mission Control Interface**: `/admin/jobs`
+- **Queue Monitoring**: Real-time job status and metrics
+- **Error Handling**: Failed job retry and inspection
+- **Performance Tracking**: Job execution timing and queue health
+
+### Database Configuration
+- **Dedicated Database**: `gupii_queue_[env]` for job storage
+- **Migration Path**: `db/queue_migrate/` for Solid Queue schema
+- **Connection**: Separate database connection for job processing isolation
+
 ## Disputes System Architecture
 
 The **Disputes Management System** handles internal dispute processes for infraction notifications with comprehensive workflow management.
@@ -329,3 +398,33 @@ The **SPI Transaction Lookup** provides real-time consultation of PIX transactio
 - **Protected Repository**: Main branch requires pull requests with passing CI checks
 
 The project combines modern Rails 8 development with enterprise-grade observability and clean service architecture to create a robust, compliant PIX payment integration solution for the Brazilian Central Bank ecosystem.
+
+## Important Notes
+
+- **Domain-Based Development**: Professional development environment using *.gupii.local domains with HTTPS
+- **PIX Focus**: Brazilian Central Bank PIX integration with MED (Mecanismo Especial de Devolução)
+- **Rails Version**: 8.0 (latest stable) with Ruby 3.4.5
+- **Multi-Database**: Separate PostgreSQL databases for app, cache, and queue
+- **Authentication**: iugu Identity Provider with JWT tokens
+- **API Strategy**: Polling-based client communication pattern
+- **Service Architecture**: Clean JDPI integration in `app/services/jdpi/`
+- **Disputes System**: Complete lifecycle management with 6-day customer response SLA
+- **SPI Transaction Lookup**: Real-time consultation via JDPI API 8.4.7 without local persistence
+- **Reference Templates**: Use `tmp/platform2-app-boleto` for Tailwind patterns only
+- **JDPI Documentation**: API specification in `tmp/jdpi-api-doc.5.2.1.pdf`
+- **Mascot**: Gupii 🐹 represents friendly, accessible PIX payments
+- **Monolithic**: Single Rails app with Admin UI + API scopes for development velocity
+- **Full Stack Observability**: Comprehensive monitoring with Grafana, Prometheus, Jaeger
+
+## Development Environment
+
+### Domain-Based Access
+- **Primary URLs**: All services accessible via https://*.gupii.local domains
+- **SSL Certificates**: Auto-generated wildcard certificates for development
+- **Team Onboarding**: Automated setup scripts solve developer environment consistency
+- **Environment Detection**: Supports local development, GitHub Codespaces, and CI
+
+### Code Style Guidelines
+- **File Formatting**: Remove trailing whitespace and ensure files end with a single newline
+- **No Comments**: Do not add code comments unless explicitly requested
+- **Follow Conventions**: Match existing codebase patterns and style

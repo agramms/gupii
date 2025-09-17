@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Api
   module V1
     class PaymentServiceProvidersController < Api::V1::BaseController
@@ -18,16 +20,16 @@ module Api
             total_count: @pagy.count,
             page: @pagy.page,
             per_page: @pagy.items,
-            total_pages: @pagy.pages
+            total_pages: @pagy.pages,
           },
           links: {
             self: api_v1_payment_service_providers_url(request.query_parameters),
             first: api_v1_payment_service_providers_url(request.query_parameters.merge(page: 1)),
             last: api_v1_payment_service_providers_url(request.query_parameters.merge(page: @pagy.pages)),
             prev: @pagy.prev ? api_v1_payment_service_providers_url(request.query_parameters.merge(page: @pagy.prev)) : nil,
-            next: @pagy.next ? api_v1_payment_service_providers_url(request.query_parameters.merge(page: @pagy.next)) : nil
+            next: @pagy.next ? api_v1_payment_service_providers_url(request.query_parameters.merge(page: @pagy.next)) : nil,
           },
-          generated_at: Time.current.iso8601
+          generated_at: Time.current.iso8601,
         }, status: :ok
 
       rescue => e
@@ -41,7 +43,7 @@ module Api
 
         render json: {
           data: psp_detailed_api_json(@psp),
-          generated_at: Time.current.iso8601
+          generated_at: Time.current.iso8601,
         }, status: :ok
 
       rescue => e
@@ -80,9 +82,9 @@ module Api
           meta: {
             search_query: search_term,
             pagination: pagy_metadata(@pagy),
-            total_matches: @pagy.count
+            total_matches: @pagy.count,
           },
-          generated_at: Time.current.iso8601
+          generated_at: Time.current.iso8601,
         }, status: :ok
 
       rescue => e
@@ -105,7 +107,7 @@ module Api
         if @psp
           render json: {
             data: psp_detailed_api_json(@psp),
-            generated_at: Time.current.iso8601
+            generated_at: Time.current.iso8601,
           }, status: :ok
         else
           render_api_error("PSP with ISPB #{ispb} not found", :not_found)
@@ -129,9 +131,9 @@ module Api
           meta: {
             filter: "active",
             pagination: pagy_metadata(@pagy),
-            total_active: @pagy.count
+            total_active: @pagy.count,
           },
-          generated_at: Time.current.iso8601
+          generated_at: Time.current.iso8601,
         }, status: :ok
 
       rescue => e
@@ -152,9 +154,9 @@ module Api
           meta: {
             filter: "pix_enabled",
             pagination: pagy_metadata(@pagy),
-            total_pix_enabled: @pagy.count
+            total_pix_enabled: @pagy.count,
           },
-          generated_at: Time.current.iso8601
+          generated_at: Time.current.iso8601,
         }, status: :ok
 
       rescue => e
@@ -182,8 +184,8 @@ module Api
             data_freshness: {
               synced_today: PaymentServiceProvider.where("last_sync_at > ?", 24.hours.ago).count,
               needs_sync: PaymentServiceProvider.needs_sync.count,
-              sync_failed: PaymentServiceProvider.sync_failed.count
-            }
+              sync_failed: PaymentServiceProvider.sync_failed.count,
+            },
           }
         end
 
@@ -191,9 +193,9 @@ module Api
           data: stats,
           meta: {
             cached: Rails.cache.exist?(cache_key),
-            cache_expires_at: 1.hour.from_now.iso8601
+            cache_expires_at: 1.hour.from_now.iso8601,
           },
-          generated_at: Time.current.iso8601
+          generated_at: Time.current.iso8601,
         }, status: :ok
 
       rescue => e
@@ -318,7 +320,7 @@ module Api
           services_offered: psp.services_offered,
           last_sync_at: psp.last_sync_at,
           created_at: psp.created_at,
-          updated_at: psp.updated_at
+          updated_at: psp.updated_at,
         }
       end
 
@@ -340,7 +342,7 @@ module Api
           total_volume: psp.total_volume,
           last_transaction_at: psp.last_transaction_at,
           availability_percentage: psp.availability_percentage,
-          avg_response_time_ms: psp.avg_response_time_ms
+          avg_response_time_ms: psp.avg_response_time_ms,
         })
       end
     end

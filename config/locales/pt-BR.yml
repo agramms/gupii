@@ -27,6 +27,7 @@ pt-BR:
     disputes: "Disputas"
     spi_transactions: "Consulta SPI"
     fraud_markings: "Marcação de Fraudes"
+    job_admin: "Administração de Tarefas"
 
   # SPI Transactions - Comprehensive translations
   spi_transactions:
@@ -265,6 +266,8 @@ pt-BR:
     environment: "Ambiente"
     api_documentation: "Documentação API"
     language: "Idioma"
+    configuration: "Configuração"
+    job_queue_admin: "Administração de Filas de Tarefas"
 
   # Botões e ações
   actions:

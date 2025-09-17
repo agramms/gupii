@@ -1,55 +1,42 @@
+# Legacy AppSettings module - migrated to use AppConfig
+# This maintains backward compatibility while using the new AppConfig system
+
 module AppSettings
   module_function
 
-  ROOT = Rails.application.config_for(:application).freeze
-
+  # Backward compatibility wrapper using AppConfig
   def get(*path)
-    # Try Rails credentials first, then config file, then environment variables
-    credentials_value = Rails.application.credentials.dig(*path)
-    config_file_value = ROOT.dig(*path)
-    env_var_value = ENV.fetch(path.join("__").upcase, nil)
-
-    value = credentials_value || config_file_value
-
-    if env_var_value.present?
-      case value
-      when TrueClass, FalseClass then ActiveModel::Type::Boolean.new.cast(env_var_value)
-      when Integer then env_var_value.to_i
-      when Numeric then Float(env_var_value)
-      else env_var_value
-      end
-    else
-      value
-    end
+    key = path.join("_").upcase
+    AppConfig.get(key)
   end
 
-  APP_NAME = AppSettings.get(:appname).freeze
-  SERVICE_NAME = ENV.fetch("DD_SERVICE", AppSettings::APP_NAME).freeze
-  APP_VERSION = ENV.fetch("DD_VERSION", "").freeze
+  APP_NAME = AppConfig.get("APPNAME", "Gupii").freeze
+  SERVICE_NAME = AppConfig.get("DD_SERVICE", APP_NAME).freeze
+  APP_VERSION = AppConfig.get("DD_VERSION", "").freeze
 
-  API_DOCUMENTATION = AppSettings.get(:api_documentation, :base_url).freeze
-  BILLING_BASE_URL = AppSettings.get(:billing, :base_url).freeze
-  CORE_BASE_URL = AppSettings.get(:core, :base_url).freeze
-  CORE_API_TOKEN = AppSettings.get(:core, :api_token).freeze
-  ICP_SIGNATURE_BASE_URL = AppSettings.get(:icp_signature, :base_url).freeze
-  ICP_SIGNATURE_SIGN_URL = AppSettings.get(:icp_signature, :sign_url).freeze
-  IDENTITY_BASE_URL = AppSettings.get(:identity, :base_url).freeze
+  API_DOCUMENTATION = AppConfig.get("API_DOCUMENTATION_BASE_URL").freeze
+  BILLING_BASE_URL = AppConfig.get("BILLING_BASE_URL").freeze
+  CORE_BASE_URL = AppConfig.get("CORE_BASE_URL").freeze
+  CORE_API_TOKEN = AppConfig.get("CORE_API_TOKEN").freeze
+  ICP_SIGNATURE_BASE_URL = AppConfig.get("ICP_SIGNATURE_BASE_URL").freeze
+  ICP_SIGNATURE_SIGN_URL = AppConfig.get("ICP_SIGNATURE_SIGN_URL").freeze
+  IDENTITY_BASE_URL = AppConfig.get("IDENTITY_BASE_URL").freeze
 
   IuguInfo = Struct.new(:company_name, :bank_code, :cnpj)
   IUGU = IuguInfo.new(
-    AppSettings.get(:iugu, :company_name),
-    AppSettings.get(:iugu, :bank_code),
-    AppSettings.get(:iugu, :cnpj)
+    AppConfig.get("IUGU_COMPANY_NAME"),
+    AppConfig.get("IUGU_BANK_CODE"),
+    AppConfig.get("IUGU_CNPJ")
   ).freeze
 
-  CHECK_INTERVAL = AppSettings.get(:jobs, :check_interval).seconds
+  CHECK_INTERVAL = AppConfig.get_integer("JOBS_CHECK_INTERVAL", 30).seconds
 
   module Oauth
-    CLIENT_ID = AppSettings.get(:oauth, :client_id).freeze
-    CLIENT_SECRET = AppSettings.get(:oauth, :client_secret).freeze
+    CLIENT_ID = AppConfig.get("OAUTH_CLIENT_ID").freeze
+    CLIENT_SECRET = AppConfig.get("OAUTH_CLIENT_SECRET").freeze
   end
 
   module Datadog
-    ENABLED = AppSettings.get(:datadog, :enabled).freeze
+    ENABLED = AppConfig.get_boolean("DATADOG_ENABLED", false).freeze
   end
 end

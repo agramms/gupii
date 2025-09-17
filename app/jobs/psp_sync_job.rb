@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class PspSyncJob < ApplicationJob
   queue_as :default
 
@@ -185,7 +187,7 @@ class PspSyncJob < ApplicationJob
     track_metric("psp.sync.job.failed", 1, {
       sync_type: @sync_type,
       error_class: exception.class.name,
-      duration_ms: duration.round(2)
+      duration_ms: duration.round(2),
     })
 
     # Store error for monitoring
@@ -196,7 +198,7 @@ class PspSyncJob < ApplicationJob
         sync_type: @sync_type,
         error: exception.message,
         job_id: job_id,
-        attempts: executions
+        attempts: executions,
       },
       expires_in: 24.hours
     )
@@ -218,7 +220,7 @@ class PspSyncJob < ApplicationJob
         timestamp: Time.current.iso8601,
         sync_type: @sync_type,
         duration_ms: duration.round(2),
-        job_id: job_id
+        job_id: job_id,
       },
       expires_in: 48.hours
     )
@@ -230,7 +232,7 @@ class PspSyncJob < ApplicationJob
       job_tags = {
         sync_type: @sync_type,
         job_id: job_id,
-        queue: queue_name
+        queue: queue_name,
       }.merge(tags)
 
       # Use StatsD client if available
@@ -295,7 +297,7 @@ class PspSyncJob < ApplicationJob
     def last_sync_status
       {
         last_success: Rails.cache.read("psp_sync_job_last_success"),
-        last_error: Rails.cache.read("psp_sync_job_last_error")
+        last_error: Rails.cache.read("psp_sync_job_last_error"),
       }
     end
 

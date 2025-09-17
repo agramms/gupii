@@ -1,0 +1,171 @@
+#!/bin/bash
+# Gupii Local Development Setup Script
+# This script sets up the local development environment
+
+set -e
+
+echo "🐹 Setting up Gupii local development environment..."
+
+# Parse arguments
+WITH_TOOLS=false
+WITH_DOMAINS=false
+
+for arg in "$@"; do
+  case $arg in
+    --with-tools)
+      WITH_TOOLS=true
+      shift
+      ;;
+    --with-domains)
+      WITH_DOMAINS=true
+      shift
+      ;;
+    --full)
+      WITH_TOOLS=true
+      WITH_DOMAINS=true
+      shift
+      ;;
+    *)
+      # Unknown argument
+      ;;
+  esac
+done
+
+# Check if Docker is running
+if ! docker info >/dev/null 2>&1; then
+  echo "❌ Docker is not running. Please start Docker and try again."
+  exit 1
+fi
+
+# Check if Docker Compose is available
+if ! command -v docker-compose >/dev/null 2>&1; then
+  echo "❌ Docker Compose is not installed. Please install Docker Compose and try again."
+  exit 1
+fi
+
+echo "✅ Docker is running"
+
+# Start essential services (PostgreSQL + Redis + MinIO)
+echo "🚀 Starting essential services (PostgreSQL, Redis, MinIO)..."
+docker-compose up -d postgres redis minio
+
+# Wait for services to be healthy
+echo "⏳ Waiting for services to be ready..."
+while ! docker-compose exec postgres pg_isready -U postgres >/dev/null 2>&1; do
+  echo "   Waiting for PostgreSQL..."
+  sleep 2
+done
+
+while ! docker-compose exec redis redis-cli ping >/dev/null 2>&1; do
+  echo "   Waiting for Redis..."
+  sleep 2
+done
+
+# Check MinIO health (optional - continue if it fails)
+if docker-compose exec minio curl -f http://localhost:9000/minio/health/live >/dev/null 2>&1; then
+  echo "   MinIO is ready"
+else
+  echo "   ⚠️  MinIO health check failed (continuing anyway)"
+fi
+
+echo "✅ Services are ready!"
+
+# Set up domains if requested
+if [[ "$WITH_DOMAINS" == "true" ]]; then
+  echo "🌐 Setting up local domains..."
+  ./bin/setup-domains
+
+  echo "🔐 Setting up SSL certificates..."
+  ./bin/setup-ssl
+fi
+
+# Check if we should start optional tools
+if [[ "$WITH_TOOLS" == "true" ]]; then
+  echo "🛠️  Starting observability and development tools..."
+  echo "   • pgAdmin (Database admin)"
+  echo "   • MailHog (Email testing)"
+  echo "   • Grafana (Dashboards)"
+  echo "   • Prometheus (Metrics)"
+  echo "   • Graphite/StatsD (Application metrics)"
+  echo "   • Jaeger (Distributed tracing)"
+  docker-compose --profile tools up -d
+
+  if [[ "$WITH_DOMAINS" == "true" ]]; then
+    echo ""
+    echo "🌐 Tool URLs (with domains):"
+    echo "   pgAdmin:     https://pgladmin.gupii.local (admin@example.com / admin123)"
+    echo "   MailHog:     https://mail.gupii.local"
+    echo "   MinIO Console: https://minio-console.gupii.local (minioadmin / minioadmin123)"
+    echo "   Grafana:     https://grafana.gupii.local (admin / admin123)"
+    echo "   Prometheus:  https://prometheus.gupii.local"
+    echo "   Graphite:    https://graphite.gupii.local"
+    echo "   Jaeger:      https://jaeger.gupii.local"
+  else
+    echo ""
+    echo "🌐 Tool URLs (localhost):"
+    echo "   pgAdmin:     http://localhost:5050 (admin@example.com / admin123)"
+    echo "   MailHog:     http://localhost:8025"
+    echo "   MinIO Console: http://localhost:9001 (minioadmin / minioadmin123)"
+    echo "   Grafana:     http://localhost:3001 (admin / admin123)"
+    echo "   Prometheus:  http://localhost:9090"
+    echo "   Graphite:    http://localhost:8080"
+    echo "   Jaeger:      http://localhost:16686"
+  fi
+fi
+
+# Start nginx reverse proxy if domains are enabled
+if [[ "$WITH_DOMAINS" == "true" ]]; then
+  echo "🌐 Starting nginx reverse proxy..."
+  docker-compose --profile domains up -d
+fi
+
+# Install Ruby dependencies if Gemfile exists
+if [[ -f "Gemfile" ]]; then
+  echo "💎 Installing Ruby dependencies..."
+  if command -v bundle >/dev/null 2>&1; then
+    bundle install
+  else
+    echo "   ⚠️  Bundle not found. Please install Ruby and Bundler first."
+  fi
+fi
+
+# Set up database if Rails is available
+if [[ -f "bin/rails" ]]; then
+  echo "🗄️  Setting up database..."
+  bin/rails db:create db:migrate db:seed || echo "   ⚠️  Database setup failed. You may need to run this manually."
+fi
+
+echo ""
+echo "✅ Development environment is ready!"
+echo ""
+echo "⚙️  Configuration:"
+echo "   Copy .env.example to .env and adjust values as needed"
+echo "   Use AppConfig.get('KEY') in code instead of ENV['KEY']"
+echo "   Set secrets via: rails credentials:edit"
+echo ""
+echo "📋 Quick commands:"
+echo "   Full dev env:    foreman start -f Procfile.dev (Rails + Workers + CSS)"
+echo "   Rails only:      bin/rails server"
+echo "   Background jobs: bin/rails solid_queue:start"
+echo "   CSS watcher:     bin/rails tailwindcss:watch"
+echo "   Run tests:       bundle exec rspec"
+echo "   Rails console:   bin/rails console"
+echo "   Verify setup:    bin/verify_observability_stack"
+echo ""
+echo "🌐 Services:"
+if [[ "$WITH_DOMAINS" == "true" ]]; then
+  echo "   Rails app:       https://gupii.local (when running)"
+  echo "   API Health:      https://gupii.local/api/v1/health"
+else
+  echo "   Rails app:       http://localhost:3000 (when running)"
+  echo "   API Health:      http://localhost:3000/api/v1/health"
+fi
+echo "   PostgreSQL:      localhost:5432 (postgres/postgres)"
+echo "   Redis:           localhost:6379 (password: redis123)"
+echo "   MinIO API:       localhost:9000 (minioadmin/minioadmin123)"
+echo "   Job Queue Admin: https://gupii.local/admin/jobs (when Rails running)"
+echo ""
+echo "🛑 To stop services: docker-compose down"
+if [[ "$WITH_DOMAINS" == "true" ]]; then
+  echo "🛑 To stop all services: docker-compose --profile tools --profile domains down"
+fi

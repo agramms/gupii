@@ -13,12 +13,12 @@ class Api::V1::DisputesController < Api::V1::BaseController
         include: {
           infraction_notification: {
             only: [ :id, :pix_key, :infraction_type, :status, :created_at ],
-            methods: [ :masked_pix_key, :short_id ]
-          }
+            methods: [ :masked_pix_key, :short_id ],
+          },
         },
         methods: [ :days_until_deadline, :hours_until_deadline, :timeline_summary ]
       ),
-      meta: build_meta_data(disputes)
+      meta: build_meta_data(disputes),
     }
   end
 
@@ -28,11 +28,11 @@ class Api::V1::DisputesController < Api::V1::BaseController
       data: @dispute.as_json(
         include: {
           infraction_notification: {
-            methods: [ :masked_pix_key, :short_id, :status_description ]
-          }
+            methods: [ :masked_pix_key, :short_id, :status_description ],
+          },
         },
         methods: [ :timeline_summary, :days_until_deadline, :hours_until_deadline ]
-      )
+      ),
     }
   end
 
@@ -47,12 +47,12 @@ class Api::V1::DisputesController < Api::V1::BaseController
       render json: {
         success: true,
         message: "Disputa criada com sucesso",
-        data: @dispute.as_json(methods: [ :timeline_summary ])
+        data: @dispute.as_json(methods: [ :timeline_summary ]),
       }, status: :created
     else
       render json: {
         success: false,
-        errors: @dispute.errors.full_messages
+        errors: @dispute.errors.full_messages,
       }, status: :unprocessable_entity
     end
   end
@@ -69,12 +69,12 @@ class Api::V1::DisputesController < Api::V1::BaseController
       render json: {
         success: true,
         message: "Disputa aprovada com sucesso",
-        data: @dispute.reload.as_json(methods: [ :timeline_summary ])
+        data: @dispute.reload.as_json(methods: [ :timeline_summary ]),
       }
     else
       render json: {
         success: false,
-        message: "Não foi possível aprovar a disputa"
+        message: "Não foi possível aprovar a disputa",
       }, status: :unprocessable_entity
     end
   end
@@ -91,12 +91,12 @@ class Api::V1::DisputesController < Api::V1::BaseController
       render json: {
         success: true,
         message: "Disputa rejeitada com sucesso",
-        data: @dispute.reload.as_json(methods: [ :timeline_summary ])
+        data: @dispute.reload.as_json(methods: [ :timeline_summary ]),
       }
     else
       render json: {
         success: false,
-        message: "Não foi possível rejeitar a disputa"
+        message: "Não foi possível rejeitar a disputa",
       }, status: :unprocessable_entity
     end
   end
@@ -113,12 +113,12 @@ class Api::V1::DisputesController < Api::V1::BaseController
       render json: {
         success: true,
         message: "Disputa escalada com sucesso",
-        data: @dispute.reload.as_json(methods: [ :timeline_summary ])
+        data: @dispute.reload.as_json(methods: [ :timeline_summary ]),
       }
     else
       render json: {
         success: false,
-        message: "Não foi possível escalar a disputa"
+        message: "Não foi possível escalar a disputa",
       }, status: :unprocessable_entity
     end
   end
@@ -129,7 +129,7 @@ class Api::V1::DisputesController < Api::V1::BaseController
     unless assignee
       render json: {
         success: false,
-        message: "Responsável deve ser informado"
+        message: "Responsável deve ser informado",
       }, status: :unprocessable_entity
       return
     end
@@ -138,12 +138,12 @@ class Api::V1::DisputesController < Api::V1::BaseController
       render json: {
         success: true,
         message: "Disputa atribuída para #{assignee} com sucesso",
-        data: @dispute.reload.as_json(methods: [ :timeline_summary ])
+        data: @dispute.reload.as_json(methods: [ :timeline_summary ]),
       }
     else
       render json: {
         success: false,
-        message: "Não foi possível atribuir a disputa"
+        message: "Não foi possível atribuir a disputa",
       }, status: :unprocessable_entity
     end
   end
@@ -157,7 +157,7 @@ class Api::V1::DisputesController < Api::V1::BaseController
     render json: {
       success: true,
       message: "Auto-declined #{count} overdue disputes",
-      count: count
+      count: count,
     }
   end
 
@@ -171,12 +171,12 @@ class Api::V1::DisputesController < Api::V1::BaseController
         include: {
           infraction_notification: {
             only: [ :id, :pix_key, :infraction_type, :status ],
-            methods: [ :masked_pix_key, :short_id ]
-          }
+            methods: [ :masked_pix_key, :short_id ],
+          },
         },
         methods: [ :days_until_deadline, :hours_until_deadline ]
       ),
-      count: disputes.count
+      count: disputes.count,
     }
   end
 
@@ -190,12 +190,12 @@ class Api::V1::DisputesController < Api::V1::BaseController
         include: {
           infraction_notification: {
             only: [ :id, :pix_key, :infraction_type, :status ],
-            methods: [ :masked_pix_key, :short_id ]
-          }
+            methods: [ :masked_pix_key, :short_id ],
+          },
         },
         methods: [ :days_until_deadline, :hours_until_deadline ]
       ),
-      count: disputes.count
+      count: disputes.count,
     }
   end
 
@@ -209,13 +209,13 @@ class Api::V1::DisputesController < Api::V1::BaseController
       overdue: Dispute.overdue_customer_response.count,
       approaching_deadline: Dispute.approaching_deadline.count,
       resolved_today: Dispute.where(resolved_at: Date.current.beginning_of_day..Date.current.end_of_day).count,
-      auto_declined: Dispute.status_auto_declined.count
+      auto_declined: Dispute.status_auto_declined.count,
     }
 
     render json: {
       success: true,
       data: stats,
-      generated_at: Time.current.iso8601
+      generated_at: Time.current.iso8601,
     }
   end
 
@@ -227,7 +227,7 @@ class Api::V1::DisputesController < Api::V1::BaseController
     unless @dispute
       render json: {
         success: false,
-        message: "Disputa não encontrada"
+        message: "Disputa não encontrada",
       }, status: :not_found
     end
   end
@@ -239,7 +239,7 @@ class Api::V1::DisputesController < Api::V1::BaseController
     unless @infraction_notification
       render json: {
         success: false,
-        message: "Notificação de infração não encontrada"
+        message: "Notificação de infração não encontrada",
       }, status: :not_found
     end
   end
@@ -302,8 +302,8 @@ class Api::V1::DisputesController < Api::V1::BaseController
         pending: Dispute.status_pending_customer_response.count,
         under_review: Dispute.status_under_internal_review.count,
         overdue: Dispute.overdue_customer_response.count,
-        approaching_deadline: Dispute.approaching_deadline.count
-      }
+        approaching_deadline: Dispute.approaching_deadline.count,
+      },
     }
   end
 

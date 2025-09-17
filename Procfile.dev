@@ -1,2 +1,20 @@
-web: bin/rails server -b 0.0.0.0
+# Foreman Procfile for Gupii Development Environment
+# Usage: foreman start -f Procfile.dev
+#
+# This starts all necessary processes for local development:
+# - Rails web server
+# - Solid Queue workers for background job processing
+# - CSS build watcher for Tailwind
+
+# Rails application server
+web: bin/rails server -p 3000 -b 0.0.0.0
+
+# Solid Queue workers for background job processing
+# Single worker process handling all queues (simplified for development)
+worker: bin/rails solid_queue:start
+
+# CSS build process for Tailwind (watches for changes)
 css: bin/rails tailwindcss:watch
+
+# Optional: Asset precompilation watcher (uncomment if needed)
+# assets: bin/rails assets:watch

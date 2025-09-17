@@ -44,32 +44,24 @@ module Jdpi
   end
 end
 
-# Configure JDPI with Rails credentials or environment variables
+# Configure JDPI using AppConfig
 Jdpi.configure do |config|
   # Base URL based on environment
-  config.base_url = Rails.application.credentials.jdpi&.dig(:base_url) ||
-                   ENV["JDPI_BASE_URL"] ||
-                   config.base_url
+  config.base_url = AppConfig.get("JDPI_BASE_URL", config.base_url)
 
   # OAuth2 credentials
-  config.client_id = Rails.application.credentials.jdpi&.dig(:client_id) ||
-                    ENV["JDPI_CLIENT_ID"]
-
-  config.client_secret = Rails.application.credentials.jdpi&.dig(:client_secret) ||
-                        ENV["JDPI_CLIENT_SECRET"]
+  config.client_id = AppConfig.get("JDPI_CLIENT_ID")
+  config.client_secret = AppConfig.get("JDPI_CLIENT_SECRET")
 
   # Institution ISPB (8-digit code)
-  config.ispb = Rails.application.credentials.jdpi&.dig(:ispb) ||
-               ENV["JDPI_ISPB"]
+  config.ispb = AppConfig.get("JDPI_ISPB")
 
   # Redis configuration
-  config.redis_url = Rails.application.credentials.redis&.dig(:url) ||
-                    ENV["REDIS_URL"] ||
-                    "redis://redis123@redis:6379/0"
+  config.redis_url = AppConfig.get("REDIS_URL", "redis://redis123@localhost:6379/0")
 
   # HTTP timeouts
-  config.timeout = (ENV["JDPI_TIMEOUT"] || 60).to_i
-  config.open_timeout = (ENV["JDPI_OPEN_TIMEOUT"] || 30).to_i
+  config.timeout = AppConfig.get_integer("JDPI_TIMEOUT", 60)
+  config.open_timeout = AppConfig.get_integer("JDPI_OPEN_TIMEOUT", 30)
 end
 
 # Validate configuration in non-test environments

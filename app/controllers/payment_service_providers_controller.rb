@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class PaymentServiceProvidersController < ApplicationController
   include Pagy::Backend
 
@@ -25,7 +27,7 @@ class PaymentServiceProvidersController < ApplicationController
             psps: @psps.map { |psp| psp_summary_json(psp) },
             pagination: build_pagination_metadata(@pagy),
             dashboard: @dashboard_summary,
-            alerts: @health_alerts
+            alerts: @health_alerts,
           }
         end
       end
@@ -50,7 +52,7 @@ class PaymentServiceProvidersController < ApplicationController
         render json: {
           psp: psp_detailed_json(@psp),
           sync_history: @sync_history,
-          operational_metrics: @operational_metrics
+          operational_metrics: @operational_metrics,
         }
       end
     end
@@ -64,7 +66,7 @@ class PaymentServiceProvidersController < ApplicationController
     options = {
       collect_metrics: true,
       manual_trigger: true,
-      triggered_by: current_user&.id || "anonymous"
+      triggered_by: current_user&.id || "anonymous",
     }
 
     case sync_type
@@ -93,7 +95,7 @@ class PaymentServiceProvidersController < ApplicationController
         render json: {
           message: "#{sync_type.capitalize} sync scheduled successfully",
           job_id: job.job_id,
-          sync_type: sync_type
+          sync_type: sync_type,
         }, status: :accepted
       end
     end
@@ -119,7 +121,7 @@ class PaymentServiceProvidersController < ApplicationController
       last_success: status[:last_success],
       last_error: status[:last_error],
       overall_health: status[:last_success] &&
-                     status[:last_success][:timestamp] > 24.hours.ago.iso8601 ? "healthy" : "stale"
+                     status[:last_success][:timestamp] > 24.hours.ago.iso8601 ? "healthy" : "stale",
     }
   end
 
@@ -136,7 +138,7 @@ class PaymentServiceProvidersController < ApplicationController
         render json: {
           dashboard: @dashboard_data,
           alerts: @health_alerts,
-          generated_at: Time.current.iso8601
+          generated_at: Time.current.iso8601,
         }
       end
     end
@@ -168,7 +170,7 @@ class PaymentServiceProvidersController < ApplicationController
         total_psps: total_count,
         needs_sync: needs_sync_count,
         failed_sync: failed_sync_count,
-        timestamp: Time.current.iso8601
+        timestamp: Time.current.iso8601,
       }, status: health_score >= 50 ? :ok : :service_unavailable
 
     rescue => e
@@ -177,7 +179,7 @@ class PaymentServiceProvidersController < ApplicationController
       render json: {
         status: "error",
         error: e.message,
-        timestamp: Time.current.iso8601
+        timestamp: Time.current.iso8601,
       }, status: :service_unavailable
     end
   end
@@ -193,7 +195,7 @@ class PaymentServiceProvidersController < ApplicationController
       total_pages: pagy.pages,
       total_count: pagy.count,
       has_next: pagy.next.present?,
-      has_prev: pagy.prev.present?
+      has_prev: pagy.prev.present?,
     }
   rescue => e
     Rails.logger.error "[PSP Controller] Pagination metadata error: #{e.message}"
@@ -281,7 +283,7 @@ class PaymentServiceProvidersController < ApplicationController
       sync_status: psp.sync_status,
       sync_health_score: psp.sync_health_score,
       last_sync_errors: psp.last_sync_errors&.last(5) || [], # Show recent errors
-      data_source: psp.data_source
+      data_source: psp.data_source,
     }
   end
 
@@ -295,7 +297,7 @@ class PaymentServiceProvidersController < ApplicationController
       availability: psp.availability_percentage,
       avg_response_time: psp.avg_response_time_ms,
       error_count_24h: psp.error_count_24h,
-      last_health_check: psp.last_health_check_at
+      last_health_check: psp.last_health_check_at,
     }
   end
 
@@ -315,7 +317,7 @@ class PaymentServiceProvidersController < ApplicationController
       sync_status: psp.sync_status,
       last_sync_at: psp.last_sync_at,
       created_at: psp.created_at,
-      updated_at: psp.updated_at
+      updated_at: psp.updated_at,
     }
   end
 
@@ -335,7 +337,7 @@ class PaymentServiceProvidersController < ApplicationController
       authorization_number: psp.bacen_authorization_number,
       authorization_date: psp.authorization_date,
       authorization_expiry: psp.authorization_expiry,
-      jdpi_metadata: psp.jdpi_metadata
+      jdpi_metadata: psp.jdpi_metadata,
     })
   end
 end

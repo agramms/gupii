@@ -25,8 +25,8 @@ module Api
             total: total_count,
             limit: limit,
             offset: offset,
-            has_more: total_count > (offset + limit)
-          }
+            has_more: total_count > (offset + limit),
+          },
         }
       end
 
@@ -34,7 +34,7 @@ module Api
         return render json: { error: "Notification not found" }, status: :not_found unless @infraction_notification
 
         render json: {
-          notification: notification_json(@infraction_notification, include_logs: true)
+          notification: notification_json(@infraction_notification, include_logs: true),
         }
       end
 
@@ -49,11 +49,11 @@ module Api
 
           render json: {
             notification: notification_json(@infraction_notification),
-            message: "Infraction notification created successfully"
+            message: "Infraction notification created successfully",
           }, status: :created
         else
           render json: {
-            errors: @infraction_notification.errors.full_messages
+            errors: @infraction_notification.errors.full_messages,
           }, status: :unprocessable_entity
         end
       end
@@ -67,12 +67,12 @@ module Api
         if @infraction_notification.soft_delete!(reason: reason, cancelled_by: cancelled_by)
           render json: {
             notification: notification_json(@infraction_notification),
-            message: "Infraction notification cancelled successfully"
+            message: "Infraction notification cancelled successfully",
           }
         else
           render json: {
             error: "Unable to cancel infraction notification",
-            details: @infraction_notification.can_be_cancelled? ? "Unknown error" : "Notification cannot be cancelled in current status"
+            details: @infraction_notification.can_be_cancelled? ? "Unknown error" : "Notification cannot be cancelled in current status",
           }, status: :unprocessable_entity
         end
       end
@@ -139,7 +139,7 @@ module Api
           pending: notification.pending?,
           completed: notification.completed?,
           days_since_submission: notification.days_since_submission,
-          overdue_for_analysis: notification.overdue_for_analysis?
+          overdue_for_analysis: notification.overdue_for_analysis?,
         }
 
         if include_logs
@@ -150,7 +150,7 @@ module Api
               level: log.level,
               message: log.message,
               metadata: log.metadata,
-              occurred_at: log.occurred_at
+              occurred_at: log.occurred_at,
             }
           end
         end
