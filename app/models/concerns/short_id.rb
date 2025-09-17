@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module ShortId
   extend ActiveSupport::Concern
 
@@ -49,7 +51,7 @@ module ShortId
   # Convert UUID string to integer for encoding
   def uuid_to_integer(uuid_string)
     # Remove hyphens and convert hex to integer
-    cleaned_uuid = uuid_string.gsub("-", "")
+    cleaned_uuid = uuid_string.delete("-")
     # Take first 16 hex characters to avoid integer overflow
     hex_part = cleaned_uuid[0, 16]
     hex_part.to_i(16)

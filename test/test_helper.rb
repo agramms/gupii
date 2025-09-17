@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # Code coverage setup (must be first)
 if ENV["COVERAGE"]
   require "simplecov"
@@ -35,7 +37,7 @@ module ActiveSupport
     def mock_jdpi_success_response(data = {})
       {
         "status" => "SUCCESS",
-        "timestamp" => Time.current.iso8601
+        "timestamp" => Time.current.iso8601,
       }.merge(data)
     end
 
@@ -44,8 +46,8 @@ module ActiveSupport
         "error" => {
           "code" => error_code,
           "message" => message,
-          "timestamp" => Time.current.iso8601
-        }
+          "timestamp" => Time.current.iso8601,
+        },
       }
     end
 
@@ -85,7 +87,7 @@ module ActiveSupport
         regulatory_status: "authorized",
         last_sync_errors: [ "no_errors" ],
         jdpi_metadata: { "test" => "data" },
-        validation_errors: [ "no_errors" ]
+        validation_errors: [ "no_errors" ],
       }.merge(overrides)
     end
 
@@ -95,7 +97,7 @@ module ActiveSupport
         pix_key: valid_cpf,
         infraction_type: InfractionTypes::FRAUD,
         description: "Test infraction for PIX key fraud detection",
-        evidence_data: { "test" => "data", "risk_score" => 0.8 }
+        evidence_data: { "test" => "data", "risk_score" => 0.8 },
       }
     end
   end

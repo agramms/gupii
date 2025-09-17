@@ -1,0 +1,76 @@
+#!/bin/bash
+# Domain Setup Script for Gupii Local Development
+# Configures /etc/hosts entries for *.gupii.local domains
+
+set -e
+
+echo "🌐 Setting up local domains for Gupii development..."
+
+# Required domains
+DOMAINS=(
+    "gupii.local"
+    "grafana.gupii.local"
+    "prometheus.gupii.local"
+    "pgadmin.gupii.local"
+    "mail.gupii.local"
+    "minio.gupii.local"
+    "minio-console.gupii.local"
+    "graphite.gupii.local"
+    "jaeger.gupii.local"
+)
+
+HOSTS_FILE="/etc/hosts"
+BACKUP_FILE="/etc/hosts.gupii.backup"
+
+# Check if domains are already configured
+ALL_CONFIGURED=true
+for domain in "${DOMAINS[@]}"; do
+    if ! grep -q "$domain" "$HOSTS_FILE" 2>/dev/null; then
+        ALL_CONFIGURED=false
+        break
+    fi
+done
+
+if [[ "$ALL_CONFIGURED" == "true" ]]; then
+    echo "✅ All domains are already configured in $HOSTS_FILE"
+    exit 0
+fi
+
+echo "📝 Adding domains to $HOSTS_FILE..."
+
+# Create backup
+if [[ ! -f "$BACKUP_FILE" ]]; then
+    echo "💾 Creating backup: $BACKUP_FILE"
+    sudo cp "$HOSTS_FILE" "$BACKUP_FILE"
+fi
+
+# Add Gupii domains section
+echo "" | sudo tee -a "$HOSTS_FILE" >/dev/null
+echo "# Gupii Local Development Domains" | sudo tee -a "$HOSTS_FILE" >/dev/null
+
+for domain in "${DOMAINS[@]}"; do
+    if ! grep -q "$domain" "$HOSTS_FILE"; then
+        echo "127.0.0.1    $domain" | sudo tee -a "$HOSTS_FILE" >/dev/null
+        echo "   ✅ Added $domain"
+    else
+        echo "   ⚠️  $domain already exists"
+    fi
+done
+
+echo ""
+echo "✅ Domain setup completed!"
+echo ""
+echo "🌍 Available domains:"
+echo "   https://gupii.local                  (Rails application)"
+echo "   https://grafana.gupii.local          (Dashboards & visualization)"
+echo "   https://prometheus.gupii.local       (Metrics collection)"
+echo "   https://pgadmin.gupii.local          (PostgreSQL administration)"
+echo "   https://mail.gupii.local             (Email testing with MailHog)"
+echo "   https://minio.gupii.local            (S3-compatible API)"
+echo "   https://minio-console.gupii.local    (MinIO web console)"
+echo "   https://graphite.gupii.local         (Application metrics)"
+echo "   https://jaeger.gupii.local           (Distributed tracing)"
+echo ""
+echo "💡 Note: SSL certificates must be trusted in your browser"
+echo "🧹 To remove these domains later, run:"
+echo "   sudo cp $BACKUP_FILE $HOSTS_FILE"

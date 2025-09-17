@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require "test_helper"
 require "ostruct"
 
@@ -33,33 +35,33 @@ class PaymentServiceProvidersControllerTest < ActionDispatch::IntegrationTest
         active_psps: 1,
         pix_enabled_count: 1,
         pix_adoption_rate: 50.0,
-        last_updated: Time.current.iso8601
+        last_updated: Time.current.iso8601,
       },
       sync_health: {
         total: 2,
         needs_sync: 0,
         sync_failed: 0,
-        last_successful_sync: 1.hour.ago
+        last_successful_sync: 1.hour.ago,
       },
       operational_status: {
         operational: 1,
         degraded: 0,
         inactive: 1,
         unauthorized: 0,
-        pix_disabled: 0
+        pix_disabled: 0,
       },
       recent_activity: {
         last_created: 1.hour.ago,
         last_updated: 1.hour.ago,
         last_synced: 1.hour.ago,
-        recent_changes_count: 0
+        recent_changes_count: 0,
       },
       data_freshness: {
         fresh_data_count: 1,
         stale_data_count: 1,
         very_stale_count: 0,
-        avg_data_age_hours: 1.5
-      }
+        avg_data_age_hours: 1.5,
+      },
     }
 
     PspMetricsService.stubs(:dashboard_data).returns(@mock_dashboard_data)
@@ -188,7 +190,7 @@ class PaymentServiceProvidersControllerTest < ActionDispatch::IntegrationTest
 
     post sync_payment_service_providers_url, params: {
       sync_type: "single",
-      ispb: @psp.ispb
+      ispb: @psp.ispb,
     }
 
     assert_redirected_to payment_service_providers_path
@@ -218,7 +220,7 @@ class PaymentServiceProvidersControllerTest < ActionDispatch::IntegrationTest
   test "should return sync status" do
     PspSyncJob.stubs(:last_sync_status).returns({
       last_success: { timestamp: 1.hour.ago.iso8601, job_id: "success-123" },
-      last_error: { timestamp: 2.hours.ago.iso8601, error: "Connection timeout" }
+      last_error: { timestamp: 2.hours.ago.iso8601, error: "Connection timeout" },
     })
 
     get sync_status_payment_service_providers_url, as: :json
@@ -306,8 +308,8 @@ class PaymentServiceProvidersControllerTest < ActionDispatch::IntegrationTest
         type: "sync_failures",
         message: "5 PSPs have sync failures",
         count: 5,
-        action: "Review error logs"
-      }
+        action: "Review error logs",
+      },
     ])
 
     get payment_service_providers_url
@@ -340,7 +342,7 @@ class PaymentServiceProvidersControllerTest < ActionDispatch::IntegrationTest
       status: "active",
       psp_type: "commercial_bank",
       state: "SP",
-      pix_enabled: "true"
+      pix_enabled: "true",
     }
 
     assert_response :success
@@ -381,7 +383,7 @@ class PaymentServiceProvidersControllerTest < ActionDispatch::IntegrationTest
     @psp.update!(last_sync_errors: [
       "Connection timeout",
       "Invalid response format",
-      "Rate limit exceeded"
+      "Rate limit exceeded",
     ])
 
     get payment_service_provider_url(@psp)

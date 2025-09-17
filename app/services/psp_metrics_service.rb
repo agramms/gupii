@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class PspMetricsService
   include ActiveModel::Model
 
@@ -18,7 +20,7 @@ class PspMetricsService
           active_psps: PaymentServiceProvider.active.count,
           pix_enabled_count: PaymentServiceProvider.pix_enabled.count,
           pix_adoption_rate: PaymentServiceProvider.pix_adoption_rate,
-          last_updated: Time.current.iso8601
+          last_updated: Time.current.iso8601,
         },
         sync_health: PaymentServiceProvider.sync_health_summary,
         operational_status: {
@@ -26,20 +28,20 @@ class PspMetricsService
           degraded: PaymentServiceProvider.where(status: "active").where("availability_percentage < 99 OR error_count_24h > 0").count,
           inactive: PaymentServiceProvider.where.not(status: "active").count,
           unauthorized: PaymentServiceProvider.where.not(regulatory_status: "authorized").count,
-          pix_disabled: PaymentServiceProvider.where(pix_enabled: false).count
+          pix_disabled: PaymentServiceProvider.where(pix_enabled: false).count,
         },
         recent_activity: {
           last_created: PaymentServiceProvider.maximum(:created_at),
           last_updated: PaymentServiceProvider.maximum(:updated_at),
           last_synced: PaymentServiceProvider.maximum(:last_sync_at),
-          recent_changes_count: PaymentServiceProvider.where("updated_at > ?", 24.hours.ago).count
+          recent_changes_count: PaymentServiceProvider.where("updated_at > ?", 24.hours.ago).count,
         },
         data_freshness: {
           fresh_data_count: PaymentServiceProvider.where("last_sync_at > ?", 1.hour.ago).count,
           stale_data_count: PaymentServiceProvider.where("last_sync_at < ? OR last_sync_at IS NULL", 1.hour.ago).count,
           very_stale_count: PaymentServiceProvider.where("last_sync_at < ? OR last_sync_at IS NULL", 24.hours.ago).count,
-          avg_data_age_hours: 1.5 # Simplified calculation
-        }
+          avg_data_age_hours: 1.5, # Simplified calculation
+        },
       }
     rescue => e
       Rails.logger.error "[PSP Metrics] Dashboard data error: #{e.message}"
@@ -50,12 +52,12 @@ class PspMetricsService
           active_psps: 0,
           pix_enabled_count: 0,
           pix_adoption_rate: 0,
-          last_updated: Time.current.iso8601
+          last_updated: Time.current.iso8601,
         },
         sync_health: { total: 0, needs_sync: 0, sync_failed: 0, last_successful_sync: nil },
         operational_status: { operational: 0, degraded: 0, inactive: 0, unauthorized: 0, pix_disabled: 0 },
         recent_activity: { last_created: nil, last_updated: nil, last_synced: nil, recent_changes_count: 0 },
-        data_freshness: { fresh_data_count: 0, stale_data_count: 0, very_stale_count: 0, avg_data_age_hours: 0 }
+        data_freshness: { fresh_data_count: 0, stale_data_count: 0, very_stale_count: 0, avg_data_age_hours: 0 },
       }
     end
   end
@@ -73,7 +75,7 @@ class PspMetricsService
           type: "sync_failures",
           message: "#{failed_count} PSPs have sync failures",
           count: failed_count,
-          action: "Review error logs"
+          action: "Review error logs",
         }
       end
 
@@ -85,7 +87,7 @@ class PspMetricsService
           type: "stale_data",
           message: "#{stale_count} PSPs have stale data",
           count: stale_count,
-          action: "Schedule sync"
+          action: "Schedule sync",
         }
       end
 
@@ -129,12 +131,12 @@ class PspMetricsService
         active_psps: PaymentServiceProvider.active.count,
         pix_enabled_count: PaymentServiceProvider.pix_enabled.count,
         pix_adoption_rate: PaymentServiceProvider.pix_adoption_rate,
-        last_updated: Time.current.iso8601
+        last_updated: Time.current.iso8601,
       },
       sync_health: PaymentServiceProvider.sync_health_summary,
       operational_status: operational_status_breakdown,
       recent_activity: recent_activity_summary,
-      data_freshness: data_freshness_indicators
+      data_freshness: data_freshness_indicators,
     }
   end
 
@@ -150,7 +152,7 @@ class PspMetricsService
         type: "sync_lag",
         message: "#{stale_sync_count} PSPs need synchronization",
         count: stale_sync_count,
-        action: "Schedule sync job"
+        action: "Schedule sync job",
       }
     end
 
@@ -162,7 +164,7 @@ class PspMetricsService
         type: "sync_failures",
         message: "#{failed_sync_count} PSPs have sync failures",
         count: failed_sync_count,
-        action: "Review error logs"
+        action: "Review error logs",
       }
     end
 
@@ -174,7 +176,7 @@ class PspMetricsService
         type: "data_quality",
         message: "#{invalid_data_count} PSPs have data quality issues",
         count: invalid_data_count,
-        action: "Review validation errors"
+        action: "Review validation errors",
       }
     end
 
@@ -186,7 +188,7 @@ class PspMetricsService
         type: "pix_inactive",
         message: "#{inactive_pix_count} active PSPs don't offer PIX",
         count: inactive_pix_count,
-        action: "Monitor PIX adoption"
+        action: "Monitor PIX adoption",
       }
     end
 
@@ -206,7 +208,7 @@ class PspMetricsService
       terminated_count: PaymentServiceProvider.where(status: "terminated").count,
       pix_enabled_count: PaymentServiceProvider.pix_enabled.count,
       pix_disabled_count: PaymentServiceProvider.where(pix_enabled: false).count,
-      pix_adoption_rate: PaymentServiceProvider.pix_adoption_rate
+      pix_adoption_rate: PaymentServiceProvider.pix_adoption_rate,
     }
   end
 
@@ -221,7 +223,7 @@ class PspMetricsService
       sync_failed_count: PaymentServiceProvider.sync_failed.count,
       never_synced_count: PaymentServiceProvider.where(last_sync_at: nil).count,
       avg_sync_attempts: PaymentServiceProvider.average(:sync_attempts)&.round(2) || 0,
-      max_sync_attempts: PaymentServiceProvider.maximum(:sync_attempts) || 0
+      max_sync_attempts: PaymentServiceProvider.maximum(:sync_attempts) || 0,
     }
 
     # Sync age distribution
@@ -229,7 +231,7 @@ class PspMetricsService
       last_hour: PaymentServiceProvider.where("last_sync_at > ?", 1.hour.ago).count,
       last_24_hours: PaymentServiceProvider.where("last_sync_at > ?", 24.hours.ago).count,
       last_week: PaymentServiceProvider.where("last_sync_at > ?", 1.week.ago).count,
-      older_than_week: PaymentServiceProvider.where("last_sync_at < ?", 1.week.ago).count
+      older_than_week: PaymentServiceProvider.where("last_sync_at < ?", 1.week.ago).count,
     }
   end
 
@@ -254,7 +256,7 @@ class PspMetricsService
     @metrics[:geographic_distribution] = {
       by_state: PaymentServiceProvider.where.not(state: nil).group(:state).count,
       states_covered: PaymentServiceProvider.where.not(state: nil).distinct.count(:state),
-      missing_state_info: PaymentServiceProvider.where(state: nil).count
+      missing_state_info: PaymentServiceProvider.where(state: nil).count,
     }
   end
 
@@ -275,7 +277,7 @@ class PspMetricsService
       total_services: service_counts.keys.count,
       service_distribution: service_counts,
       pix_services: service_counts.select { |k, _| k.include?("pix") },
-      avg_services_per_psp: service_counts.values.sum.to_f / PaymentServiceProvider.count
+      avg_services_per_psp: service_counts.values.sum.to_f / PaymentServiceProvider.count,
     }
   end
 
@@ -288,7 +290,7 @@ class PspMetricsService
       total_error_count_24h: PaymentServiceProvider.sum(:error_count_24h),
       avg_availability: PaymentServiceProvider.where.not(availability_percentage: nil)
                                              .average(:availability_percentage)&.round(2) || 100,
-      low_availability_count: PaymentServiceProvider.where("availability_percentage < ?", 99).count
+      low_availability_count: PaymentServiceProvider.where("availability_percentage < ?", 99).count,
     }
   end
 
@@ -306,7 +308,7 @@ class PspMetricsService
         contact_email: [ nil, "" ],
         contact_phone: [ nil, "" ],
         legal_address: [ nil, "" ]
-      ).count
+      ).count,
     }
   end
 
@@ -322,7 +324,7 @@ class PspMetricsService
       # Volume trends (if available)
       total_transaction_volume: PaymentServiceProvider.sum(:total_transactions),
       total_financial_volume: PaymentServiceProvider.sum(:total_volume),
-      active_transacting_psps: PaymentServiceProvider.where("total_transactions > 0").count
+      active_transacting_psps: PaymentServiceProvider.where("total_transactions > 0").count,
     }
   end
 
@@ -343,7 +345,7 @@ class PspMetricsService
       last_updated: PaymentServiceProvider.maximum(:updated_at),
       last_synced: PaymentServiceProvider.maximum(:last_sync_at),
       last_successful_sync: PaymentServiceProvider.maximum(:last_successful_sync_at),
-      recent_changes_count: PaymentServiceProvider.where("updated_at > ?", 1.hour.ago).count
+      recent_changes_count: PaymentServiceProvider.where("updated_at > ?", 1.hour.ago).count,
     }
   end
 
@@ -357,7 +359,7 @@ class PspMetricsService
       oldest_sync: PaymentServiceProvider.minimum(:last_sync_at),
       newest_sync: PaymentServiceProvider.maximum(:last_sync_at),
       avg_data_age_hours: PaymentServiceProvider.where.not(last_sync_at: nil)
-                                               .average("EXTRACT(EPOCH FROM (NOW() - last_sync_at))/3600")&.round(2) || 0
+                                               .average("EXTRACT(EPOCH FROM (NOW() - last_sync_at))/3600")&.round(2) || 0,
     }
   end
 

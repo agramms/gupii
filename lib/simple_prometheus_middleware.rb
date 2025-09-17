@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class SimplePrometheusMiddleware
   def initialize(app)
     @app = app
@@ -25,7 +27,7 @@ class SimplePrometheusMiddleware
       Rails.application.config.simple_metrics = {
         requests_total: @requests_total,
         avg_response_time: @request_durations.sum / @request_durations.size,
-        last_request_duration: duration
+        last_request_duration: duration,
       }
 
       [ status, headers, response ]
@@ -38,7 +40,7 @@ class SimplePrometheusMiddleware
         requests_total: @requests_total,
         avg_response_time: @request_durations.sum / @request_durations.size,
         last_request_duration: duration,
-        errors_total: (@requests_total * 0.01).round # Simple error estimate
+        errors_total: (@requests_total * 0.01).round, # Simple error estimate
       }
 
       raise e

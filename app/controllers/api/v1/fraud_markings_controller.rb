@@ -182,7 +182,7 @@ class Api::V1::FraudMarkingsController < Api::V1::BaseController
       today_created: FraudMarking.where("created_at >= ?", Time.current.beginning_of_day).count,
       by_status: FraudMarking.group(:status).count,
       by_fraud_type: FraudMarking.group(:fraud_type).count,
-      by_risk_level: FraudMarking.group(:risk_level).count
+      by_risk_level: FraudMarking.group(:risk_level).count,
     }
   end
 
@@ -272,9 +272,9 @@ class Api::V1::FraudMarkingsController < Api::V1::BaseController
           fraud_type_filter: params[:fraud_type_filter],
           risk_level_filter: params[:risk_level_filter],
           date_range: params[:date_range],
-          search: params[:search]
-        }
-      }
+          search: params[:search],
+        },
+      },
     }
   end
 
@@ -314,7 +314,7 @@ class Api::V1::FraudMarkingsController < Api::V1::BaseController
       can_be_approved: marking.can_be_approved?,
       can_be_rejected: marking.can_be_rejected?,
       can_be_cancelled: marking.can_be_cancelled?,
-      can_be_submitted: marking.can_be_submitted?
+      can_be_submitted: marking.can_be_submitted?,
     }
   end
 
