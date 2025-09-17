@@ -25,7 +25,7 @@ gem "jbuilder"
 # gem "bcrypt", "~> 3.1.7"
 
 # Authentication and HTTP clients for iugu Identity and JDPI
-gem "jwt", "~> 2.8"
+gem "jwt", "~> 3.1"
 gem "oauth2", "~> 2.0"
 gem "faraday", "~> 2.8"
 
@@ -53,7 +53,7 @@ gem "thruster", require: false
 # gem "image_processing", "~> 1.2"
 
 # Pagination and search
-gem "pagy", "~> 6.2"
+gem "pagy", "~> 9.4"
 gem "ransack", "~> 4.1"
 
 # Generate short, URL-safe, unique identifiers from integers
