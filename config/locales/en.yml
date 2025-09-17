@@ -36,6 +36,22 @@ en:
 
   # Navigation
   sidebar:
+    dashboard: "Dashboard"
+    pix_keys: "PIX Keys"
+    infraction_notifications: "Infraction Reports"
+    psps: "PSPs"
+    disputes: "Disputes"
+    spi_transactions: "SPI Lookup"
+    fraud_markings: "Fraud Markings"
+    job_admin: "Job Administration"
+  # Gupii Application - PIX System
+  app:
+    name: "Gupii"
+    tagline: "PIX Integration System"
+    description: "Integration system with Brazil's Central Bank PIX"
+
+  # Navigation
+  sidebar:
     home: "Home"
     dashboard: "Dashboard"
     pix_keys: "PIX Keys"
@@ -59,6 +75,8 @@ en:
     environment: "Environment"
     api_documentation: "API Documentation"
     language: "Language"
+    configuration: "Configuration"
+    job_queue_admin: "Job Queue Administration"
 
   # JDPI - English translations
   jdpi:

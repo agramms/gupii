@@ -49,6 +49,12 @@ module Gupii
     require_relative "../lib/simple_prometheus_middleware" unless Rails.env.test?
     config.middleware.use SimplePrometheusMiddleware unless Rails.env.test?
 
+    # Configure Active Job to use Solid Queue
+    config.active_job.queue_adapter = :solid_queue
+
+    # Configure Solid Queue to use dedicated queue database
+    config.solid_queue.connects_to = { database: { writing: :queue } }
+
     # config.eager_load_paths << Rails.root.join("extras")
   end
 end
