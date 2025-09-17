@@ -73,9 +73,7 @@ services:
       PGADMIN_CONFIG_ENHANCED_COOKIE_PROTECTION: 'False'
       PGADMIN_CONFIG_PROXY_FIX_NUM_PROXIES: 1
       PGADMIN_CONFIG_PROXY_FIX_ENABLE: 'True'
-      PGADMIN_CONFIG_FORCE_SCRIPT_NAME: ''
       PGADMIN_CONFIG_PREFERRED_URL_SCHEME: 'https'
-      SCRIPT_NAME: ''
     volumes:
       - pgadmin_data:/var/lib/pgadmin
     ports:
