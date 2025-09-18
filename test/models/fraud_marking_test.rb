@@ -21,8 +21,7 @@ class FraudMarkingTest < ActiveSupport::TestCase
     )
 
     unless fraud_marking.valid?
-      puts "Validation errors: #{fraud_marking.errors.full_messages}"
-      puts "Detected pix_key_type: #{fraud_marking.pix_key_type}"
+      # Validation failed - check errors in test output
     end
     assert fraud_marking.valid?
   end
@@ -50,7 +49,7 @@ class FraudMarkingTest < ActiveSupport::TestCase
       @fraud_marking.pix_key_type = type
       @fraud_marking.pix_key = key
       unless @fraud_marking.valid?
-        puts "#{type} validation errors: #{@fraud_marking.errors.full_messages}"
+        # Validation failed for #{type} - check errors in test output
       end
       assert @fraud_marking.valid?, "#{type} should be valid"
     end

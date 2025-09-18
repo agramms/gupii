@@ -21,7 +21,7 @@ class FraudMarkingLogTest < ActiveSupport::TestCase
     )
 
     unless log.valid?
-      puts "Validation errors: #{log.errors.full_messages}"
+      # Validation failed - check errors in test output
     end
     assert log.valid?
   end

@@ -18,7 +18,7 @@ class DisputeTest < ActiveSupport::TestCase
     )
 
     unless dispute.valid?
-      puts "Validation errors: #{dispute.errors.full_messages}"
+      # Validation failed - check errors in test output
     end
     assert dispute.valid?
   end
