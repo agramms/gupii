@@ -9,7 +9,7 @@ class MissionControlControllerTest < ActionDispatch::IntegrationTest
 
   test "should allow access in test environment" do
     # Test environment should skip authentication
-    get jobs_path
+    get "/admin/jobs"
 
     assert_response :success
   end
@@ -18,7 +18,7 @@ class MissionControlControllerTest < ActionDispatch::IntegrationTest
     # Mock Rails.env to return development
     Rails.env.expects(:test?).returns(false).at_least_once
 
-    get jobs_path
+    get "/admin/jobs"
 
     # Should redirect to authentication
     assert_response :redirect

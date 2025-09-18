@@ -28,8 +28,7 @@ module ActiveSupport
     # No manual Mocha teardown - let Mocha handle it automatically
 
     # Setup all fixtures in test/fixtures/*.yml for all tests in alphabetical order.
-    # Temporarily disabled due to foreign key constraint violations
-    # fixtures :all
+    fixtures :all
 
     # Add more helper methods to be used by all tests here...
 
@@ -77,11 +76,16 @@ module ActiveSupport
 
     # Valid PSP attributes for testing
     def valid_psp_attributes(overrides = {})
+      # Generate unique ISPB to avoid conflicts with fixtures and other tests
+      # Fixtures use: 12345678, 87654321, 11223344
+      # Use range 90000000-99999999 to avoid conflicts
+      unique_ispb = rand(90000000..99999999).to_s
+
       {
-        ispb: "12345678",
+        ispb: unique_ispb,
         name: "Test Payment Provider",
         short_name: "TestPSP",
-        document_number: "12345678000199",
+        document_number: "#{unique_ispb}000199",
         document_type: "CNPJ",
         status: "active",
         psp_type: "commercial_bank",

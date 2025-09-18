@@ -1,2 +1,28 @@
 # Dispute test fixtures
-# Temporarily empty due to foreign key constraint issues
+
+pending_dispute:
+  id: "8876a1d7-c8fa-7d40-d393-2fd7f279d3aa"
+  infraction_notification_id: "6654e9b5-a6d8-5b28-b171-0fb5d067b1fd"
+  dispute_type: 0
+  status: 0
+  justification: "Customer disputes fraud allegation with supporting documentation"
+  evidence_notes: "Provided bank statements and location proof"
+  additional_data: { "documents_provided": ["bank_statement", "location_proof"] }
+  created_by: "customer_service"
+  customer_response_due_at: <%= 5.days.from_now %>
+  created_at: <%= 1.day.ago %>
+  updated_at: <%= 1.day.ago %>
+
+under_review_dispute:
+  id: "9987b2e8-d9fb-8e41-e404-3fe8a380e4bb"
+  infraction_notification_id: "7765f0c6-b7e9-6c39-c282-1fc6e178c2fe"
+  dispute_type: 0
+  status: 1
+  justification: "Customer disputes AML flag based on legitimate business activity"
+  evidence_notes: "Business registration documents and transaction records provided"
+  additional_data: { "business_documents": ["registration", "tax_id", "bank_records"] }
+  created_by: "customer_service"
+  assigned_to: "compliance_officer_001"
+  customer_response_due_at: <%= 2.days.from_now %>
+  created_at: <%= 3.days.ago %>
+  updated_at: <%= 1.hour.ago %>

@@ -18,9 +18,7 @@ class Api::V1::PaymentServiceProvidersControllerTest < ActionDispatch::Integrati
 
     @inactive_psp = PaymentServiceProvider.create!(
       valid_psp_attributes.merge(
-        ispb: "87654321",
         name: "Inactive PSP",
-        document_number: "87654321000188",
         status: "inactive",
         psp_type: "cooperative",
         services_offered: [ "ted_transfer" ],

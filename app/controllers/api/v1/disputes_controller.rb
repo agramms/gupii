@@ -53,7 +53,7 @@ class Api::V1::DisputesController < Api::V1::BaseController
       render json: {
         success: false,
         errors: @dispute.errors.full_messages,
-      }, status: :unprocessable_entity
+      }, status: :unprocessable_content
     end
   end
 
@@ -75,7 +75,7 @@ class Api::V1::DisputesController < Api::V1::BaseController
       render json: {
         success: false,
         message: "Não foi possível aprovar a disputa",
-      }, status: :unprocessable_entity
+      }, status: :unprocessable_content
     end
   end
 
@@ -97,7 +97,7 @@ class Api::V1::DisputesController < Api::V1::BaseController
       render json: {
         success: false,
         message: "Não foi possível rejeitar a disputa",
-      }, status: :unprocessable_entity
+      }, status: :unprocessable_content
     end
   end
 
@@ -119,7 +119,7 @@ class Api::V1::DisputesController < Api::V1::BaseController
       render json: {
         success: false,
         message: "Não foi possível escalar a disputa",
-      }, status: :unprocessable_entity
+      }, status: :unprocessable_content
     end
   end
 
@@ -130,7 +130,7 @@ class Api::V1::DisputesController < Api::V1::BaseController
       render json: {
         success: false,
         message: "Responsável deve ser informado",
-      }, status: :unprocessable_entity
+      }, status: :unprocessable_content
       return
     end
 
@@ -144,7 +144,7 @@ class Api::V1::DisputesController < Api::V1::BaseController
       render json: {
         success: false,
         message: "Não foi possível atribuir a disputa",
-      }, status: :unprocessable_entity
+      }, status: :unprocessable_content
     end
   end
 

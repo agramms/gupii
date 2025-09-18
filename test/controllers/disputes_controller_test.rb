@@ -57,7 +57,7 @@ class DisputesControllerTest < ActionDispatch::IntegrationTest
       }
     end
 
-    assert_response :unprocessable_entity
+    assert_response :unprocessable_content
     assert_match "erro", response.body.downcase
   end
 
@@ -111,7 +111,7 @@ class DisputesControllerTest < ActionDispatch::IntegrationTest
   test "should not approve dispute without resolution notes" do
     patch approve_dispute_path(@dispute)
 
-    assert_response :unprocessable_entity
+    assert_response :unprocessable_content
     assert_match "obrigatórias", response.body.downcase
   end
 
@@ -122,7 +122,7 @@ class DisputesControllerTest < ActionDispatch::IntegrationTest
       resolution_notes: "Already approved",
     }
 
-    assert_response :unprocessable_entity
+    assert_response :unprocessable_content
     assert_match "inválida", response.body.downcase
   end
 end

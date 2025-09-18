@@ -58,7 +58,7 @@ class FraudMarkingsControllerTest < ActionDispatch::IntegrationTest
       }
     end
 
-    assert_response :unprocessable_entity
+    assert_response :unprocessable_content
     assert_match "erro", response.body.downcase
   end
 
@@ -91,7 +91,7 @@ class FraudMarkingsControllerTest < ActionDispatch::IntegrationTest
       },
     }
 
-    assert_response :unprocessable_entity
+    assert_response :unprocessable_content
     assert_match "erro", response.body.downcase
   end
 

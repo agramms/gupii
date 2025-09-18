@@ -46,7 +46,7 @@ class InfractionNotificationsController < AuthBaseController
       redirect_to @infraction_notification, notice: "Notificação de infração criada com sucesso."
     else
       flash.now[:error] = @infraction_notification.errors.full_messages
-      render :new, status: :unprocessable_entity
+      render :new, status: :unprocessable_content
     end
   end
 

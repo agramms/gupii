@@ -30,7 +30,7 @@ class SpiTransactionsControllerTest < ActionDispatch::IntegrationTest
       end_to_end_id: @invalid_e2e_id,
     }
 
-    assert_response :unprocessable_entity
+    assert_response :unprocessable_content
     assert_match "deve ter exatamente 32 caracteres", response.body
   end
 
@@ -77,7 +77,7 @@ class SpiTransactionsControllerTest < ActionDispatch::IntegrationTest
       end_to_end_id: @valid_e2e_id,
     }
 
-    assert_response :unprocessable_entity
+    assert_response :unprocessable_content
     assert_match "Transação não encontrada", response.body
   end
 
@@ -96,7 +96,7 @@ class SpiTransactionsControllerTest < ActionDispatch::IntegrationTest
       end_to_end_id: @valid_e2e_id,
     }
 
-    assert_response :unprocessable_entity
+    assert_response :unprocessable_content
     assert_match "Erro na consulta", response.body
   end
 
@@ -108,14 +108,14 @@ class SpiTransactionsControllerTest < ActionDispatch::IntegrationTest
       end_to_end_id: @valid_e2e_id,
     }
 
-    assert_response :unprocessable_entity
+    assert_response :unprocessable_content
     assert_match "Erro interno", response.body
   end
 
   test "should require end_to_end_id parameter" do
     post spi_transactions_path, params: {}
 
-    assert_response :unprocessable_entity
+    assert_response :unprocessable_content
     assert_match "End-to-End ID é obrigatório", response.body
   end
 
