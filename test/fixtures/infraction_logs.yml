@@ -1,0 +1,39 @@
+# InfractionLog test fixtures
+
+notification_received:
+  infraction_notification: fraud_notification
+  level: "info"
+  message: "Infraction notification received from JDPI"
+  metadata:
+    jdpi_protocol: "JDPI-2024-INF001"
+    notification_type: "fraud_detection"
+    risk_assessment: "high"
+    action: "received"
+    status_transition: "nil -> received"
+  occurred_at: <%= 2.days.ago %>
+
+manual_review:
+  infraction_notification: fraud_notification
+  level: "info"
+  message: "Manual review completed by compliance officer"
+  metadata:
+    reviewer: "compliance_officer_001"
+    review_duration_minutes: 45
+    evidence_quality: "sufficient"
+    recommendation: "proceed_with_infraction"
+    action: "reviewed"
+    status_transition: "received -> under_review"
+  occurred_at: <%= 1.day.ago %>
+
+status_updated:
+  infraction_notification: fraud_notification
+  level: "info"
+  message: "Infraction status updated after processing"
+  metadata:
+    processing_time_hours: 24
+    automated_checks_passed: true
+    manual_approval: true
+    final_decision: "infraction_confirmed"
+    action: "status_updated"
+    status_transition: "under_review -> processed"
+  occurred_at: <%= 1.hour.ago %>

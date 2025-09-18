@@ -20,7 +20,7 @@ class Api::V1::MedRefundsController < ApiBaseController
         success: false,
         errors: result[:errors],
         message: "Refund request failed",
-      }, status: :unprocessable_entity
+      }, status: :unprocessable_content
     end
   end
 
@@ -45,7 +45,7 @@ class Api::V1::MedRefundsController < ApiBaseController
         success: false,
         errors: result[:errors],
         message: "Status query failed",
-      }, status: :unprocessable_entity
+      }, status: :unprocessable_content
     end
   end
 
@@ -64,7 +64,7 @@ class Api::V1::MedRefundsController < ApiBaseController
         success: false,
         errors: result[:errors],
         message: "Failed to retrieve refund reasons",
-      }, status: :unprocessable_entity
+      }, status: :unprocessable_content
     end
   end
 
@@ -87,7 +87,7 @@ class Api::V1::MedRefundsController < ApiBaseController
         success: false,
         errors: result[:errors],
         message: "Credit status query failed",
-      }, status: :unprocessable_entity
+      }, status: :unprocessable_content
     end
   end
 
@@ -130,7 +130,7 @@ class Api::V1::MedRefundsController < ApiBaseController
         status: "error",
         errors: result[:errors],
         retry_info: result[:retry_info],
-      }, status: :unprocessable_entity
+      }, status: :unprocessable_content
     end
   end
 

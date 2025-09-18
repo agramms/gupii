@@ -38,6 +38,7 @@ class Dispute < ApplicationRecord
   validate :ensure_unique_per_infraction
   validate :validate_timeline_constraints
   validate :validate_status_transitions
+  validate :validate_resolution_notes_for_final_statuses
 
   # Scopes
   scope :by_status, ->(status) { where(status: status) if status.present? }
@@ -53,6 +54,8 @@ class Dispute < ApplicationRecord
   }
   scope :recent, -> { order(created_at: :desc) }
   scope :active, -> { where.not(status: [ :approved, :rejected, :auto_declined ]) }
+  scope :overdue, -> { overdue_customer_response }
+  scope :pending_customer_response, -> { where(status: :pending_customer_response) }
 
   # Callbacks
   before_validation :set_customer_response_deadline, on: :create
@@ -65,8 +68,20 @@ class Dispute < ApplicationRecord
 
   # Instance Methods
 
+  # Override ShortId concern to use custom format for disputes
+  def short_id
+    return @short_id if defined?(@short_id) && @short_id.present?
+
+    if persisted? && id.present?
+      # Generate a deterministic 3-digit number from UUID
+      integer = send(:uuid_to_integer, id.to_s)
+      number = (integer % 900) + 100  # Ensures 3-digit number (100-999)
+      @short_id = "DSP#{number}"
+    end
+  end
+
   def days_until_deadline
-    return 0 if customer_response_due_at.nil? || customer_response_due_at < Time.current
+    return 0 if customer_response_due_at.nil?
     ((customer_response_due_at - Time.current) / 1.day).ceil
   end
 
@@ -88,6 +103,9 @@ class Dispute < ApplicationRecord
   def can_auto_decline?
     status_pending_customer_response? && overdue_for_customer_response?
   end
+
+  # Aliases for test compatibility
+  alias_method :overdue?, :overdue_for_customer_response?
 
   def auto_decline!
     return false unless can_auto_decline?
@@ -241,6 +259,20 @@ class Dispute < ApplicationRecord
     overdue_customer_response.group(:dispute_type).count
   end
 
+  def status_in_portuguese
+    translations = {
+      "pending_customer_response" => "Aguardando resposta do cliente",
+      "under_internal_review" => "Em análise interna",
+      "pending_resolution" => "Aguardando resolução",
+      "approved" => "Aprovada",  # Feminine form to agree with "disputa"
+      "rejected" => "Rejeitada",  # Feminine form to agree with "disputa"
+      "auto_declined" => "Recusada automaticamente",  # Feminine form to agree with "disputa"
+      "escalated" => "Escalada",  # Feminine form to agree with "disputa"
+    }
+
+    translations[status] || status.humanize
+  end
+
   private
 
   def set_customer_response_deadline
@@ -262,7 +294,7 @@ class Dispute < ApplicationRecord
     existing = existing.where.not(id: id) if persisted?
 
     if existing.exists?
-      errors.add(:infraction_notification_id, "can only have one dispute per infraction notification")
+      errors.add(:infraction_notification, "já possui uma disputa")
     end
   end
 
@@ -287,14 +319,26 @@ class Dispute < ApplicationRecord
     new_status = status.to_s
 
     valid_transitions = {
-      "pending_customer_response" => %w[under_internal_review auto_declined],
+      "pending_customer_response" => %w[under_internal_review auto_declined approved rejected],
       "under_internal_review" => %w[pending_resolution approved rejected escalated],
       "pending_resolution" => %w[approved rejected escalated],
       "escalated" => %w[approved rejected],
+      "approved" => %w[],  # Final state - no transitions allowed
+      "rejected" => %w[],  # Final state - no transitions allowed
+      "auto_declined" => %w[],  # Final state - no transitions allowed
     }
 
     if old_status && !valid_transitions[old_status]&.include?(new_status)
       errors.add(:status, "cannot transition from #{old_status} to #{new_status}")
+    end
+  end
+
+  def validate_resolution_notes_for_final_statuses
+    final_statuses = %w[approved rejected escalated]
+
+    # Only validate if status is changing TO a final status
+    if status_changed? && status.in?(final_statuses) && resolution_notes.blank?
+      errors.add(:resolution_notes, "são obrigatórias")
     end
   end
 

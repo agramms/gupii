@@ -80,12 +80,12 @@ class FraudMarkingsController < AuthBaseController
       redirect_to @fraud_marking, notice: I18n.t("fraud_markings.notices.created_successfully")
     else
       flash.now[:error] = @fraud_marking.errors.full_messages
-      render :new, status: :unprocessable_entity
+      render :new, status: :unprocessable_content
     end
   rescue StandardError => e
     Rails.logger.error "[FraudMarkingsController] Create failed: #{e.message}"
     flash.now[:error] = I18n.t("fraud_markings.errors.creation_failed")
-    render :new, status: :unprocessable_entity
+    render :new, status: :unprocessable_content
   end
 
   # Supervisor approval action

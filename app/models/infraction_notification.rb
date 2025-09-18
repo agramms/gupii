@@ -86,6 +86,10 @@ class InfractionNotification < ApplicationRecord
     created_by == InfractionSources::DICT_AUTOMATIC
   end
 
+  def external_id
+    jdpi_notification_id || short_id
+  end
+
   def can_be_cancelled?
     [ InfractionStatus::SUBMITTED, InfractionStatus::PROCESSING ].include?(status)
   end

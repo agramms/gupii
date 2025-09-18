@@ -1,0 +1,53 @@
+# FraudMarkingLog test fixtures
+
+initial_submission:
+  fraud_marking: cpf_fraud
+  level: "info"
+  action: "submitted"
+  user: "automated_system"
+  message: "Fraud marking submitted to JDPI for processing"
+  metadata:
+    api_endpoint: "/jdpi/fraud-markings"
+    request_id: "req-123456"
+    response_time_ms: 250
+    status_transition: "pending -> submitted"
+  request_details: "POST /jdpi/fraud-markings with PIX key validation"
+  response_details: "HTTP 200 - Submission accepted"
+  ip_address: "192.168.1.100"
+  user_agent: "Gupii/1.0 Fraud Detection System"
+  created_at: <%= 1.day.ago %>
+
+review_completed:
+  fraud_marking: email_fraud_submitted
+  level: "info"
+  action: "reviewed"
+  user: "fraud_analyst_001"
+  message: "Fraud marking review completed - evidence meets criteria"
+  metadata:
+    reviewer: "fraud_analyst_001"
+    review_notes: "Evidence meets all criteria for fraud marking"
+    jdpi_protocol: "JDPI-2024-001234"
+    review_duration_minutes: 45
+  request_details: "Manual review of evidence and documentation"
+  response_details: "Approved for JDPI submission"
+  ip_address: "10.0.1.50"
+  user_agent: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)"
+  created_at: <%= 1.hour.ago %>
+
+rejection_logged:
+  fraud_marking: phone_fraud_rejected
+  level: "warn"
+  action: "rejected"
+  user: "jdpi_system"
+  message: "Fraud marking rejected due to insufficient evidence"
+  metadata:
+    rejection_reason: "insufficient_evidence"
+    risk_score_threshold: 70
+    actual_risk_score: 45
+    jdpi_error_code: "INSUFFICIENT_EVIDENCE"
+    auto_rejection: true
+  request_details: "Automated validation check failed"
+  response_details: "HTTP 400 - Evidence quality below threshold"
+  ip_address: "203.0.113.10"
+  user_agent: "JDPI-System/2.1"
+  created_at: <%= 1.day.ago %>
