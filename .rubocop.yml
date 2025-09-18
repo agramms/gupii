@@ -138,9 +138,17 @@ Metrics/AbcSize:
 
 # Rails specific
 Rails/Output:
+  Description: 'Prevent use of puts, print, p, etc. Use Rails.logger instead'
+  Enabled: true
+  Include:
+    - 'app/**/*.rb'
+    - 'lib/**/*.rb'
+    - 'config/initializers/**/*.rb'
   Exclude:
     - 'db/seeds.rb'
     - 'lib/tasks/**/*.rake'
+    - 'test/**/*_test.rb'
+    - 'spec/**/*_spec.rb'
 
 Rails/SkipsModelValidations:
   Exclude:
