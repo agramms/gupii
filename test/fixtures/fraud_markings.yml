@@ -1,0 +1,72 @@
+# FraudMarking test fixtures
+
+cpf_fraud:
+  pix_key: "12345678901"
+  pix_key_type: "CPF"
+  masked_pix_key: "123.***.***-01"
+  fraud_type: "account_takeover"
+  classification: "confirmed"
+  status: "PENDING"
+  description: "Multiple suspicious transactions from different locations"
+  detailed_description: "Analysis shows transactions from geographically distant locations within short time windows"
+  evidence_data:
+    transaction_count: 5
+    location_variance: "high"
+    time_variance: "suspicious"
+  idempotency_key: <%= SecureRandom.uuid %>
+  requested_by: "automated_system"
+  risk_level: "high"
+  risk_score: 85
+  created_by_source: "fraud_detection"
+  requires_supervisor_approval: true
+  created_at: <%= 1.day.ago %>
+  updated_at: <%= 1.day.ago %>
+
+email_fraud_submitted:
+  pix_key: "suspicious@example.com"
+  pix_key_type: "EMAIL"
+  masked_pix_key: "s***@example.com"
+  fraud_type: "identity_theft"
+  classification: "confirmed"
+  status: "SUBMITTED"
+  description: "Identity documents do not match account holder"
+  detailed_description: "KYC verification failed - provided documents appear fraudulent"
+  evidence_data:
+    document_verification: "failed"
+    identity_match: false
+    fraud_indicators: ["document_tampering", "identity_mismatch"]
+  jdpi_marking_id: "JDPI-2024-001234"
+  idempotency_key: <%= SecureRandom.uuid %>
+  submitted_at: <%= 1.hour.ago %>
+  requested_by: "manual_review"
+  approved_by: "supervisor_001"
+  approved_at: <%= 1.hour.ago %>
+  risk_level: "critical"
+  risk_score: 92
+  created_by_source: "manual_review"
+  requires_supervisor_approval: true
+  created_at: <%= 2.days.ago %>
+  updated_at: <%= 1.hour.ago %>
+
+phone_fraud_rejected:
+  pix_key: "+5511999999999"
+  pix_key_type: "PHONE"
+  masked_pix_key: "+55119****9999"
+  fraud_type: "social_engineering"
+  classification: "suspected"
+  status: "REJECTED"
+  description: "Insufficient evidence for fraud classification"
+  detailed_description: "Evidence quality does not meet minimum threshold for fraud marking"
+  evidence_data:
+    evidence_quality: "low"
+    verification_status: "insufficient"
+    rejection_reason: "INSUFFICIENT_EVIDENCE"
+  idempotency_key: <%= SecureRandom.uuid %>
+  requested_by: "customer_service"
+  rejection_reason: "Evidence does not meet threshold for fraud marking"
+  risk_level: "medium"
+  risk_score: 45
+  created_by_source: "customer_service"
+  requires_supervisor_approval: false
+  created_at: <%= 1.week.ago %>
+  updated_at: <%= 1.day.ago %>

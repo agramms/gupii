@@ -3,7 +3,7 @@
 # Code coverage setup (must be first)
 if ENV["COVERAGE"]
   require "simplecov"
-  require_relative "../.simplecov"
+  require_relative "../simplecov"
 end
 
 ENV["RAILS_ENV"] ||= "test"

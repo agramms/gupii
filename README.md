@@ -11,7 +11,7 @@
 
 Gupii is a Rails 8 application that provides seamless integration with Brazil's PIX instant payment system through the JDPI (Diretório de Identificadores de Contas Transacionais) API.
 
-![Gupii Mascot](https://github.com/agramms/gupii/app/assets/images/gupii.png)
+![Gupii Mascot](https://github.com/agramms/gupii/blob/118be63a7e4f612c307cc358addeed827fbbce5f/app/assets/images/gupii.png)
 
 ## 🚀 Features
 
