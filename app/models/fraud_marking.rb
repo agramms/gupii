@@ -405,7 +405,7 @@ class FraudMarking < ApplicationRecord
     self.fraud_type = fraud_type&.strip&.upcase
     self.classification = classification&.strip&.upcase
     self.description = description&.strip
-    self.pix_key_type = Jdpi::StatusCodes::Utils.detect_pix_key_type(pix_key) if pix_key.present?
+    self.pix_key_type = Jdpi::StatusCodes::Utils.detect_pix_key_type(pix_key)&.upcase if pix_key.present?
     self.masked_pix_key = Jdpi::StatusCodes::Utils.mask_sensitive_data(pix_key, :pix_key) if pix_key.present?
   end
 

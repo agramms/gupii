@@ -13,7 +13,7 @@ cpf_fraud:
     transaction_count: 5
     location_variance: "high"
     time_variance: "suspicious"
-  idempotency_key: <%= SecureRandom.uuid %>
+  idempotency_key: "fraud-cpf-idem-key-001"
   requested_by: "automated_system"
   risk_level: "high"
   risk_score: 85
@@ -36,7 +36,7 @@ email_fraud_submitted:
     identity_match: false
     fraud_indicators: ["document_tampering", "identity_mismatch"]
   jdpi_marking_id: "JDPI-2024-001234"
-  idempotency_key: <%= SecureRandom.uuid %>
+  idempotency_key: "fraud-email-idem-key-002"
   submitted_at: <%= 1.hour.ago %>
   requested_by: "manual_review"
   approved_by: "supervisor_001"
@@ -61,7 +61,7 @@ phone_fraud_rejected:
     evidence_quality: "low"
     verification_status: "insufficient"
     rejection_reason: "INSUFFICIENT_EVIDENCE"
-  idempotency_key: <%= SecureRandom.uuid %>
+  idempotency_key: "fraud-phone-idem-key-003"
   requested_by: "customer_service"
   rejection_reason: "Evidence does not meet threshold for fraud marking"
   risk_level: "medium"

@@ -10,13 +10,20 @@ class FraudMarkingTest < ActiveSupport::TestCase
   test "should be valid with valid attributes" do
     fraud_marking = FraudMarking.new(
       pix_key: "12345678901",
-      pix_key_type: "CPF",
-      fraud_type: "account_takeover",
-      evidence_description: "Suspicious activity detected",
-      risk_score: 0.75,
-      reported_by: "manual_review"
+      # pix_key_type is auto-detected by normalize_data callback
+      fraud_type: "ACCOUNT_TAKEOVER",
+      classification: "CONFIRMED_FRAUD",
+      description: "Suspicious activity detected",
+      risk_score: 75,
+      requested_by: "manual_review",
+      created_by_source: "FRAUD_TEAM",
+      idempotency_key: "test-idem-key-001"
     )
 
+    unless fraud_marking.valid?
+      puts "Validation errors: #{fraud_marking.errors.full_messages}"
+      puts "Detected pix_key_type: #{fraud_marking.pix_key_type}"
+    end
     assert fraud_marking.valid?
   end
 
