@@ -16,7 +16,7 @@ pending_dispute:
   updated_at: <%= 1.day.ago %>
 
 under_review:
-  infraction_notification: fraud_notification
+  infraction_notification: aml_notification
   dispute_type: 0
   status: 1
   justification: "False positive fraud detection. Transaction was legitimate."
@@ -32,7 +32,7 @@ under_review:
   updated_at: <%= 1.day.ago %>
 
 approved_dispute:
-  infraction_notification: fraud_notification
+  infraction_notification: completed_notification
   dispute_type: 0
   status: 2
   justification: "Account was compromised during the transaction period"

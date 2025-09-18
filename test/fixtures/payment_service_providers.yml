@@ -1,7 +1,7 @@
 # PaymentServiceProvider test fixtures
 
 test_bank:
-  id: 1
+  id: "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
   ispb: "12345678"
   name: "Test Bank S.A."
   short_name: "TestBank"
@@ -21,7 +21,7 @@ test_bank:
   updated_at: <%= 1.day.ago %>
 
 cooperative_bank:
-  id: 2
+  id: "b2c3d4e5-f6a7-8901-bcde-f23456789012"
   ispb: "87654321"
   name: "Cooperative Credit Union"
   short_name: "CoopBank"
@@ -39,7 +39,7 @@ cooperative_bank:
   updated_at: <%= 1.week.ago %>
 
 inactive_bank:
-  id: 3
+  id: "c3d4e5f6-a7b8-9012-cdef-345678901234"
   ispb: "11223344"
   name: "Inactive Financial Institution"
   short_name: "InactiveBank"
