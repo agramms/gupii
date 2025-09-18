@@ -98,7 +98,7 @@ class DisputesControllerTest < ActionDispatch::IntegrationTest
   test "should decline overdue dispute" do
     @dispute.update!(
       status: "pending_customer_response",
-      customer_response_deadline: 1.day.ago
+      customer_response_due_at: 1.day.ago
     )
 
     patch decline_dispute_path(@dispute)
