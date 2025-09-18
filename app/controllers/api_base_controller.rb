@@ -18,7 +18,7 @@ class ApiBaseController < ActionController::API
       render json: {
         success: false,
         error: "UNAUTHORIZED",
-        message: "Invalid or missing API token"
+        message: "Invalid or missing API token",
       }, status: :unauthorized
       return false
     end
@@ -49,19 +49,19 @@ class ApiBaseController < ActionController::API
       render json: {
         success: false,
         error: "MISSING_PARAMETER",
-        message: "Required parameter missing: #{exception.param}"
+        message: "Required parameter missing: #{exception.param}",
       }, status: :bad_request
     when ActiveRecord::RecordNotFound
       render json: {
         success: false,
         error: "NOT_FOUND",
-        message: "Requested resource not found"
+        message: "Requested resource not found",
       }, status: :not_found
     when ActionController::UnpermittedParameters
       render json: {
         success: false,
         error: "INVALID_PARAMETERS",
-        message: "Invalid parameters provided"
+        message: "Invalid parameters provided",
       }, status: :bad_request
     else
       Rails.logger.error "API Error: #{exception.class}: #{exception.message}"
@@ -70,7 +70,7 @@ class ApiBaseController < ActionController::API
       render json: {
         success: false,
         error: "INTERNAL_ERROR",
-        message: "An internal error occurred"
+        message: "An internal error occurred",
       }, status: :internal_server_error
     end
   end
