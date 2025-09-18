@@ -9,6 +9,10 @@ class MissionControlController < AuthBaseController
   # Skip CSRF protection for API endpoints (Mission Control uses AJAX)
   skip_before_action :verify_authenticity_token, if: :api_request?
 
+  def show
+    render json: { status: "ok", message: "Mission Control is operational" }
+  end
+
   # Override the parent's authentication to handle API requests
   def authenticated
     return if Rails.env.test? || logged?

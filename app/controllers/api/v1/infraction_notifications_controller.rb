@@ -54,7 +54,7 @@ module Api
         else
           render json: {
             errors: @infraction_notification.errors.full_messages,
-          }, status: :unprocessable_entity
+          }, status: :unprocessable_content
         end
       end
 
@@ -73,7 +73,7 @@ module Api
           render json: {
             error: "Unable to cancel infraction notification",
             details: @infraction_notification.can_be_cancelled? ? "Unknown error" : "Notification cannot be cancelled in current status",
-          }, status: :unprocessable_entity
+          }, status: :unprocessable_content
         end
       end
 

@@ -55,7 +55,7 @@ class PaymentServiceProvider < ApplicationRecord
 
   # Callbacks
   before_validation :normalize_fields
-  before_save :validate_document_number
+  validate :validate_document_number
   after_update :log_status_changes
 
   # Class methods for statistics and reporting
@@ -173,9 +173,9 @@ class PaymentServiceProvider < ApplicationRecord
   def validate_document_number
     case document_type
     when "CNPJ"
-      errors.add(:document_number, "must be 14 digits for CNPJ") unless document_number&.length == 14
+      errors.add(:document_number, "deve ter 14 dígitos para CNPJ") unless document_number&.length == 14
     when "CPF"
-      errors.add(:document_number, "must be 11 digits for CPF") unless document_number&.length == 11
+      errors.add(:document_number, "deve ter 11 dígitos para CPF") unless document_number&.length == 11
     end
   end
 

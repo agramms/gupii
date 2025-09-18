@@ -1,30 +1,30 @@
 # Infraction Notification Fixtures for Testing
 
 fraud_notification:
-  id: <%= SecureRandom.uuid %>
-  pix_key: "12345678901" 
+  id: "6654e9b5-a6d8-5b28-b171-0fb5d067b1fd"
+  pix_key: "12345678901"
   infraction_type: "FRAUD"
   description: "Suspected fraudulent activity on PIX key"
   evidence_data: { "risk_score": 0.85, "detection_method": "automated" }
   status: "SUBMITTED"
   created_by: "CUSTOMER_SERVICE"
   submitted_at: <%= 1.day.ago %>
-  idempotency_key: <%= SecureRandom.uuid %>
+  idempotency_key: "fraud-idem-key-2024-001"
 
 aml_notification:
-  id: <%= SecureRandom.uuid %>
+  id: "7765f0c6-b7e9-6c39-c282-1fc6e178c2fe"
   pix_key: "test@suspicious-domain.com"
-  infraction_type: "AML_VIOLATION" 
+  infraction_type: "AML_VIOLATION"
   description: "Anti-money laundering violation detected"
   evidence_data: { "suspicious_patterns": ["velocity", "amount"] }
   status: "PROCESSING"
   created_by: "CUSTOMER_EXPERIENCE"
   submitted_at: <%= 2.hours.ago %>
   last_status_change_at: <%= 1.hour.ago %>
-  idempotency_key: <%= SecureRandom.uuid %>
+  idempotency_key: "aml-idem-key-2024-002"
 
 completed_notification:
-  id: <%= SecureRandom.uuid %>
+  id: "8876f1d7-c8fa-7d4a-d393-2fd7f289d3ff"
   pix_key: "+5511999999999"
   infraction_type: "ACCOUNT_MISUSE"
   description: "Inappropriate account usage patterns"
@@ -34,4 +34,15 @@ completed_notification:
   analysis_notes: "Evidence confirmed violation"
   submitted_at: <%= 1.week.ago %>
   processed_at: <%= 6.days.ago %>
-  idempotency_key: <%= SecureRandom.uuid %>
+  idempotency_key: "account-misuse-idem-2024-003"
+
+test_notification:
+  id: "1111a1a1-aaaa-1111-aaaa-111111111111"
+  pix_key: "test.dispute@example.com"
+  infraction_type: "FRAUD"
+  description: "Test infraction for dispute testing"
+  evidence_data: { "test": true }
+  status: "SUBMITTED"
+  created_by: "CUSTOMER_SERVICE"
+  submitted_at: <%= 2.days.ago %>
+  idempotency_key: "test-dispute-idem-key-001"

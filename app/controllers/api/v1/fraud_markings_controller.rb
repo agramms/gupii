@@ -54,11 +54,11 @@ class Api::V1::FraudMarkingsController < Api::V1::BaseController
 
       render json: fraud_marking_json(@fraud_marking), status: :created
     else
-      render json: { errors: @fraud_marking.errors }, status: :unprocessable_entity
+      render json: { errors: @fraud_marking.errors }, status: :unprocessable_content
     end
   rescue StandardError => e
     Rails.logger.error "[API::FraudMarkingsController] Create failed: #{e.message}"
-    render json: { error: "Creation failed" }, status: :unprocessable_entity
+    render json: { error: "Creation failed" }, status: :unprocessable_content
   end
 
   # Supervisor approval action
@@ -83,11 +83,11 @@ class Api::V1::FraudMarkingsController < Api::V1::BaseController
 
       render json: fraud_marking_json(@fraud_marking)
     else
-      render json: { errors: @fraud_marking.errors }, status: :unprocessable_entity
+      render json: { errors: @fraud_marking.errors }, status: :unprocessable_content
     end
   rescue StandardError => e
     Rails.logger.error "[API::FraudMarkingsController] Approval failed: #{e.message}"
-    render json: { error: "Approval failed" }, status: :unprocessable_entity
+    render json: { error: "Approval failed" }, status: :unprocessable_content
   end
 
   # Supervisor rejection action
@@ -95,7 +95,7 @@ class Api::V1::FraudMarkingsController < Api::V1::BaseController
     reason = params[:rejection_reason]
 
     if reason.blank?
-      render json: { error: "Rejection reason is required" }, status: :unprocessable_entity
+      render json: { error: "Rejection reason is required" }, status: :unprocessable_content
       return
     end
 
@@ -112,11 +112,11 @@ class Api::V1::FraudMarkingsController < Api::V1::BaseController
 
       render json: fraud_marking_json(@fraud_marking)
     else
-      render json: { errors: @fraud_marking.errors }, status: :unprocessable_entity
+      render json: { errors: @fraud_marking.errors }, status: :unprocessable_content
     end
   rescue StandardError => e
     Rails.logger.error "[API::FraudMarkingsController] Rejection failed: #{e.message}"
-    render json: { error: "Rejection failed" }, status: :unprocessable_entity
+    render json: { error: "Rejection failed" }, status: :unprocessable_content
   end
 
   # Cancel fraud marking action
@@ -136,17 +136,17 @@ class Api::V1::FraudMarkingsController < Api::V1::BaseController
 
       render json: fraud_marking_json(@fraud_marking)
     else
-      render json: { errors: @fraud_marking.errors }, status: :unprocessable_entity
+      render json: { errors: @fraud_marking.errors }, status: :unprocessable_content
     end
   rescue StandardError => e
     Rails.logger.error "[API::FraudMarkingsController] Cancellation failed: #{e.message}"
-    render json: { error: "Cancellation failed" }, status: :unprocessable_entity
+    render json: { error: "Cancellation failed" }, status: :unprocessable_content
   end
 
   # Submit approved fraud marking to JDPI
   def submit_to_jdpi
     unless @fraud_marking.can_be_submitted?
-      render json: { error: "Cannot submit fraud marking in current state" }, status: :unprocessable_entity
+      render json: { error: "Cannot submit fraud marking in current state" }, status: :unprocessable_content
       return
     end
 
@@ -155,7 +155,7 @@ class Api::V1::FraudMarkingsController < Api::V1::BaseController
     render json: fraud_marking_json(@fraud_marking)
   rescue StandardError => e
     Rails.logger.error "[API::FraudMarkingsController] JDPI submission failed: #{e.message}"
-    render json: { error: "JDPI submission failed" }, status: :unprocessable_entity
+    render json: { error: "JDPI submission failed" }, status: :unprocessable_content
   end
 
   # Collection action endpoints
@@ -204,7 +204,7 @@ class Api::V1::FraudMarkingsController < Api::V1::BaseController
     when "json"
       render json: service.to_compliance_report, content_type: "application/json"
     else
-      render json: { error: "Unsupported format" }, status: :unprocessable_entity
+      render json: { error: "Unsupported format" }, status: :unprocessable_content
     end
   end
 

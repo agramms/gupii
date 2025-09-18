@@ -57,6 +57,7 @@ Rails.application.routes.draw do
       patch :reject
       patch :cancel
       patch :submit_to_jdpi
+      patch :submit, action: :submit_to_jdpi # Alias for test compatibility
     end
     collection do
       get :export
@@ -83,8 +84,8 @@ Rails.application.routes.draw do
   # Job Queue Administration with Mission Control
   mount MissionControl::Jobs::Engine, at: "/admin/jobs"
 
-  # Authentication test (development only)
-  get "auth-test", to: "auth_test#show" if Rails.env.development?
+  # Authentication test (development and test only)
+  get "auth-test", to: "auth_test#show" if Rails.env.development? || Rails.env.test?
 
   # API routes for client applications
   namespace :api do

@@ -4,22 +4,7 @@ require "test_helper"
 
 class PaymentServiceProviderTest < ActiveSupport::TestCase
   def setup
-    @valid_attributes = {
-      ispb: "12345678",
-      name: "Test Payment Provider",
-      short_name: "TestPSP",
-      document_number: "12345678000199",
-      document_type: "CNPJ",
-      status: "active",
-      psp_type: "commercial_bank",
-      services_offered: [ "pix_payment", "pix_receiving" ],
-      pix_enabled: true,
-      regulatory_status: "authorized",
-      last_sync_errors: [ "no_errors" ],
-      jdpi_metadata: { "test" => "data" },
-      validation_errors: [ "no_errors" ],
-    }
-
+    @valid_attributes = valid_psp_attributes
     @psp = PaymentServiceProvider.new(@valid_attributes)
   end
 
@@ -90,10 +75,15 @@ class PaymentServiceProviderTest < ActiveSupport::TestCase
   end
 
   test "should validate document type" do
-    [ "CNPJ", "CPF" ].each do |type|
-      @psp.document_type = type
-      assert @psp.valid?, "#{type} should be valid"
-    end
+    # Test CNPJ
+    @psp.document_type = "CNPJ"
+    @psp.document_number = "12345678000190"
+    assert @psp.valid?, "CNPJ should be valid"
+
+    # Test CPF
+    @psp.document_type = "CPF"
+    @psp.document_number = "12345678901"
+    assert @psp.valid?, "CPF should be valid"
 
     @psp.document_type = "INVALID"
     assert_not @psp.valid?
@@ -113,16 +103,16 @@ class PaymentServiceProviderTest < ActiveSupport::TestCase
     @psp.total_volume = 0
     @psp.availability_percentage = 101
     assert_not @psp.valid?
-    assert_includes @psp.errors[:availability_percentage], "must be less than or equal to 100"
+    assert_includes @psp.errors[:availability_percentage], "deve ser menor ou igual a 100"
   end
 
   test "should validate state format" do
     @psp.state = "SP"
     assert @psp.valid?
 
-    @psp.state = "sp" # lowercase
-    assert_not @psp.valid?
-    assert_includes @psp.errors[:state], "deve ter 2 letras maiúsculas"
+    @psp.state = "sp" # lowercase gets normalized to uppercase
+    assert @psp.valid?
+    assert_equal "SP", @psp.state
 
     @psp.state = "SAO" # 3 letters
     assert_not @psp.valid?
@@ -164,8 +154,8 @@ class PaymentServiceProviderTest < ActiveSupport::TestCase
 
   # Scope tests
   test "active scope should return only active PSPs" do
-    active_psp = PaymentServiceProvider.create!(@valid_attributes)
-    inactive_psp = PaymentServiceProvider.create!(@valid_attributes.merge(ispb: "87654321", status: "inactive"))
+    active_psp = PaymentServiceProvider.create!(valid_psp_attributes.merge(status: "active"))
+    inactive_psp = PaymentServiceProvider.create!(valid_psp_attributes.merge(status: "inactive"))
 
     active_psps = PaymentServiceProvider.active
     assert_includes active_psps, active_psp
@@ -173,8 +163,8 @@ class PaymentServiceProviderTest < ActiveSupport::TestCase
   end
 
   test "pix_enabled scope should return only PIX-enabled PSPs" do
-    pix_psp = PaymentServiceProvider.create!(@valid_attributes)
-    non_pix_psp = PaymentServiceProvider.create!(@valid_attributes.merge(ispb: "87654321", pix_enabled: false))
+    pix_psp = PaymentServiceProvider.create!(valid_psp_attributes.merge(pix_enabled: true))
+    non_pix_psp = PaymentServiceProvider.create!(valid_psp_attributes.merge(pix_enabled: false))
 
     pix_psps = PaymentServiceProvider.pix_enabled
     assert_includes pix_psps, pix_psp
@@ -182,9 +172,9 @@ class PaymentServiceProviderTest < ActiveSupport::TestCase
   end
 
   test "needs_sync scope should return PSPs that need synchronization" do
-    fresh_psp = PaymentServiceProvider.create!(@valid_attributes.merge(last_sync_at: 30.minutes.ago))
-    stale_psp = PaymentServiceProvider.create!(@valid_attributes.merge(ispb: "87654321", last_sync_at: 2.hours.ago))
-    never_synced_psp = PaymentServiceProvider.create!(@valid_attributes.merge(ispb: "11111111", last_sync_at: nil))
+    fresh_psp = PaymentServiceProvider.create!(valid_psp_attributes.merge(last_sync_at: 30.minutes.ago))
+    stale_psp = PaymentServiceProvider.create!(valid_psp_attributes.merge(last_sync_at: 2.hours.ago))
+    never_synced_psp = PaymentServiceProvider.create!(valid_psp_attributes.merge(last_sync_at: nil))
 
     stale_psps = PaymentServiceProvider.needs_sync
     assert_not_includes stale_psps, fresh_psp
@@ -309,27 +299,36 @@ class PaymentServiceProviderTest < ActiveSupport::TestCase
 
   # Class method tests
   test "pix_adoption_rate should calculate correctly" do
-    PaymentServiceProvider.create!(@valid_attributes.merge(pix_enabled: true))
-    PaymentServiceProvider.create!(@valid_attributes.merge(ispb: "87654321", pix_enabled: false))
+    initial_total = PaymentServiceProvider.count
+    initial_pix_enabled = PaymentServiceProvider.pix_enabled.count
 
-    assert_equal 50.0, PaymentServiceProvider.pix_adoption_rate
+    PaymentServiceProvider.create!(valid_psp_attributes.merge(pix_enabled: true))
+    PaymentServiceProvider.create!(valid_psp_attributes.merge(pix_enabled: false))
+
+    # Should be (initial_pix_enabled + 1) / (initial_total + 2) * 100
+    expected_rate = ((initial_pix_enabled + 1).to_f / (initial_total + 2) * 100).round(2)
+    assert_equal expected_rate, PaymentServiceProvider.pix_adoption_rate
   end
 
   test "sync_health_summary should provide overview" do
-    PaymentServiceProvider.create!(@valid_attributes.merge(last_sync_at: 2.hours.ago))
-    PaymentServiceProvider.create!(@valid_attributes.merge(ispb: "87654321", last_sync_at: nil, sync_attempts: 3))
+    initial_total = PaymentServiceProvider.count
+    initial_needs_sync = PaymentServiceProvider.needs_sync.count
+    initial_sync_failed = PaymentServiceProvider.sync_failed.count
+
+    PaymentServiceProvider.create!(valid_psp_attributes.merge(last_sync_at: 2.hours.ago))
+    PaymentServiceProvider.create!(valid_psp_attributes.merge(last_sync_at: nil, sync_attempts: 3))
 
     summary = PaymentServiceProvider.sync_health_summary
 
-    assert_equal 2, summary[:total]
-    assert_equal 2, summary[:needs_sync]
-    assert_equal 1, summary[:sync_failed]
+    assert_equal initial_total + 2, summary[:total]
+    assert_equal initial_needs_sync + 2, summary[:needs_sync]
+    assert_equal initial_sync_failed + 1, summary[:sync_failed]
   end
 
   test "top_by_volume should return highest volume PSPs" do
-    low_volume = PaymentServiceProvider.create!(@valid_attributes.merge(total_volume: 1000))
-    high_volume = PaymentServiceProvider.create!(@valid_attributes.merge(ispb: "87654321", total_volume: 10000))
-    zero_volume = PaymentServiceProvider.create!(@valid_attributes.merge(ispb: "11111111", total_volume: 0))
+    low_volume = PaymentServiceProvider.create!(valid_psp_attributes.merge(total_volume: 1000))
+    high_volume = PaymentServiceProvider.create!(valid_psp_attributes.merge(total_volume: 10000))
+    zero_volume = PaymentServiceProvider.create!(valid_psp_attributes.merge(total_volume: 0))
 
     top_psps = PaymentServiceProvider.top_by_volume(2)
 

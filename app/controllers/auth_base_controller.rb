@@ -66,10 +66,10 @@ class AuthBaseController < ApplicationController
 
   def redirect_user_to_auth
     redirect_host = request.protocol + request.host_with_port
-    puts "🚨 AUTH DEBUG: redirect_host=#{redirect_host.inspect}, request.url=#{request.url.inspect}"
+    Rails.logger.debug "🚨 AUTH DEBUG: redirect_host=#{redirect_host.inspect}, request.url=#{request.url.inspect}"
 
     authorization_url = IdentityClient.authorize_url(redirect_host: redirect_host)
-    puts "🚨 AUTH DEBUG: authorization_url=#{authorization_url.inspect}"
+    Rails.logger.debug "🚨 AUTH DEBUG: authorization_url=#{authorization_url.inspect}"
     redirect_to authorization_url, allow_other_host: true
   end
 

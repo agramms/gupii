@@ -38,7 +38,7 @@ class DisputesController < AuthBaseController
       redirect_to @dispute, notice: "Disputa criada com sucesso."
     else
       flash.now[:error] = @dispute.errors.full_messages
-      render :new, status: :unprocessable_entity
+      render :new, status: :unprocessable_content
     end
   end
 
