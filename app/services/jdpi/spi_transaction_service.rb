@@ -15,6 +15,7 @@ module Jdpi
 
     # Alias for test compatibility
     InvalidFormatError = InvalidEndToEndIdError
+    ApiError = SpiApiError
 
     class << self
       # Consult transaction by End-to-End ID
@@ -192,6 +193,11 @@ module Jdpi
 
     # Alias for test compatibility
     alias_method :lookup_transaction, :perform_lookup
+
+    # Instance method version for test compatibility
+    def validate_end_to_end_id!(end_to_end_id)
+      self.class.send(:validate_end_to_end_id!, end_to_end_id)
+    end
 
     private
 

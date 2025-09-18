@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_09_12_020731) do
+ActiveRecord::Schema[8.0].define(version: 2025_09_18_041520) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -92,7 +92,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_12_020731) do
     t.datetime "cancelled_at", precision: nil
     t.text "cancellation_reason"
     t.string "risk_level", limit: 20
-    t.integer "risk_score"
+    t.decimal "risk_score", precision: 5, scale: 3
     t.decimal "transaction_amount", precision: 15, scale: 2
     t.string "transaction_currency", limit: 3, default: "BRL"
     t.string "created_by_source", limit: 50, null: false
@@ -106,6 +106,10 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_12_020731) do
     t.string "reference_case_id", limit: 36
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.jsonb "jdpi_response_data"
+    t.jsonb "submission_errors"
+    t.text "evidence_description"
+    t.string "reported_by"
     t.index ["created_at"], name: "index_fraud_markings_on_created_at"
     t.index ["fraud_type"], name: "index_fraud_markings_on_fraud_type"
     t.index ["idempotency_key"], name: "index_fraud_markings_on_idempotency_key", unique: true

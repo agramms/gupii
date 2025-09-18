@@ -11,13 +11,18 @@ class FraudMarkingLogTest < ActiveSupport::TestCase
   test "should be valid with valid attributes" do
     log = FraudMarkingLog.new(
       fraud_marking: @fraud_marking,
+      level: "info",
       action: "reviewed",
+      message: "Review completed",
       status_from: "pending",
       status_to: "approved",
       details: { reviewer: "analyst_001" },
       performed_by: "analyst_001"
     )
 
+    unless log.valid?
+      puts "Validation errors: #{log.errors.full_messages}"
+    end
     assert log.valid?
   end
 
@@ -36,7 +41,7 @@ class FraudMarkingLogTest < ActiveSupport::TestCase
   test "should require performed_by" do
     @log.performed_by = ""
     assert_not @log.valid?
-    assert_includes @log.errors[:performed_by], "não pode ficar em branco"
+    assert_includes @log.errors[:user], "não pode ficar em branco"
   end
 
   test "should validate action values" do
@@ -74,7 +79,9 @@ class FraudMarkingLogTest < ActiveSupport::TestCase
     other_fraud_marking = fraud_markings(:email_fraud_submitted)
     other_log = FraudMarkingLog.create!(
       fraud_marking: other_fraud_marking,
+      level: "info",
       action: "created",
+      message: "Created by system",
       performed_by: "system"
     )
 
@@ -94,7 +101,9 @@ class FraudMarkingLogTest < ActiveSupport::TestCase
   test "should order by created_at descending by default" do
     newer_log = FraudMarkingLog.create!(
       fraud_marking: @fraud_marking,
+      level: "info",
       action: "reviewed",
+      message: "Reviewed by analyst",
       performed_by: "analyst",
       created_at: 1.hour.from_now
     )

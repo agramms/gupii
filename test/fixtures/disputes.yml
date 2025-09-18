@@ -4,7 +4,7 @@ pending_dispute:
   id: "8876a1d7-c8fa-7d40-d393-2fd7f279d3aa"
   infraction_notification_id: "6654e9b5-a6d8-5b28-b171-0fb5d067b1fd"
   dispute_type: 0
-  status: 1
+  status: 0  # pending_customer_response
   justification: "Customer disputes fraud allegation with supporting documentation"
   evidence_notes: "Provided bank statements and location proof"
   additional_data: { "documents_provided": ["bank_statement", "location_proof"] }

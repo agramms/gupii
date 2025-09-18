@@ -4,7 +4,7 @@
 # Handles asynchronous submission of approved fraud markings to JDPI
 # Includes retry logic and comprehensive error handling for resilience
 class FraudMarkingSubmissionJob < ApplicationJob
-  queue_as :default
+  queue_as :fraud_marking
 
   # Retry configuration for network issues and temporary failures
   retry_on StandardError, wait: :exponentially_longer, attempts: 3
@@ -20,7 +20,7 @@ class FraudMarkingSubmissionJob < ApplicationJob
 
     Rails.logger.info "[FraudMarkingSubmissionJob] Processing fraud marking: #{fraud_marking.short_id}"
 
-    unless fraud_marking.can_be_submitted?
+    unless fraud_marking.submittable?
       Rails.logger.warn "[FraudMarkingSubmissionJob] Fraud marking #{fraud_marking.short_id} cannot be submitted"
 
       FraudMarkingLog.create_error!(
@@ -62,7 +62,7 @@ class FraudMarkingSubmissionJob < ApplicationJob
 
     # Update fraud marking status
     fraud_marking.update!(
-      status: FraudMarking::Status::SUBMITTED,
+      status: "submitted",
       jdpi_marking_id: service.marking_id,
       submitted_at: Time.current,
       status_changed_at: Time.current
@@ -92,7 +92,7 @@ class FraudMarkingSubmissionJob < ApplicationJob
 
     # Update fraud marking with error status
     fraud_marking.update!(
-      status: FraudMarking::Status::ERROR,
+      status: "failed",
       status_changed_at: Time.current,
       internal_notes: [
         fraud_marking.internal_notes,
@@ -122,7 +122,7 @@ class FraudMarkingSubmissionJob < ApplicationJob
       fraud_marking = FraudMarking.find(fraud_marking_id)
 
       fraud_marking.update!(
-        status: FraudMarking::Status::ERROR,
+        status: "failed",
         status_changed_at: Time.current,
         internal_notes: [
           fraud_marking.internal_notes,

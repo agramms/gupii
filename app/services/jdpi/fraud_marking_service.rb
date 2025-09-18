@@ -176,7 +176,119 @@ module Jdpi
       false
     end
 
+    # Submit fraud marking (test-compatible interface)
+    def submit_fraud_marking(fraud_marking)
+      return { success: false, error: "Invalid fraud marking" } unless fraud_marking
+
+      begin
+        # Validate fraud marking
+        unless validate_fraud_marking(fraud_marking)
+          return {
+            success: false,
+            error_code: "VALIDATION_ERROR",
+            error_message: "Dados inválidos para marcação de fraude"
+          }
+        end
+
+        # Build request payload
+        payload = build_request_payload(fraud_marking)
+
+        # Make API call
+        response = post("/jdpi/fraud-markings", payload)
+
+        if response["erro"]
+          # Handle API error response
+          error_info = response["erro"]
+          return {
+            success: false,
+            error_code: error_info["codigo"],
+            error_message: error_info["mensagem"]
+          }
+        elsif response["protocolo"]
+          # Success response
+          fraud_marking.update!(
+            status: "submitted",
+            jdpi_response_data: response
+          )
+
+          {
+            success: true,
+            protocol: response["protocolo"],
+            status: response["status"]
+          }
+        else
+          {
+            success: false,
+            error_code: "UNKNOWN_ERROR",
+            error_message: "Resposta inválida da API JDPI"
+          }
+        end
+
+      rescue Timeout::Error => e
+        fraud_marking.update!(submission_errors: [e.message]) if fraud_marking.persisted?
+        {
+          success: false,
+          error_code: "NETWORK_ERROR",
+          error_message: "Timeout durante comunicação com JDPI: #{e.message}"
+        }
+      rescue Jdpi::AuthenticationService::AuthenticationError => e
+        {
+          success: false,
+          error_code: "AUTHENTICATION_ERROR",
+          error_message: "Erro de autenticação: #{e.message}"
+        }
+      rescue Net::HTTPServerError => e
+        # Retry logic for server errors - for now just return error
+        {
+          success: false,
+          error_code: "SERVER_ERROR",
+          error_message: "Erro interno do servidor JDPI: #{e.message}"
+        }
+      rescue StandardError => e
+        fraud_marking.update!(submission_errors: [e.message]) if fraud_marking.persisted?
+        Rails.logger.error "Exception in submit_fraud_marking: #{e.message}"
+        {
+          success: false,
+          error_code: "SYSTEM_ERROR",
+          error_message: "Erro interno do sistema: #{e.message}"
+        }
+      end
+    end
+
+    # Build request payload for tests (test-expected format)
+    def build_request_payload(fraud_marking)
+      {
+        "chave_pix" => fraud_marking.pix_key,
+        "tipo_chave" => fraud_marking.pix_key_type,
+        "tipo_fraude" => fraud_marking.fraud_type,
+        "descricao_evidencia" => fraud_marking.evidence_description,
+        "score_risco" => fraud_marking.risk_score,
+        "reportado_por" => fraud_marking.reported_by,
+        "data_ocorrencia" => fraud_marking.created_at.iso8601
+      }
+    end
+
+    # HTTP method for tests
+    def post(path, payload)
+      # This will be mocked in tests
+      # In real implementation, this would call the base service
+      # First ensure we have authentication
+      auth_service = Jdpi::AuthenticationService.new
+      auth_service.access_token # This will raise AuthenticationError if auth fails
+
+      execute_request(:post, path, body: payload)
+    end
+
     private
+
+    # Validate fraud marking for submission
+    def validate_fraud_marking(fraud_marking)
+      return false if fraud_marking.pix_key.blank?
+      return false if fraud_marking.fraud_type.blank?
+      return false unless %w[CPF CNPJ EMAIL PHONE EVP].include?(fraud_marking.pix_key_type)
+      return false if fraud_marking.risk_score && (fraud_marking.risk_score < 0 || fraud_marking.risk_score > 100)
+      true
+    end
 
     # Validation methods
 
@@ -296,7 +408,6 @@ module Jdpi
 
       params.join("&")
     end
-
 
     # Logging methods
 

@@ -14,7 +14,7 @@ class FraudMarkingTest < ActiveSupport::TestCase
       fraud_type: "ACCOUNT_TAKEOVER",
       classification: "CONFIRMED_FRAUD",
       description: "Suspicious activity detected",
-      risk_score: 75,
+      risk_score: 0.75,
       requested_by: "manual_review",
       created_by_source: "FRAUD_TEAM",
       idempotency_key: "test-idem-key-001"
@@ -38,9 +38,20 @@ class FraudMarkingTest < ActiveSupport::TestCase
     assert_not @fraud_marking.valid?
     assert_includes @fraud_marking.errors[:pix_key_type], "não está incluído na lista"
 
-    valid_types = %w[CPF CNPJ EMAIL PHONE UUID]
-    valid_types.each do |type|
+    valid_types_with_keys = {
+      "CPF" => "12345678901",
+      "CNPJ" => "12345678000195",
+      "EMAIL" => "user@example.com",
+      "PHONE" => "+5511999999999",
+      "UUID" => "550e8400-e29b-41d4-a716-446655440000"
+    }
+
+    valid_types_with_keys.each do |type, key|
       @fraud_marking.pix_key_type = type
+      @fraud_marking.pix_key = key
+      unless @fraud_marking.valid?
+        puts "#{type} validation errors: #{@fraud_marking.errors.full_messages}"
+      end
       assert @fraud_marking.valid?, "#{type} should be valid"
     end
   end
@@ -125,9 +136,12 @@ class FraudMarkingTest < ActiveSupport::TestCase
       pix_key: "98765432100",
       pix_key_type: "CPF",
       fraud_type: "account_takeover",
-      evidence_description: "Test evidence",
+      classification: "CONFIRMED_FRAUD",
+      description: "Test evidence",
       risk_score: 0.8,
-      reported_by: "test"
+      requested_by: "test",
+      created_by_source: "FRAUD_TEAM",
+      idempotency_key: SecureRandom.uuid
     )
 
     assert fraud_marking.short_id.present?

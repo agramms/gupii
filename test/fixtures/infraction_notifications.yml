@@ -35,3 +35,14 @@ completed_notification:
   submitted_at: <%= 1.week.ago %>
   processed_at: <%= 6.days.ago %>
   idempotency_key: "account-misuse-idem-2024-003"
+
+test_notification:
+  id: "1111a1a1-aaaa-1111-aaaa-111111111111"
+  pix_key: "test.dispute@example.com"
+  infraction_type: "FRAUD"
+  description: "Test infraction for dispute testing"
+  evidence_data: { "test": true }
+  status: "SUBMITTED"
+  created_by: "CUSTOMER_SERVICE"
+  submitted_at: <%= 2.days.ago %>
+  idempotency_key: "test-dispute-idem-key-001"

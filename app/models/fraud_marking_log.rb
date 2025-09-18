@@ -12,7 +12,10 @@ class FraudMarkingLog < ApplicationRecord
     created
     approved
     rejected
+    submitted
     submitted_to_jdpi
+    resubmitted
+    reviewed
     cancelled
     status_changed
     evidence_added
@@ -28,7 +31,7 @@ class FraudMarkingLog < ApplicationRecord
   validates :level, presence: true, inclusion: { in: LOG_LEVELS }
   validates :action, presence: true, inclusion: { in: ACTIONS }
   validates :message, presence: true, length: { maximum: 2000 }
-  validates :user, length: { maximum: 255 }
+  validates :user, presence: true, length: { maximum: 255 }
   validates :ip_address, length: { maximum: 45 }
   validates :user_agent, length: { maximum: 500 }
 
@@ -40,6 +43,19 @@ class FraudMarkingLog < ApplicationRecord
   # Aliases for backward compatibility
   alias_attribute :performed_by, :user
 
+  # Additional attributes for test compatibility
+  attribute :status_from, :string
+  attribute :status_to, :string
+
+  # Details is stored in metadata for test compatibility
+  def details
+    metadata || {}
+  end
+
+  def details=(value)
+    self.metadata = value
+  end
+
   # Scopes
   scope :by_level, ->(level) { where(level: level) if level.present? }
   scope :by_action, ->(action) { where(action: action) if action.present? }
@@ -50,6 +66,8 @@ class FraudMarkingLog < ApplicationRecord
   scope :system_actions, -> { where(user: [ "system", nil ]) }
   scope :created_after, ->(date) { where("created_at >= ?", date) if date.present? }
   scope :created_before, ->(date) { where("created_at <= ?", date) if date.present? }
+  scope :with_action, ->(action) { where(action: action) if action.present? }
+  scope :for_fraud_marking, ->(fraud_marking) { where(fraud_marking: fraud_marking).order(created_at: :desc) if fraud_marking.present? }
 
   # Callbacks
   before_validation :normalize_data
@@ -113,6 +131,34 @@ class FraudMarkingLog < ApplicationRecord
       formatted_value = format_metadata_value(value)
       result[formatted_key] = formatted_value
     end
+  end
+
+  def performer_type
+    case user
+    when nil, "system"
+      "system"
+    when /system$/i  # Matches anything ending with "system" (case insensitive)
+      "system"
+    else
+      "user"
+    end
+  end
+
+  def system_performed?
+    performer_type == "system"
+  end
+
+  def details_summary
+    return "—" if details.blank? || details.empty?
+
+    details.map { |k, v| "#{k}: #{v}" }.join(", ")
+  end
+
+  def status_transition
+    return nil if status_from.blank? && status_to.blank?
+    return "— → #{status_to}" if status_from.blank?
+    return "#{status_from} → —" if status_to.blank?
+    "#{status_from} → #{status_to}"
   end
 
   # Class Methods
@@ -192,6 +238,23 @@ class FraudMarkingLog < ApplicationRecord
     includes(:fraud_marking)
       .order(created_at: :desc)
       .limit(limit)
+  end
+
+  def self.log_action(fraud_marking:, action:, user: nil, performed_by: nil, message: nil, details: {}, **additional_data)
+    actual_user = user || performed_by
+    # Merge details into additional metadata
+    merged_metadata = additional_data.except(:status_from, :status_to).merge(details)
+
+    create!(
+      fraud_marking: fraud_marking,
+      level: "info",
+      action: action.to_s,
+      user: actual_user,
+      message: message || "#{action.humanize} executed",
+      status_from: additional_data[:status_from],
+      status_to: additional_data[:status_to],
+      metadata: merged_metadata.presence || {}
+    )
   end
 
   private

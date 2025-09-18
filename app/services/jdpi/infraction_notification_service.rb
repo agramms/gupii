@@ -199,7 +199,105 @@ module Jdpi
       nil
     end
 
+    # Fetch notifications with formatted response for tests
+    def fetch_notifications(page: 1, per_page: 50, status: nil)
+      Rails.logger.info "#{Logging::SERVICE_PREFIX} #{Logging::INFRACTION_TAG} Fetching notifications"
+
+      # Mock API request
+      response = get("/jdpi/infraction-notifications", {
+        page: page,
+        per_page: per_page,
+        status: status
+      }.compact)
+
+      if response && response["notificacoes"]
+        {
+          success: true,
+          notifications: response["notificacoes"].map { |n| normalize_notification_data(n) },
+          total: response["total"] || 0,
+          page: response["pagina"] || 1
+        }
+      else
+        {
+          success: false,
+          error: "Failed to fetch notifications",
+          notifications: [],
+          total: 0
+        }
+      end
+    rescue => e
+      Rails.logger.error "#{Logging::SERVICE_PREFIX} #{Logging::INFRACTION_TAG} Exception fetching notifications: #{e.message}"
+      {
+        success: false,
+        error: e.message,
+        notifications: [],
+        total: 0
+      }
+    end
+
+    # Acknowledge notification receipt
+    def acknowledge_notification(infraction)
+      Rails.logger.info "#{Logging::SERVICE_PREFIX} #{Logging::INFRACTION_TAG} Acknowledging notification: #{infraction.external_id}"
+
+      # Mock API request
+      response = post("/jdpi/infraction-notifications/#{infraction.external_id}/acknowledge", {
+        acknowledged_at: Time.current.iso8601,
+        acknowledged_by: "SYSTEM"
+      })
+
+      if response && response["protocolo"]
+        {
+          success: true,
+          protocol: response["protocolo"],
+          status: response["status"],
+          acknowledged_at: response["data_confirmacao"]
+        }
+      elsif response && response["erro"]
+        {
+          success: false,
+          error_code: response["erro"]["codigo"],
+          error_message: response["erro"]["mensagem"]
+        }
+      else
+        {
+          success: false,
+          error: "Failed to acknowledge notification"
+        }
+      end
+    rescue => e
+      Rails.logger.error "#{Logging::SERVICE_PREFIX} #{Logging::INFRACTION_TAG} Exception acknowledging notification: #{e.message}"
+      {
+        success: false,
+        error: e.message
+      }
+    end
+
     private
+
+    # Normalize notification data from API response
+    def normalize_notification_data(raw_data)
+      {
+        id: raw_data["id"],
+        pix_key: raw_data["chave_pix"],
+        infraction_type: raw_data["tipo_infracao"],
+        description: raw_data["descricao"],
+        occurred_at: raw_data["data_ocorrencia"],
+        status: raw_data["status"],
+        reporting_institution: raw_data["instituicao_reportante"],
+        evidence: raw_data["evidencias"] || []
+      }
+    end
+
+    # HTTP helper methods for test compatibility
+    def get(path, params = {})
+      # This would normally use execute_request, but for tests we expect mocked responses
+      execute_request(:get, path, query: params)
+    end
+
+    def post(path, body = {})
+      # This would normally use execute_request, but for tests we expect mocked responses
+      execute_request(:post, path, body: body)
+    end
 
     def validate_notification_data
       errors.clear

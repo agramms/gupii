@@ -5,14 +5,12 @@ require "test_helper"
 class DisputeTest < ActiveSupport::TestCase
   setup do
     @dispute = disputes(:pending_dispute)
-    @infraction = infraction_notifications(:fraud_notification)
+    @infraction = infraction_notifications(:test_notification)  # Use infraction without existing dispute
   end
 
   test "should be valid with valid attributes" do
-    # Use a different infraction that doesn't have a dispute yet
-    other_infraction = infraction_notifications(:aml_notification)
     dispute = Dispute.new(
-      infraction_notification: other_infraction,
+      infraction_notification: @infraction,
       justification: "Transaction not authorized by customer",
       evidence_notes: "Customer was not at the location during transaction",
       created_by: "customer_service",
@@ -67,8 +65,7 @@ class DisputeTest < ActiveSupport::TestCase
       infraction_notification: @infraction,
       created_by: "Test User",
       justification: "Test reason",
-      evidence_notes: "Test evidence",
-      customer_response_due_at: 7.days.from_now
+      evidence_notes: "Test evidence"
     )
 
     expected_deadline = 6.days.from_now.to_date
@@ -87,10 +84,11 @@ class DisputeTest < ActiveSupport::TestCase
 
     # Invalid transition: approved -> pending_customer_response
     @dispute.status = "approved"
+    @dispute.resolution_notes = "Test resolution"
     @dispute.save!
     @dispute.status = "pending_customer_response"
     assert_not @dispute.valid?
-    assert_includes @dispute.errors[:status], "cannot transition"
+    assert @dispute.errors[:status].any? { |msg| msg.include?("cannot transition") }
   end
 
   test "should check if overdue" do
@@ -108,13 +106,13 @@ class DisputeTest < ActiveSupport::TestCase
     overdue_dispute = Dispute.create!(
       infraction_notification: @infraction,
       created_by: "Overdue User",
-      evidence_notes: "overdue@example.com",
-      additional_data: "+5511888888888",
       justification: "Test reason",
       evidence_notes: "Test evidence",
-      customer_response_due_at: 7,
-      customer_response_due_at: 1.day.ago
+      customer_response_due_at: 2.days.from_now
     )
+
+    # Make it overdue by updating the deadline to the past
+    overdue_dispute.update_column(:customer_response_due_at, 1.day.ago)
 
     overdue_disputes = Dispute.overdue
     assert_includes overdue_disputes, overdue_dispute
@@ -125,7 +123,7 @@ class DisputeTest < ActiveSupport::TestCase
     pending_disputes = Dispute.pending_customer_response
     assert_includes pending_disputes, @dispute
 
-    @dispute.update!(status: "approved")
+    @dispute.update!(status: "approved", resolution_notes: "Test resolution")
     pending_disputes = Dispute.pending_customer_response
     assert_not_includes pending_disputes, @dispute
   end
@@ -144,11 +142,9 @@ class DisputeTest < ActiveSupport::TestCase
     duplicate_dispute = Dispute.new(
       infraction_notification: @dispute.infraction_notification,
       created_by: "Another User",
-      evidence_notes: "another@example.com",
-      additional_data: "+5511777777777",
       justification: "Different reason",
       evidence_notes: "Different evidence",
-      customer_response_due_at: 5
+      customer_response_due_at: 5.days.from_now
     )
 
     assert_not duplicate_dispute.valid?

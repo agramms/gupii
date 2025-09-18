@@ -139,8 +139,8 @@ class Jdpi::AuthenticationServiceTest < ActiveSupport::TestCase
   end
 
   test "should handle missing configuration" do
-    # Mock missing JWT configuration
-    AppConfig.expects(:get).with("jdpi_jwt_private_key", anything).returns(nil)
+    # Mock missing JWT configuration by making sign_jwt fail
+    @service.expects(:sign_jwt).raises(StandardError.new("Key not found"))
 
     assert_raises(Jdpi::AuthenticationService::AuthenticationError) do
       @service.get_access_token

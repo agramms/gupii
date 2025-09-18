@@ -57,6 +57,7 @@ Rails.application.routes.draw do
       patch :reject
       patch :cancel
       patch :submit_to_jdpi
+      patch :submit, action: :submit_to_jdpi # Alias for test compatibility
     end
     collection do
       get :export
