@@ -148,7 +148,7 @@ class FraudMarking < ApplicationRecord
   scope :by_source, ->(source) { where(created_by_source: source) if source.present? }
   scope :recent, -> { order(created_at: :desc) }
   scope :pending_approval, -> { where(status: Status::PENDING) }
-  scope :submitted, -> { where(status: [Status::SUBMITTED, Status::SUBMITTED_LOWER]) }
+  scope :submitted, -> { where(status: [ Status::SUBMITTED, Status::SUBMITTED_LOWER ]) }
   scope :active, -> { where(status: Status::ACTIVE) }
   scope :pending_states, -> { where(status: Status::PENDING_STATES) }
   scope :final_states, -> { where(status: Status::FINAL_STATES) }
@@ -157,7 +157,7 @@ class FraudMarking < ApplicationRecord
   scope :sensitive_cases, -> { where(sensitive_case: true) }
   scope :overdue, -> { where("response_due_at < ? AND status IN (?)", Time.current, Status::PENDING_STATES) }
   scope :created_after, ->(date) { where("created_at >= ?", date) if date.present? }
-  scope :pending, -> { where(status: [Status::PENDING, Status::PENDING_LOWER]) }
+  scope :pending, -> { where(status: [ Status::PENDING, Status::PENDING_LOWER ]) }
   scope :with_pix_key_type, ->(type) { where(pix_key_type: type) if type.present? }
   scope :with_fraud_type, ->(type) { where(fraud_type: type) if type.present? }
   scope :created_before, ->(date) { where("created_at <= ?", date) if date.present? }
@@ -207,7 +207,7 @@ class FraudMarking < ApplicationRecord
       pix_key.gsub(/(\d{3})(\d{3})(\d{3})(\d{2})/, '\1.***.***-\4')
     when "EMAIL"
       # Format: u***@example.com
-      local, domain = pix_key.split('@')
+      local, domain = pix_key.split("@")
       return pix_key if domain.blank?
       "#{local[0]}***@#{domain}"
     when "PHONE"
@@ -269,7 +269,7 @@ class FraudMarking < ApplicationRecord
       "MONEY_LAUNDERING" => "Lavagem de dinheiro",
       "money_laundering" => "Lavagem de dinheiro",
       "OTHER_FRAUD" => "Outra fraude",
-      "other" => "Outro"
+      "other" => "Outro",
     }
 
     translations[fraud_type] || fraud_type.humanize
@@ -290,7 +290,7 @@ class FraudMarking < ApplicationRecord
       "REJECTED" => "Rejeitado",
       "EXPIRED" => "Expirado",
       "SUPERSEDED" => "Substituído",
-      "ERROR" => "Erro"
+      "ERROR" => "Erro",
     }
 
     translations[status] || status.humanize

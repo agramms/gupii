@@ -64,7 +64,7 @@ module Jdpi
     def get_access_token
       # Simple in-memory caching for test compatibility
       @jwt_cache ||= {}
-      cache_key = scopes.sort.join(',')
+      cache_key = scopes.sort.join(",")
 
       # Check if we have a cached JWT token
       if @jwt_cache[cache_key] && !jwt_token_expired?(@jwt_cache[cache_key])

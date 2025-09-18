@@ -186,7 +186,7 @@ module Jdpi
           return {
             success: false,
             error_code: "VALIDATION_ERROR",
-            error_message: "Dados inválidos para marcação de fraude"
+            error_message: "Dados inválidos para marcação de fraude",
           }
         end
 
@@ -199,10 +199,10 @@ module Jdpi
         if response["erro"]
           # Handle API error response
           error_info = response["erro"]
-          return {
+          {
             success: false,
             error_code: error_info["codigo"],
-            error_message: error_info["mensagem"]
+            error_message: error_info["mensagem"],
           }
         elsif response["protocolo"]
           # Success response
@@ -214,43 +214,43 @@ module Jdpi
           {
             success: true,
             protocol: response["protocolo"],
-            status: response["status"]
+            status: response["status"],
           }
         else
           {
             success: false,
             error_code: "UNKNOWN_ERROR",
-            error_message: "Resposta inválida da API JDPI"
+            error_message: "Resposta inválida da API JDPI",
           }
         end
 
       rescue Timeout::Error => e
-        fraud_marking.update!(submission_errors: [e.message]) if fraud_marking.persisted?
+        fraud_marking.update!(submission_errors: [ e.message ]) if fraud_marking.persisted?
         {
           success: false,
           error_code: "NETWORK_ERROR",
-          error_message: "Timeout durante comunicação com JDPI: #{e.message}"
+          error_message: "Timeout durante comunicação com JDPI: #{e.message}",
         }
       rescue Jdpi::AuthenticationService::AuthenticationError => e
         {
           success: false,
           error_code: "AUTHENTICATION_ERROR",
-          error_message: "Erro de autenticação: #{e.message}"
+          error_message: "Erro de autenticação: #{e.message}",
         }
       rescue Net::HTTPServerError => e
         # Retry logic for server errors - for now just return error
         {
           success: false,
           error_code: "SERVER_ERROR",
-          error_message: "Erro interno do servidor JDPI: #{e.message}"
+          error_message: "Erro interno do servidor JDPI: #{e.message}",
         }
       rescue StandardError => e
-        fraud_marking.update!(submission_errors: [e.message]) if fraud_marking.persisted?
+        fraud_marking.update!(submission_errors: [ e.message ]) if fraud_marking.persisted?
         Rails.logger.error "Exception in submit_fraud_marking: #{e.message}"
         {
           success: false,
           error_code: "SYSTEM_ERROR",
-          error_message: "Erro interno do sistema: #{e.message}"
+          error_message: "Erro interno do sistema: #{e.message}",
         }
       end
     end
@@ -264,7 +264,7 @@ module Jdpi
         "descricao_evidencia" => fraud_marking.evidence_description,
         "score_risco" => fraud_marking.risk_score,
         "reportado_por" => fraud_marking.reported_by,
-        "data_ocorrencia" => fraud_marking.created_at.iso8601
+        "data_ocorrencia" => fraud_marking.created_at.iso8601,
       }
     end
 

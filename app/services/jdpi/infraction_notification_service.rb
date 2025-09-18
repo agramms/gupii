@@ -207,7 +207,7 @@ module Jdpi
       response = get("/jdpi/infraction-notifications", {
         page: page,
         per_page: per_page,
-        status: status
+        status: status,
       }.compact)
 
       if response && response["notificacoes"]
@@ -215,14 +215,14 @@ module Jdpi
           success: true,
           notifications: response["notificacoes"].map { |n| normalize_notification_data(n) },
           total: response["total"] || 0,
-          page: response["pagina"] || 1
+          page: response["pagina"] || 1,
         }
       else
         {
           success: false,
           error: "Failed to fetch notifications",
           notifications: [],
-          total: 0
+          total: 0,
         }
       end
     rescue => e
@@ -231,7 +231,7 @@ module Jdpi
         success: false,
         error: e.message,
         notifications: [],
-        total: 0
+        total: 0,
       }
     end
 
@@ -242,7 +242,7 @@ module Jdpi
       # Mock API request
       response = post("/jdpi/infraction-notifications/#{infraction.external_id}/acknowledge", {
         acknowledged_at: Time.current.iso8601,
-        acknowledged_by: "SYSTEM"
+        acknowledged_by: "SYSTEM",
       })
 
       if response && response["protocolo"]
@@ -250,25 +250,25 @@ module Jdpi
           success: true,
           protocol: response["protocolo"],
           status: response["status"],
-          acknowledged_at: response["data_confirmacao"]
+          acknowledged_at: response["data_confirmacao"],
         }
       elsif response && response["erro"]
         {
           success: false,
           error_code: response["erro"]["codigo"],
-          error_message: response["erro"]["mensagem"]
+          error_message: response["erro"]["mensagem"],
         }
       else
         {
           success: false,
-          error: "Failed to acknowledge notification"
+          error: "Failed to acknowledge notification",
         }
       end
     rescue => e
       Rails.logger.error "#{Logging::SERVICE_PREFIX} #{Logging::INFRACTION_TAG} Exception acknowledging notification: #{e.message}"
       {
         success: false,
-        error: e.message
+        error: e.message,
       }
     end
 
@@ -284,7 +284,7 @@ module Jdpi
         occurred_at: raw_data["data_ocorrencia"],
         status: raw_data["status"],
         reporting_institution: raw_data["instituicao_reportante"],
-        evidence: raw_data["evidencias"] || []
+        evidence: raw_data["evidencias"] || [],
       }
     end
 

@@ -152,7 +152,7 @@ class DisputeTest < ActiveSupport::TestCase
   end
 
   test "should handle additional data" do
-    @dispute.additional_data = { "phone" => "+5511999999999", "documents" => ["id", "proof"] }
+    @dispute.additional_data = { "phone" => "+5511999999999", "documents" => [ "id", "proof" ] }
     assert @dispute.valid?
     assert_equal "+5511999999999", @dispute.additional_data["phone"]
   end

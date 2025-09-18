@@ -43,7 +43,7 @@ class FraudMarkingTest < ActiveSupport::TestCase
       "CNPJ" => "12345678000195",
       "EMAIL" => "user@example.com",
       "PHONE" => "+5511999999999",
-      "UUID" => "550e8400-e29b-41d4-a716-446655440000"
+      "UUID" => "550e8400-e29b-41d4-a716-446655440000",
     }
 
     valid_types_with_keys.each do |type, key|
