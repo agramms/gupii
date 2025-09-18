@@ -70,10 +70,10 @@ jobs:
         env:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: gupii_test
+          POSTGRES_DB: postgres
         ports:
           - 5432:5432
-        options: --health-cmd="pg_isready" --health-interval=10s --health-timeout=5s --health-retries=3
+        options: --health-cmd="pg_isready -U postgres" --health-interval=10s --health-timeout=5s --health-retries=5
 
       redis:
         image: redis:7-alpine
@@ -89,11 +89,17 @@ jobs:
       DATABASE_URL: postgres://postgres:postgres@localhost:5432/gupii_test
       CACHE_DATABASE_URL: postgres://postgres:postgres@localhost:5432/gupii_cache_test
       QUEUE_DATABASE_URL: postgres://postgres:postgres@localhost:5432/gupii_queue_test
+      CABLE_DATABASE_URL: postgres://postgres:postgres@localhost:5432/gupii_cable_test
       REDIS_URL: redis://localhost:6379/0
       COVERAGE: true
       # Disable observability features in CI
       OTEL_SDK_DISABLED: true
       STATSD_HOST: ""
+      # Explicitly set PostgreSQL connection parameters to avoid socket issues
+      PGHOST: localhost
+      PGPORT: 5432
+      PGUSER: postgres
+      PGPASSWORD: postgres
 
     steps:
       - name: Install packages
@@ -110,7 +116,19 @@ jobs:
 
       - name: Set up test databases
         run: |
-          bin/rails db:create:all
+          # Wait for PostgreSQL to be ready
+          until pg_isready -h localhost -p 5432 -U postgres; do
+            echo "Waiting for PostgreSQL to be ready..."
+            sleep 1
+          done
+
+          # Create all databases explicitly
+          createdb -h localhost -U postgres gupii_test || true
+          createdb -h localhost -U postgres gupii_cache_test || true
+          createdb -h localhost -U postgres gupii_queue_test || true
+          createdb -h localhost -U postgres gupii_cable_test || true
+
+          # Load schema for all databases
           bin/rails db:schema:load:all
           bin/rails solid_queue:install
 
