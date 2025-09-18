@@ -53,6 +53,8 @@ class Dispute < ApplicationRecord
   }
   scope :recent, -> { order(created_at: :desc) }
   scope :active, -> { where.not(status: [ :approved, :rejected, :auto_declined ]) }
+  scope :overdue, -> { overdue_customer_response }
+  scope :pending_customer_response, -> { where(status: :pending_customer_response) }
 
   # Callbacks
   before_validation :set_customer_response_deadline, on: :create
@@ -88,6 +90,9 @@ class Dispute < ApplicationRecord
   def can_auto_decline?
     status_pending_customer_response? && overdue_for_customer_response?
   end
+
+  # Aliases for test compatibility
+  alias_method :overdue?, :overdue_for_customer_response?
 
   def auto_decline!
     return false unless can_auto_decline?
@@ -239,6 +244,20 @@ class Dispute < ApplicationRecord
 
   def self.overdue_summary
     overdue_customer_response.group(:dispute_type).count
+  end
+
+  def status_in_portuguese
+    translations = {
+      "pending_customer_response" => "Aguardando resposta do cliente",
+      "under_internal_review" => "Em análise interna",
+      "pending_resolution" => "Aguardando resolução",
+      "approved" => "Aprovado",
+      "rejected" => "Rejeitado",
+      "auto_declined" => "Auto-declinado",
+      "escalated" => "Escalado",
+    }
+
+    translations[status] || status.humanize
   end
 
   private

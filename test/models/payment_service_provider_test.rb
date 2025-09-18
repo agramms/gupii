@@ -4,22 +4,7 @@ require "test_helper"
 
 class PaymentServiceProviderTest < ActiveSupport::TestCase
   def setup
-    @valid_attributes = {
-      ispb: "12345678",
-      name: "Test Payment Provider",
-      short_name: "TestPSP",
-      document_number: "12345678000199",
-      document_type: "CNPJ",
-      status: "active",
-      psp_type: "commercial_bank",
-      services_offered: [ "pix_payment", "pix_receiving" ],
-      pix_enabled: true,
-      regulatory_status: "authorized",
-      last_sync_errors: [ "no_errors" ],
-      jdpi_metadata: { "test" => "data" },
-      validation_errors: [ "no_errors" ],
-    }
-
+    @valid_attributes = valid_psp_attributes
     @psp = PaymentServiceProvider.new(@valid_attributes)
   end
 

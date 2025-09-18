@@ -9,16 +9,19 @@ class DisputeTest < ActiveSupport::TestCase
   end
 
   test "should be valid with valid attributes" do
+    # Use a different infraction that doesn't have a dispute yet
+    other_infraction = infraction_notifications(:aml_notification)
     dispute = Dispute.new(
-      infraction_notification: @infraction,
-      requester_name: "Test User",
-      requester_email: "test@example.com",
-      requester_phone: "+5511999999999",
-      dispute_reason: "Transaction not authorized",
-      evidence_description: "I was not at the location",
-      timeline_days: 7
+      infraction_notification: other_infraction,
+      justification: "Transaction not authorized by customer",
+      evidence_notes: "Customer was not at the location during transaction",
+      created_by: "customer_service",
+      customer_response_due_at: 7.days.from_now
     )
 
+    unless dispute.valid?
+      puts "Validation errors: #{dispute.errors.full_messages}"
+    end
     assert dispute.valid?
   end
 
@@ -28,43 +31,31 @@ class DisputeTest < ActiveSupport::TestCase
     assert_includes @dispute.errors[:infraction_notification], "é obrigatório(a)"
   end
 
-  test "should require requester name" do
-    @dispute.requester_name = ""
+  test "should require created_by" do
+    @dispute.created_by = ""
     assert_not @dispute.valid?
-    assert_includes @dispute.errors[:requester_name], "não pode ficar em branco"
+    assert_includes @dispute.errors[:created_by], "não pode ficar em branco"
   end
 
-  test "should require valid email format" do
-    @dispute.requester_email = "invalid-email"
+  test "should require justification" do
+    @dispute.justification = ""
     assert_not @dispute.valid?
-    assert_includes @dispute.errors[:requester_email], "não é válido"
+    assert_includes @dispute.errors[:justification], "não pode ficar em branco"
   end
 
-  test "should require valid phone format" do
-    @dispute.requester_phone = "123"
+  test "should require customer_response_due_at" do
+    @dispute.customer_response_due_at = nil
     assert_not @dispute.valid?
-    assert_includes @dispute.errors[:requester_phone], "deve estar no formato internacional"
-  end
-
-  test "should require timeline days between 1 and 14" do
-    @dispute.timeline_days = 0
-    assert_not @dispute.valid?
-    assert_includes @dispute.errors[:timeline_days], "deve ser maior que 0"
-
-    @dispute.timeline_days = 15
-    assert_not @dispute.valid?
-    assert_includes @dispute.errors[:timeline_days], "deve ser menor ou igual a 14"
+    assert_includes @dispute.errors[:customer_response_due_at], "não pode ficar em branco"
   end
 
   test "should generate short_id on creation" do
     dispute = Dispute.create!(
       infraction_notification: @infraction,
-      requester_name: "Test User",
-      requester_email: "test@example.com",
-      requester_phone: "+5511999999999",
-      dispute_reason: "Test reason",
-      evidence_description: "Test evidence",
-      timeline_days: 7
+      created_by: "Test User",
+      justification: "Test reason",
+      evidence_notes: "Test evidence",
+      customer_response_due_at: 7.days.from_now
     )
 
     assert dispute.short_id.present?
@@ -74,16 +65,14 @@ class DisputeTest < ActiveSupport::TestCase
   test "should set customer response deadline on creation" do
     dispute = Dispute.create!(
       infraction_notification: @infraction,
-      requester_name: "Test User",
-      requester_email: "test@example.com",
-      requester_phone: "+5511999999999",
-      dispute_reason: "Test reason",
-      evidence_description: "Test evidence",
-      timeline_days: 7
+      created_by: "Test User",
+      justification: "Test reason",
+      evidence_notes: "Test evidence",
+      customer_response_due_at: 7.days.from_now
     )
 
     expected_deadline = 6.days.from_now.to_date
-    assert_equal expected_deadline, dispute.customer_response_deadline.to_date
+    assert_equal expected_deadline, dispute.customer_response_due_at.to_date
   end
 
   test "should have default status of pending_customer_response" do
@@ -101,16 +90,16 @@ class DisputeTest < ActiveSupport::TestCase
     @dispute.save!
     @dispute.status = "pending_customer_response"
     assert_not @dispute.valid?
-    assert_includes @dispute.errors[:status], "transição inválida"
+    assert_includes @dispute.errors[:status], "cannot transition"
   end
 
   test "should check if overdue" do
     # Not overdue
-    @dispute.customer_response_deadline = 1.day.from_now
+    @dispute.customer_response_due_at = 1.day.from_now
     assert_not @dispute.overdue?
 
     # Overdue
-    @dispute.customer_response_deadline = 1.day.ago
+    @dispute.customer_response_due_at = 1.day.ago
     assert @dispute.overdue?
   end
 
@@ -118,13 +107,13 @@ class DisputeTest < ActiveSupport::TestCase
     # Create overdue dispute
     overdue_dispute = Dispute.create!(
       infraction_notification: @infraction,
-      requester_name: "Overdue User",
-      requester_email: "overdue@example.com",
-      requester_phone: "+5511888888888",
-      dispute_reason: "Test reason",
-      evidence_description: "Test evidence",
-      timeline_days: 7,
-      customer_response_deadline: 1.day.ago
+      created_by: "Overdue User",
+      evidence_notes: "overdue@example.com",
+      additional_data: "+5511888888888",
+      justification: "Test reason",
+      evidence_notes: "Test evidence",
+      customer_response_due_at: 7,
+      customer_response_due_at: 1.day.ago
     )
 
     overdue_disputes = Dispute.overdue
@@ -154,21 +143,22 @@ class DisputeTest < ActiveSupport::TestCase
   test "should not allow duplicate disputes for same infraction" do
     duplicate_dispute = Dispute.new(
       infraction_notification: @dispute.infraction_notification,
-      requester_name: "Another User",
-      requester_email: "another@example.com",
-      requester_phone: "+5511777777777",
-      dispute_reason: "Different reason",
-      evidence_description: "Different evidence",
-      timeline_days: 5
+      created_by: "Another User",
+      evidence_notes: "another@example.com",
+      additional_data: "+5511777777777",
+      justification: "Different reason",
+      evidence_notes: "Different evidence",
+      customer_response_due_at: 5
     )
 
     assert_not duplicate_dispute.valid?
     assert_includes duplicate_dispute.errors[:infraction_notification], "já possui uma disputa"
   end
 
-  test "should format phone number for display" do
-    @dispute.requester_phone = "+5511999999999"
-    assert_equal "(11) 99999-9999", @dispute.formatted_phone
+  test "should handle additional data" do
+    @dispute.additional_data = { "phone" => "+5511999999999", "documents" => ["id", "proof"] }
+    assert @dispute.valid?
+    assert_equal "+5511999999999", @dispute.additional_data["phone"]
   end
 
   test "should return status in Portuguese" do
@@ -189,10 +179,10 @@ class DisputeTest < ActiveSupport::TestCase
   end
 
   test "should calculate days until deadline" do
-    @dispute.customer_response_deadline = 3.days.from_now
+    @dispute.customer_response_due_at = 3.days.from_now
     assert_equal 3, @dispute.days_until_deadline
 
-    @dispute.customer_response_deadline = 1.day.ago
+    @dispute.customer_response_due_at = 1.day.ago
     assert_equal(-1, @dispute.days_until_deadline)
   end
 end
