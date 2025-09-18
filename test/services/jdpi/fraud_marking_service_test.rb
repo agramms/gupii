@@ -47,7 +47,7 @@ class Jdpi::FraudMarkingServiceTest < ActiveSupport::TestCase
 
   test "should handle network errors" do
     @service.expects(:post).with("/jdpi/fraud-markings", anything)
-           .raises(Net::TimeoutError.new("Request timeout"))
+           .raises(Timeout::Error.new("Request timeout"))
 
     result = @service.submit_fraud_marking(@fraud_marking)
 

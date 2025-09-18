@@ -8,7 +8,7 @@ class FraudMarkingSubmissionJob < ApplicationJob
 
   # Retry configuration for network issues and temporary failures
   retry_on StandardError, wait: :exponentially_longer, attempts: 3
-  retry_on Net::TimeoutError, wait: 5.seconds, attempts: 5
+  retry_on Timeout::Error, wait: 5.seconds, attempts: 5
   retry_on Faraday::Error, wait: 10.seconds, attempts: 3
 
   # Discard on permanent failures
