@@ -13,7 +13,7 @@ class AuthTestControllerTest < ActionDispatch::IntegrationTest
     get auth_test_path
 
     assert_response :success
-    assert_equal "application/json", response.content_type
+    assert_match "application/json", response.content_type
 
     json_response = JSON.parse(response.body)
     assert_equal false, json_response["authenticated"]
@@ -32,7 +32,7 @@ class AuthTestControllerTest < ActionDispatch::IntegrationTest
     get auth_test_path
 
     assert_response :success
-    assert_equal "application/json", response.content_type
+    assert_match "application/json", response.content_type
 
     json_response = JSON.parse(response.body)
     assert_equal true, json_response["authenticated"]

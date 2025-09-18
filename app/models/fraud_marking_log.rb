@@ -37,6 +37,9 @@ class FraudMarkingLog < ApplicationRecord
   # Associations
   belongs_to :fraud_marking
 
+  # Aliases for backward compatibility
+  alias_attribute :performed_by, :user
+
   # Scopes
   scope :by_level, ->(level) { where(level: level) if level.present? }
   scope :by_action, ->(action) { where(action: action) if action.present? }
@@ -70,6 +73,28 @@ class FraudMarkingLog < ApplicationRecord
 
   def user_display
     user.presence || "System"
+  end
+
+  def action_in_portuguese
+    translations = {
+      "created" => "Criado",
+      "approved" => "Aprovado",
+      "rejected" => "Rejeitado",
+      "submitted_to_jdpi" => "Submetido",
+      "cancelled" => "Cancelado",
+      "status_changed" => "Status alterado",
+      "evidence_added" => "Evidência adicionada",
+      "evidence_removed" => "Evidência removida",
+      "notes_updated" => "Notas atualizadas",
+      "jdpi_response_received" => "Resposta JDPI recebida",
+      "error_occurred" => "Erro ocorreu",
+      "system_update" => "Atualização do sistema",
+      "submitted" => "Submetido",
+      "reviewed" => "Revisado",
+      "resubmitted" => "Reenviado",
+    }
+
+    translations[action] || action.humanize
   end
 
   def formatted_created_at

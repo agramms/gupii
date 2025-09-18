@@ -27,7 +27,7 @@ class MissionControlControllerTest < ActionDispatch::IntegrationTest
   test "should handle JSON API requests when not authenticated" do
     Rails.env.expects(:test?).returns(false).at_least_once
 
-    get jobs_path, headers: { "Accept" => "application/json" }
+    get "/admin/jobs", headers: { "Accept" => "application/json" }
 
     assert_response :unauthorized
     assert_equal "application/json", response.content_type
@@ -39,7 +39,7 @@ class MissionControlControllerTest < ActionDispatch::IntegrationTest
   test "should handle AJAX requests when not authenticated" do
     Rails.env.expects(:test?).returns(false).at_least_once
 
-    get jobs_path, xhr: true
+    get "/admin/jobs", xhr: true
 
     assert_response :unauthorized
     assert_equal "application/json", response.content_type

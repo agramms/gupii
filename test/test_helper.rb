@@ -15,6 +15,9 @@ require "mocha/minitest"
 # Force English locale for tests
 I18n.locale = :en
 
+# Use test adapter for ActiveJob in tests
+ActiveJob::Base.queue_adapter = :test
+
 module ActiveSupport
   class TestCase
     # Disable parallel testing when using Mocha to prevent state corruption

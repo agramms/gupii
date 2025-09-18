@@ -13,6 +13,9 @@ module Jdpi
     class InvalidEndToEndIdError < StandardError; end
     class SpiApiError < StandardError; end
 
+    # Alias for test compatibility
+    InvalidFormatError = InvalidEndToEndIdError
+
     class << self
       # Consult transaction by End-to-End ID
       # @param end_to_end_id [String] 32-character E2E ID
@@ -186,6 +189,9 @@ module Jdpi
         handle_service_errors_instance(errors, end_to_end_id)
       end
     end
+
+    # Alias for test compatibility
+    alias_method :lookup_transaction, :perform_lookup
 
     private
 

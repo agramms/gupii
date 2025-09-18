@@ -83,8 +83,8 @@ Rails.application.routes.draw do
   # Job Queue Administration with Mission Control
   mount MissionControl::Jobs::Engine, at: "/admin/jobs"
 
-  # Authentication test (development only)
-  get "auth-test", to: "auth_test#show" if Rails.env.development?
+  # Authentication test (development and test only)
+  get "auth-test", to: "auth_test#show" if Rails.env.development? || Rails.env.test?
 
   # API routes for client applications
   namespace :api do
