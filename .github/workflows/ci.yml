@@ -122,15 +122,24 @@ jobs:
             sleep 1
           done
 
-          # Create all databases explicitly
-          createdb -h localhost -U postgres gupii_test || true
-          createdb -h localhost -U postgres gupii_cache_test || true
-          createdb -h localhost -U postgres gupii_queue_test || true
-          createdb -h localhost -U postgres gupii_cable_test || true
+          # Create and setup all databases using Rails commands
+          RAILS_ENV=test bin/rails db:create
+          RAILS_ENV=test bin/rails db:schema:load
 
-          # Load schema for all databases
-          bin/rails db:schema:load:all
-          bin/rails solid_queue:install
+          # Setup cache database
+          RAILS_ENV=test bin/rails db:create:cache
+          RAILS_ENV=test bin/rails db:schema:load:cache
+
+          # Setup queue database
+          RAILS_ENV=test bin/rails db:create:queue
+          RAILS_ENV=test bin/rails db:schema:load:queue
+
+          # Setup cable database
+          RAILS_ENV=test bin/rails db:create:cable
+          RAILS_ENV=test bin/rails db:schema:load:cable
+
+          # Install Solid Queue
+          RAILS_ENV=test bin/rails solid_queue:install
 
       - name: Run tests with coverage
         run: |
