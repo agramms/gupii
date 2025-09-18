@@ -19,7 +19,7 @@ class Jdpi::SpiTransactionServiceTest < ActiveSupport::TestCase
       "ispbRecebedor" => "87654321",
       "dataHoraLancamento" => "2024-01-15T10:30:00Z",
       "tipoLancamento" => "CREDIT",
-      "formaPagamento" => "PIX"
+      "formaPagamento" => "PIX",
     }
 
     @service.expects(:get).with("/jdpi/spi/api/v2/lancamento/#{@valid_e2e_id}")
@@ -91,7 +91,7 @@ class Jdpi::SpiTransactionServiceTest < ActiveSupport::TestCase
       "dataHoraLancamento" => "2024-02-20T15:45:30Z",
       "tipoLancamento" => "DEBIT",
       "formaPagamento" => "TED",
-      "descricaoLancamento" => "Test payment"
+      "descricaoLancamento" => "Test payment",
     }
 
     normalized = @service.send(:normalize_transaction_data, raw_data)
@@ -111,7 +111,7 @@ class Jdpi::SpiTransactionServiceTest < ActiveSupport::TestCase
   test "should handle missing optional fields in normalization" do
     minimal_data = {
       "endToEndId" => @valid_e2e_id,
-      "status" => "COMPLETED"
+      "status" => "COMPLETED",
     }
 
     normalized = @service.send(:normalize_transaction_data, minimal_data)

@@ -18,7 +18,7 @@ class Jdpi::InfractionNotificationServiceTest < ActiveSupport::TestCase
           "tipo_infracao" => "FRAUDE",
           "descricao" => "Atividade suspeita detectada",
           "data_ocorrencia" => "2024-01-15T10:30:00Z",
-          "status" => "PENDENTE"
+          "status" => "PENDENTE",
         },
         {
           "id" => "INF-002",
@@ -26,11 +26,11 @@ class Jdpi::InfractionNotificationServiceTest < ActiveSupport::TestCase
           "tipo_infracao" => "LAVAGEM_DINHEIRO",
           "descricao" => "Transações em valor elevado",
           "data_ocorrencia" => "2024-01-14T15:20:00Z",
-          "status" => "PROCESSADO"
-        }
+          "status" => "PROCESSADO",
+        },
       ],
       "total" => 2,
-      "pagina" => 1
+      "pagina" => 1,
     }
 
     @service.expects(:get).with("/jdpi/infraction-notifications", anything)
@@ -48,7 +48,7 @@ class Jdpi::InfractionNotificationServiceTest < ActiveSupport::TestCase
     mock_response = {
       "notificacoes" => [],
       "total" => 0,
-      "pagina" => 1
+      "pagina" => 1,
     }
 
     @service.expects(:get).returns(mock_response)
@@ -64,7 +64,7 @@ class Jdpi::InfractionNotificationServiceTest < ActiveSupport::TestCase
     mock_response = {
       "protocolo" => "ACK-2024-001234",
       "status" => "CONFIRMADO",
-      "data_confirmacao" => "2024-01-15T11:00:00Z"
+      "data_confirmacao" => "2024-01-15T11:00:00Z",
     }
 
     @service.expects(:post).with("/jdpi/infraction-notifications/#{@infraction.external_id}/acknowledge", anything)
@@ -81,8 +81,8 @@ class Jdpi::InfractionNotificationServiceTest < ActiveSupport::TestCase
     mock_response = {
       "erro" => {
         "codigo" => "NOTIFICATION_NOT_FOUND",
-        "mensagem" => "Notificação não encontrada"
-      }
+        "mensagem" => "Notificação não encontrada",
+      },
     }
 
     @service.expects(:post).returns(mock_response)
@@ -103,7 +103,7 @@ class Jdpi::InfractionNotificationServiceTest < ActiveSupport::TestCase
       "data_ocorrencia" => "2024-01-15T10:30:00Z",
       "status" => "PENDENTE",
       "instituicao_reportante" => "12345678",
-      "evidencias" => ["documento1.pdf", "log_transacao.txt"]
+      "evidencias" => [ "documento1.pdf", "log_transacao.txt" ],
     }
 
     normalized = @service.send(:normalize_notification_data, raw_data)
@@ -115,7 +115,7 @@ class Jdpi::InfractionNotificationServiceTest < ActiveSupport::TestCase
     assert_equal "2024-01-15T10:30:00Z", normalized[:occurred_at]
     assert_equal "PENDENTE", normalized[:status]
     assert_equal "12345678", normalized[:reporting_institution]
-    assert_equal ["documento1.pdf", "log_transacao.txt"], normalized[:evidence_files]
+    assert_equal [ "documento1.pdf", "log_transacao.txt" ], normalized[:evidence_files]
   end
 
   test "should fetch notifications with pagination" do
@@ -123,13 +123,13 @@ class Jdpi::InfractionNotificationServiceTest < ActiveSupport::TestCase
       "notificacoes" => [],
       "total" => 50,
       "pagina" => 2,
-      "total_paginas" => 5
+      "total_paginas" => 5,
     }
 
     expected_params = {
       page: 2,
       per_page: 10,
-      status: "PENDENTE"
+      status: "PENDENTE",
     }
 
     @service.expects(:get).with("/jdpi/infraction-notifications", expected_params)
@@ -176,7 +176,7 @@ class Jdpi::InfractionNotificationServiceTest < ActiveSupport::TestCase
   test "should update infraction status after successful acknowledgment" do
     mock_response = {
       "protocolo" => "ACK-2024-001234",
-      "status" => "CONFIRMADO"
+      "status" => "CONFIRMADO",
     }
 
     @service.expects(:post).returns(mock_response)

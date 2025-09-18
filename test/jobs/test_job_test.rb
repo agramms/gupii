@@ -16,7 +16,7 @@ class TestJobTest < ActiveJob::TestCase
   test "should perform job with custom message" do
     message = "Custom test message"
 
-    assert_enqueued_with(job: TestJob, args: [message]) do
+    assert_enqueued_with(job: TestJob, args: [ message ]) do
       TestJob.perform_later(message)
     end
 
@@ -101,7 +101,7 @@ class TestJobTest < ActiveJob::TestCase
   end
 
   test "should handle case insensitive fail matching" do
-    ["fail", "FAIL", "Fail", "this will FAIL"].each do |message|
+    [ "fail", "FAIL", "Fail", "this will FAIL" ].each do |message|
       assert_raises(StandardError) do
         TestJob.new.perform(message)
       end
@@ -109,14 +109,14 @@ class TestJobTest < ActiveJob::TestCase
   end
 
   test "should handle case insensitive slow matching" do
-    ["slow", "SLOW", "Slow", "this is SLOW"].each do |message|
+    [ "slow", "SLOW", "Slow", "this is SLOW" ].each do |message|
       TestJob.any_instance.expects(:sleep).with(30)
       TestJob.new.perform(message)
     end
   end
 
   test "should handle case insensitive priority matching" do
-    ["priority", "PRIORITY", "Priority", "high PRIORITY"].each do |message|
+    [ "priority", "PRIORITY", "Priority", "high PRIORITY" ].each do |message|
       job = TestJob.new
       job.expects(:priority=).with(10)
       job.perform(message)

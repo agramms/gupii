@@ -60,7 +60,7 @@ class FraudMarkingLogTest < ActiveSupport::TestCase
     details = {
       reviewer: "analyst_001",
       review_duration_minutes: 45,
-      notes: "Evidence is sufficient"
+      notes: "Evidence is sufficient",
     }
 
     @log.details = details
@@ -110,7 +110,7 @@ class FraudMarkingLogTest < ActiveSupport::TestCase
       "reviewed" => "Revisado",
       "approved" => "Aprovado",
       "rejected" => "Rejeitado",
-      "resubmitted" => "Reenviado"
+      "resubmitted" => "Reenviado",
     }
 
     action_translations.each do |action, expected_translation|
@@ -138,7 +138,7 @@ class FraudMarkingLogTest < ActiveSupport::TestCase
   end
 
   test "should extract performer type from performed_by" do
-    system_performers = ["system", "automated_system", "jdpi_system"]
+    system_performers = [ "system", "automated_system", "jdpi_system" ]
     system_performers.each do |performer|
       @log.performed_by = performer
       assert_equal "system", @log.performer_type
@@ -164,7 +164,7 @@ class FraudMarkingLogTest < ActiveSupport::TestCase
       "reviewer" => "analyst_001",
       "review_duration_minutes" => 45,
       "evidence_quality" => "sufficient",
-      "recommendation" => "approve"
+      "recommendation" => "approve",
     }
 
     summary = @log.details_summary

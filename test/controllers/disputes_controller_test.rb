@@ -38,8 +38,8 @@ class DisputesControllerTest < ActionDispatch::IntegrationTest
           requester_phone: "+5511999999999",
           dispute_reason: "Transaction not authorized",
           evidence_description: "I was not at the location",
-          timeline_days: 7
-        }
+          timeline_days: 7,
+        },
       }
     end
 
@@ -52,8 +52,8 @@ class DisputesControllerTest < ActionDispatch::IntegrationTest
         dispute: {
           requester_name: "",
           requester_email: "invalid-email",
-          timeline_days: 0
-        }
+          timeline_days: 0,
+        },
       }
     end
 
@@ -63,7 +63,7 @@ class DisputesControllerTest < ActionDispatch::IntegrationTest
 
   test "should approve dispute" do
     patch approve_dispute_path(@dispute), params: {
-      resolution_notes: "Evidence confirmed the dispute"
+      resolution_notes: "Evidence confirmed the dispute",
     }
 
     assert_redirected_to dispute_path(@dispute)
@@ -74,7 +74,7 @@ class DisputesControllerTest < ActionDispatch::IntegrationTest
 
   test "should reject dispute" do
     patch reject_dispute_path(@dispute), params: {
-      resolution_notes: "Insufficient evidence provided"
+      resolution_notes: "Insufficient evidence provided",
     }
 
     assert_redirected_to dispute_path(@dispute)
@@ -87,7 +87,7 @@ class DisputesControllerTest < ActionDispatch::IntegrationTest
     @dispute.update!(status: "under_internal_review")
 
     patch escalate_dispute_path(@dispute), params: {
-      escalation_notes: "Requires senior review"
+      escalation_notes: "Requires senior review",
     }
 
     assert_redirected_to dispute_path(@dispute)
@@ -119,7 +119,7 @@ class DisputesControllerTest < ActionDispatch::IntegrationTest
     @dispute.update!(status: "approved")
 
     patch approve_dispute_path(@dispute), params: {
-      resolution_notes: "Already approved"
+      resolution_notes: "Already approved",
     }
 
     assert_response :unprocessable_entity

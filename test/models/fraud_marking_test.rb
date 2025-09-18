@@ -178,7 +178,7 @@ class FraudMarkingTest < ActiveSupport::TestCase
       "submitted" => "Submetido",
       "approved" => "Aprovado",
       "rejected" => "Rejeitado",
-      "failed" => "Falhou"
+      "failed" => "Falhou",
     }
 
     status_translations.each do |status, expected_translation|
@@ -193,7 +193,7 @@ class FraudMarkingTest < ActiveSupport::TestCase
       "identity_theft" => "Roubo de identidade",
       "social_engineering" => "Engenharia social",
       "money_laundering" => "Lavagem de dinheiro",
-      "other" => "Outro"
+      "other" => "Outro",
     }
 
     type_translations.each do |type, expected_translation|

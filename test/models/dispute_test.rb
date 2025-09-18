@@ -179,7 +179,7 @@ class DisputeTest < ActiveSupport::TestCase
       "approved" => "Aprovada",
       "rejected" => "Rejeitada",
       "escalated" => "Escalada",
-      "auto_declined" => "Recusada automaticamente"
+      "auto_declined" => "Recusada automaticamente",
     }
 
     status_translations.each do |status, expected_translation|

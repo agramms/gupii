@@ -27,7 +27,7 @@ class SpiTransactionsControllerTest < ActionDispatch::IntegrationTest
 
   test "should validate end-to-end ID format" do
     post spi_transactions_path, params: {
-      end_to_end_id: @invalid_e2e_id
+      end_to_end_id: @invalid_e2e_id,
     }
 
     assert_response :unprocessable_entity
@@ -46,14 +46,14 @@ class SpiTransactionsControllerTest < ActionDispatch::IntegrationTest
         currency: "BRL",
         payer_institution: "12345678",
         payee_institution: "87654321",
-        created_at: "2024-01-15T10:30:00Z"
-      }
+        created_at: "2024-01-15T10:30:00Z",
+      },
     })
 
     Jdpi::SpiTransactionService.expects(:new).returns(service_mock)
 
     post spi_transactions_path, params: {
-      end_to_end_id: @valid_e2e_id
+      end_to_end_id: @valid_e2e_id,
     }
 
     assert_response :success
@@ -68,13 +68,13 @@ class SpiTransactionsControllerTest < ActionDispatch::IntegrationTest
     service_mock.expects(:lookup_transaction).with(@valid_e2e_id).returns({
       success: false,
       error: "TRANSACTION_NOT_FOUND",
-      message: "Transaction not found in SPI"
+      message: "Transaction not found in SPI",
     })
 
     Jdpi::SpiTransactionService.expects(:new).returns(service_mock)
 
     post spi_transactions_path, params: {
-      end_to_end_id: @valid_e2e_id
+      end_to_end_id: @valid_e2e_id,
     }
 
     assert_response :unprocessable_entity
@@ -87,13 +87,13 @@ class SpiTransactionsControllerTest < ActionDispatch::IntegrationTest
     service_mock.expects(:lookup_transaction).with(@valid_e2e_id).returns({
       success: false,
       error: "API_ERROR",
-      message: "JDPI service temporarily unavailable"
+      message: "JDPI service temporarily unavailable",
     })
 
     Jdpi::SpiTransactionService.expects(:new).returns(service_mock)
 
     post spi_transactions_path, params: {
-      end_to_end_id: @valid_e2e_id
+      end_to_end_id: @valid_e2e_id,
     }
 
     assert_response :unprocessable_entity
@@ -105,7 +105,7 @@ class SpiTransactionsControllerTest < ActionDispatch::IntegrationTest
     Jdpi::SpiTransactionService.expects(:new).raises(StandardError.new("Connection timeout"))
 
     post spi_transactions_path, params: {
-      end_to_end_id: @valid_e2e_id
+      end_to_end_id: @valid_e2e_id,
     }
 
     assert_response :unprocessable_entity
@@ -123,13 +123,13 @@ class SpiTransactionsControllerTest < ActionDispatch::IntegrationTest
     service_mock = mock
     service_mock.expects(:lookup_transaction).with(@valid_e2e_id).returns({
       success: true,
-      transaction: { end_to_end_id: @valid_e2e_id }
+      transaction: { end_to_end_id: @valid_e2e_id },
     })
 
     Jdpi::SpiTransactionService.expects(:new).returns(service_mock)
 
     post spi_transactions_path, params: {
-      end_to_end_id: "  #{@valid_e2e_id}  "
+      end_to_end_id: "  #{@valid_e2e_id}  ",
     }
 
     assert_response :success

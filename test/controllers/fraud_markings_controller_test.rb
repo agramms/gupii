@@ -38,8 +38,8 @@ class FraudMarkingsControllerTest < ActionDispatch::IntegrationTest
           fraud_type: "account_takeover",
           evidence_description: "Suspicious activity detected",
           risk_score: 0.75,
-          reported_by: "manual_review"
-        }
+          reported_by: "manual_review",
+        },
       }
     end
 
@@ -53,8 +53,8 @@ class FraudMarkingsControllerTest < ActionDispatch::IntegrationTest
           pix_key: "",
           pix_key_type: "INVALID",
           fraud_type: "",
-          risk_score: 1.5
-        }
+          risk_score: 1.5,
+        },
       }
     end
 
@@ -73,8 +73,8 @@ class FraudMarkingsControllerTest < ActionDispatch::IntegrationTest
     patch fraud_marking_path(@fraud_marking), params: {
       fraud_marking: {
         evidence_description: "Updated evidence description",
-        risk_score: 0.90
-      }
+        risk_score: 0.90,
+      },
     }
 
     assert_redirected_to fraud_marking_path(@fraud_marking)
@@ -87,8 +87,8 @@ class FraudMarkingsControllerTest < ActionDispatch::IntegrationTest
     patch fraud_marking_path(@fraud_marking), params: {
       fraud_marking: {
         pix_key: "",
-        risk_score: 2.0
-      }
+        risk_score: 2.0,
+      },
     }
 
     assert_response :unprocessable_entity
@@ -100,7 +100,7 @@ class FraudMarkingsControllerTest < ActionDispatch::IntegrationTest
     service_mock = mock
     service_mock.expects(:submit_fraud_marking).returns({
       success: true,
-      protocol: "JDPI-2024-TEST123"
+      protocol: "JDPI-2024-TEST123",
     })
 
     Jdpi::FraudMarkingService.expects(:new).returns(service_mock)
@@ -116,7 +116,7 @@ class FraudMarkingsControllerTest < ActionDispatch::IntegrationTest
     service_mock = mock
     service_mock.expects(:submit_fraud_marking).returns({
       success: false,
-      error: "JDPI service unavailable"
+      error: "JDPI service unavailable",
     })
 
     Jdpi::FraudMarkingService.expects(:new).returns(service_mock)

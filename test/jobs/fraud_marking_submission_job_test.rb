@@ -8,7 +8,7 @@ class FraudMarkingSubmissionJobTest < ActiveJob::TestCase
   end
 
   test "should enqueue job with fraud marking" do
-    assert_enqueued_with(job: FraudMarkingSubmissionJob, args: [@fraud_marking]) do
+    assert_enqueued_with(job: FraudMarkingSubmissionJob, args: [ @fraud_marking ]) do
       FraudMarkingSubmissionJob.perform_later(@fraud_marking)
     end
   end
@@ -19,7 +19,7 @@ class FraudMarkingSubmissionJobTest < ActiveJob::TestCase
     service_mock.expects(:submit_fraud_marking).with(@fraud_marking).returns({
       success: true,
       protocol: "JDPI-2024-001234",
-      status: "ACCEPTED"
+      status: "ACCEPTED",
     })
 
     Jdpi::FraudMarkingService.expects(:new).returns(service_mock)
@@ -38,7 +38,7 @@ class FraudMarkingSubmissionJobTest < ActiveJob::TestCase
     service_mock.expects(:submit_fraud_marking).with(@fraud_marking).returns({
       success: false,
       error_code: "VALIDATION_ERROR",
-      error_message: "Invalid PIX key format"
+      error_message: "Invalid PIX key format",
     })
 
     Jdpi::FraudMarkingService.expects(:new).returns(service_mock)
@@ -97,7 +97,7 @@ class FraudMarkingSubmissionJobTest < ActiveJob::TestCase
     service_mock.expects(:submit_fraud_marking).returns({
       success: false,
       error_code: "API_ERROR",
-      error_message: "Service unavailable"
+      error_message: "Service unavailable",
     })
     Jdpi::FraudMarkingService.expects(:new).returns(service_mock)
 
@@ -144,7 +144,7 @@ class FraudMarkingSubmissionJobTest < ActiveJob::TestCase
     service_mock.expects(:submit_fraud_marking).once.returns({
       success: false,
       error_code: "VALIDATION_ERROR",
-      error_message: "Invalid data"
+      error_message: "Invalid data",
     })
 
     Jdpi::FraudMarkingService.expects(:new).returns(service_mock)

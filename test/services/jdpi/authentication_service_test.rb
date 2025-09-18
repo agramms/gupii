@@ -16,7 +16,7 @@ class Jdpi::AuthenticationServiceTest < ActiveSupport::TestCase
       aud: "jdpi",
       iat: Time.current.to_i,
       exp: 5.minutes.from_now.to_i,
-      sub: "system"
+      sub: "system",
     })
 
     @service.expects(:sign_jwt).returns(mock_token)
@@ -54,7 +54,7 @@ class Jdpi::AuthenticationServiceTest < ActiveSupport::TestCase
       aud: "jdpi",
       iat: 1.hour.ago.to_i,
       exp: 30.minutes.ago.to_i,
-      sub: "system"
+      sub: "system",
     }
 
     assert_not @service.send(:token_valid?, expired_payload)
@@ -66,7 +66,7 @@ class Jdpi::AuthenticationServiceTest < ActiveSupport::TestCase
       aud: "jdpi",
       iat: 1.hour.from_now.to_i,
       exp: 2.hours.from_now.to_i,
-      sub: "system"
+      sub: "system",
     }
 
     assert_not @service.send(:token_valid?, future_payload)
@@ -78,7 +78,7 @@ class Jdpi::AuthenticationServiceTest < ActiveSupport::TestCase
       aud: "jdpi",
       iat: 1.minute.ago.to_i,
       exp: 4.minutes.from_now.to_i,
-      sub: "system"
+      sub: "system",
     }
 
     assert @service.send(:token_valid?, current_payload)
@@ -93,7 +93,7 @@ class Jdpi::AuthenticationServiceTest < ActiveSupport::TestCase
       aud: "jdpi",
       iat: Time.current.to_i,
       exp: 5.minutes.from_now.to_i,
-      sub: "system"
+      sub: "system",
     })
     @service.expects(:sign_jwt).once.returns(mock_token)
 
@@ -116,14 +116,14 @@ class Jdpi::AuthenticationServiceTest < ActiveSupport::TestCase
         aud: "jdpi",
         iat: 1.hour.ago.to_i,
         exp: 30.minutes.ago.to_i,
-        sub: "system"
+        sub: "system",
       },
       {
         iss: "gupii",
         aud: "jdpi",
         iat: Time.current.to_i,
         exp: 5.minutes.from_now.to_i,
-        sub: "system"
+        sub: "system",
       }
     )
 

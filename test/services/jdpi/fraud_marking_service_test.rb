@@ -13,7 +13,7 @@ class Jdpi::FraudMarkingServiceTest < ActiveSupport::TestCase
     mock_response = {
       "protocolo" => "JDPI-2024-001234",
       "status" => "ACEITO",
-      "dataHora" => "2024-01-15T10:30:00Z"
+      "dataHora" => "2024-01-15T10:30:00Z",
     }
 
     @service.expects(:post).with("/jdpi/fraud-markings", anything)
@@ -31,8 +31,8 @@ class Jdpi::FraudMarkingServiceTest < ActiveSupport::TestCase
     mock_response = {
       "erro" => {
         "codigo" => "EVIDENCE_INSUFFICIENT",
-        "mensagem" => "Evidência insuficiente para marcação de fraude"
-      }
+        "mensagem" => "Evidência insuficiente para marcação de fraude",
+      },
     }
 
     @service.expects(:post).with("/jdpi/fraud-markings", anything)
@@ -64,7 +64,7 @@ class Jdpi::FraudMarkingServiceTest < ActiveSupport::TestCase
       "descricao_evidencia" => @fraud_marking.evidence_description,
       "score_risco" => @fraud_marking.risk_score,
       "reportado_por" => @fraud_marking.reported_by,
-      "data_ocorrencia" => @fraud_marking.created_at.iso8601
+      "data_ocorrencia" => @fraud_marking.created_at.iso8601,
     }
 
     actual_payload = @service.send(:build_request_payload, @fraud_marking)
@@ -103,7 +103,7 @@ class Jdpi::FraudMarkingServiceTest < ActiveSupport::TestCase
     # Mock transient failure followed by success
     mock_response = {
       "protocolo" => "JDPI-2024-001234",
-      "status" => "ACEITO"
+      "status" => "ACEITO",
     }
 
     @service.expects(:post).with("/jdpi/fraud-markings", anything)
@@ -119,7 +119,7 @@ class Jdpi::FraudMarkingServiceTest < ActiveSupport::TestCase
   test "should update fraud marking status after successful submission" do
     mock_response = {
       "protocolo" => "JDPI-2024-001234",
-      "status" => "ACEITO"
+      "status" => "ACEITO",
     }
 
     @service.expects(:post).returns(mock_response)
