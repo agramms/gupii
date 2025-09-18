@@ -6,9 +6,13 @@ class PspSyncJobTest < ActiveJob::TestCase
   def setup
     @job = PspSyncJob.new
 
+    # Clear any existing PSPs to prevent ISPB conflicts
+    PaymentServiceProvider.delete_all
+
     # Create test PSPs
     @active_psp = PaymentServiceProvider.create!(
       valid_psp_attributes.merge(
+        ispb: "12345678",
         last_sync_at: 2.hours.ago,
         sync_attempts: 1
       )
