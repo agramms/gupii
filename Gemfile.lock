@@ -575,9 +575,9 @@ GEM
     rainbow (3.1.1)
     rake (13.3.0)
     rake-compiler-dock (1.9.1)
-    ransack (4.3.0)
-      activerecord (>= 6.1.5)
-      activesupport (>= 6.1.5)
+    ransack (4.4.0)
+      activerecord (>= 7.1)
+      activesupport (>= 7.1)
       i18n
     rb_sys (0.9.117)
       rake-compiler-dock (= 1.9.1)
@@ -736,7 +736,7 @@ DEPENDENCIES
   pry-byebug (~> 3.10)
   puma (>= 5.0)
   rails (~> 8.0.2, >= 8.0.2.1)
-  ransack (~> 4.1)
+  ransack (~> 4.4)
   redis (~> 5.0)
   rubocop-rails-omakase
   selenium-webdriver
