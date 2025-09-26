@@ -70,7 +70,7 @@ gem "opentelemetry-exporter-otlp", "~> 0.28"
 gem "opentelemetry-instrumentation-all", "~> 0.65"
 
 # AWS S3 SDK for MinIO compatibility
-gem "aws-sdk-s3", "~> 1.138"
+gem "aws-sdk-s3", "~> 1.199"
 
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
