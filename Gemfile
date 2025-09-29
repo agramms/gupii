@@ -54,7 +54,7 @@ gem "thruster", require: false
 
 # Pagination and search
 gem "pagy", "~> 9.4"
-gem "ransack", "~> 4.1"
+gem "ransack", "~> 4.4"
 
 # Generate short, URL-safe, unique identifiers from integers
 gem "hashids", "~> 1.0"
