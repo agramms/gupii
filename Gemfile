@@ -67,7 +67,7 @@ gem "statsd-ruby", "~> 1.5"
 # OpenTelemetry distributed tracing
 gem "opentelemetry-sdk", "~> 1.4"
 gem "opentelemetry-exporter-otlp", "~> 0.28"
-gem "opentelemetry-instrumentation-all", "~> 0.65"
+gem "opentelemetry-instrumentation-all", "~> 0.85"
 
 # AWS S3 SDK for MinIO compatibility
 gem "aws-sdk-s3", "~> 1.138"
